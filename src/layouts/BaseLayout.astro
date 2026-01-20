@@ -1,0 +1,54 @@
+---
+const { title, description } = Astro.props;
+const siteTitle = "SmallGrid";
+const siteDesc = "Small, efficient, low-power homelabs that don’t become a second job.";
+const pageTitle = title ? `${title} | ${siteTitle}` : siteTitle;
+const metaDesc = description ?? siteDesc;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={metaDesc} />
+    <link rel="icon" href="/favicon.svg" />
+    <style>
+      :root { color-scheme: dark; }
+      body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#050814; color:#e6e8ff; }
+      a { color:#7aa7ff; text-decoration:none; }
+      a:hover { text-decoration:underline; }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+      header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 10px 0 24px; }
+      nav { display:flex; gap:14px; flex-wrap:wrap; }
+      .card { background:#0b1227; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; }
+      .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+      footer { opacity:.7; margin-top: 36px; font-size: 14px; }
+      .tag { display:inline-block; font-size:12px; padding:4px 8px; border:1px solid rgba(255,255,255,.12); border-radius:999px; margin-right:6px; margin-top:8px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <a href="/" style="font-weight:800; font-size: 20px;">SmallGrid</a>
+          <div style="opacity:.8; font-size: 13px;">low-power homelabs • jellyfin • sane defaults</div>
+        </div>
+        <nav>
+          <a href="/guides/">Guides</a>
+          <a href="/about/">About</a>
+          <a href="/privacy/">Privacy</a>
+          <a href="/contact/">Contact</a>
+        </nav>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer>
+        <div>© {new Date().getFullYear()} SmallGrid.uk</div>
+      </footer>
+    </div>
+  </body>
+</html>
