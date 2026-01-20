@@ -1,8 +1,3 @@
-Here’s a full pasteover for
-`src/content/guides/quiet-storage-without-noise.md`
-in the same style as your other upgraded guides:
-
-```markdown
 ---
 title: "Quiet Storage: Add Disks Without Turning Your Home Into a Datacentre"
 description: "How to expand storage quietly: enclosures, placement, power, and why vibration is the real villain."
