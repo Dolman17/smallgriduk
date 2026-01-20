@@ -1,8 +1,3 @@
-Here’s a full pasteover for
-`src/content/guides/proxmox-one-node-starter.md`
-in the same style as the other upgraded guides:
-
-```markdown
 ---
 title: "Proxmox for Normal Humans: One-Node Starter Setup"
 description: "A clean one-node Proxmox setup for small homelabs: simple layout, backups, and low-power defaults."
