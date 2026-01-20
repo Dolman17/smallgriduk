@@ -3,40 +3,43 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
 const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
-const guides = guidesAll
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
+const guides = guidesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const featured = guides.slice(0, 6);
 ---
 
 <BaseLayout
   title="Small, efficient homelabs"
-  description="Guides for building low-power, quiet homelabs and Jellyfin servers with practical, reliable setups."
+  description="Low-power Jellyfin servers, mini PC homelabs, simple networking, and backups that actually restore."
   canonicalPath="/"
 >
-  <section class="card" style="padding: 18px;">
-    <h1 style="margin: 0 0 8px;">Build a homelab that doesn’t take over your life (or electric bill).</h1>
-    <p class="muted" style="margin: 0;">
-      SmallGrid is a practical guide to low-power Jellyfin servers, mini PC homelabs, simple networking, and backups that actually restore.
-      No enterprise cosplay. No 47-container “hello world”. Just working systems.
+  <section class="card">
+    <div class="kicker">⚡ SmallGrid philosophy</div>
+    <h1>Homelabs that don’t become a second job.</h1>
+    <p>
+      Build quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, and
+      backups you can actually restore. No enterprise cosplay. Just sane defaults.
     </p>
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
-      <a class="chip" href="/guides/">Browse Guides</a>
-      <a class="chip" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
-      <a class="chip" href="/guides/mini-pc-under-200/">Budget Mini PC Build</a>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+      <a class="btn primary" href="/guides/">Browse guides</a>
+      <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
+      <a class="btn" href="/guides/mini-pc-under-200/">Mini PC under £200</a>
     </div>
   </section>
 
-  <section style="margin-top: 18px;">
-    <h2 style="margin: 0 0 10px;">Latest guides</h2>
-    <div class="grid">
+  <section style="margin-top: 16px;">
+    <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+      <h2>Latest guides</h2>
+      <a class="btn" href="/guides/">View all →</a>
+    </div>
+
+    <div class="grid" style="margin-top: 10px;">
       {featured.map((post) => (
-        <article class="card">
-          <h3 style="margin: 0 0 8px;">
+        <article class="card hover">
+          <h3 style="margin-top: 0;">
             <a href={`/guides/${post.slug}/`}>{post.data.title}</a>
           </h3>
-          <p class="muted" style="margin: 0 0 10px;">{post.data.description}</p>
+          <p>{post.data.description}</p>
           <div>
             {post.data.tags.slice(0, 4).map((t) => (
               <span class="pill">#{t}</span>
@@ -45,27 +48,23 @@ const featured = guides.slice(0, 6);
         </article>
       ))}
     </div>
-
-    <div style="margin-top: 14px;">
-      <a class="chip" href="/guides/">View all guides →</a>
-    </div>
   </section>
 
-  <section class="card" style="margin-top: 18px;">
-    <h2 style="margin: 0 0 8px;">The SmallGrid approach</h2>
-    <div class="grid" style="margin-top: 10px;">
-      <div class="card">
-        <h3 style="margin: 0 0 6px;">Low power</h3>
-        <p class="muted" style="margin:0;">Prefer mini PCs, Quick Sync, sane transcoding, and “good enough” performance.</p>
-      </div>
-      <div class="card">
-        <h3 style="margin: 0 0 6px;">Low drama</h3>
-        <p class="muted" style="margin:0;">Simple setups you can maintain when you’re tired, busy, or both.</p>
-      </div>
-      <div class="card">
-        <h3 style="margin: 0 0 6px;">Secure by default</h3>
-        <p class="muted" style="margin:0;">Remote access via Tailscale, not open ports and hope.</p>
-      </div>
+  <section class="grid" style="margin-top: 16px;">
+    <div class="card">
+      <div class="kicker">🔌 Low power</div>
+      <h2>Efficiency first</h2>
+      <p>Mini PCs, iGPU transcoding, and “good enough” choices that keep wattage and noise down.</p>
+    </div>
+    <div class="card">
+      <div class="kicker">🧰 Low drama</div>
+      <h2>Maintainable</h2>
+      <p>Setups you can support when you’re busy, tired, or both. Fewer moving parts, fewer surprises.</p>
+    </div>
+    <div class="card">
+      <div class="kicker">🛡️ Secure default</div>
+      <h2>Tailscale over port-forwarding</h2>
+      <p>Remote access that isn’t “open ports and pray”. Private networking that just works.</p>
     </div>
   </section>
 </BaseLayout>

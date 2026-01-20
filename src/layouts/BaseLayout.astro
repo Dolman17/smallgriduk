@@ -1,9 +1,7 @@
 ---
-const {
-  title,
-  description,
-  canonicalPath,
-} = Astro.props;
+import "../styles/global.css";
+
+const { title, description, canonicalPath } = Astro.props;
 
 const site = {
   name: "SmallGrid",
@@ -27,112 +25,36 @@ const canonicalUrl = canonicalPath
     <title>{pageTitle}</title>
     <meta name="description" content={metaDesc} />
     <link rel="canonical" href={canonicalUrl} />
-
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={metaDesc} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalUrl} />
-
-    <style>
-      :root { color-scheme: dark; }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: radial-gradient(1200px 600px at 20% 0%, rgba(122,167,255,.18), transparent 60%),
-                    radial-gradient(900px 500px at 80% 10%, rgba(0,255,204,.10), transparent 55%),
-                    #050814;
-        color: #e6e8ff;
-        line-height: 1.6;
-      }
-      a { color: #7aa7ff; text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
-      header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 10px 0 22px; }
-      nav { display:flex; gap:12px; flex-wrap:wrap; }
-      .chip {
-        display:inline-flex; align-items:center; gap:8px;
-        padding: 8px 12px;
-        border: 1px solid rgba(255,255,255,.10);
-        border-radius: 999px;
-        background: rgba(11,18,39,.55);
-        backdrop-filter: blur(6px);
-        color: #e6e8ff;
-        font-size: 14px;
-      }
-      .chip:hover { text-decoration:none; border-color: rgba(122,167,255,.45); }
-      .brand { font-weight: 850; letter-spacing: .3px; font-size: 20px; }
-      .tagline { opacity: .75; font-size: 13px; margin-top: 2px; }
-      .card {
-        background: rgba(11,18,39,.72);
-        border: 1px solid rgba(255,255,255,.09);
-        border-radius: 16px;
-        padding: 16px;
-      }
-      .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-      h1,h2,h3 { line-height: 1.25; }
-      .muted { opacity: .8; }
-      .pill {
-        display:inline-block;
-        font-size: 12px;
-        padding: 4px 9px;
-        border-radius: 999px;
-        border: 1px solid rgba(255,255,255,.12);
-        background: rgba(255,255,255,.04);
-        margin-right: 6px;
-        margin-top: 8px;
-      }
-      .footer {
-        opacity: .75;
-        margin-top: 38px;
-        font-size: 14px;
-        display:flex;
-        align-items:flex-start;
-        justify-content: space-between;
-        gap: 14px;
-        flex-wrap: wrap;
-      }
-      .hr { height:1px; background: rgba(255,255,255,.08); margin: 18px 0; }
-      code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-      pre {
-        overflow:auto;
-        padding: 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,.10);
-        background: rgba(0,0,0,.25);
-      }
-    </style>
   </head>
 
   <body>
-    <div class="wrap">
-      <header>
-        <div>
-          <a class="brand" href="/">SmallGrid</a>
-          <div class="tagline">low-power homelabs • Jellyfin • sane defaults</div>
+    <header class="header">
+      <div class="header-inner">
+        <div class="brand">
+          <a href="/">SmallGrid</a>
+          <small>low-power homelabs • Jellyfin • sane defaults</small>
         </div>
-        <nav>
-          <a class="chip" href="/guides/">Guides</a>
-          <a class="chip" href="/about/">About</a>
-          <a class="chip" href="/privacy/">Privacy</a>
-          <a class="chip" href="/contact/">Contact</a>
+
+        <nav class="nav">
+          <a class="btn" href="/guides/">Guides</a>
+          <a class="btn" href="/about/">About</a>
+          <a class="btn" href="/privacy/">Privacy</a>
+          <a class="btn primary" href="/contact/">Contact</a>
         </nav>
-      </header>
+      </div>
+    </header>
 
-      <main>
-        <slot />
-      </main>
+    <main class="wrap">
+      <slot />
+    </main>
 
-      <div class="hr"></div>
+    <div class="hr"></div>
 
-      <footer class="footer">
-        <div>
-          <div>© {new Date().getFullYear()} SmallGrid.uk</div>
-          <div class="muted">Small, efficient, low-power homelabs that don’t become a second job.</div>
-        </div>
-        <div class="muted">
-          <a href="/privacy/">Privacy</a> · <a href="/cookies/">Cookies</a>
-        </div>
-      </footer>
-    </div>
+    <footer class="footer">
+      <div>© {new Date().getFullYear()} SmallGrid.uk</div>
+      <div>
+        <a href="/privacy/">Privacy</a> · <a href="/cookies/">Cookies</a>
+      </div>
+    </footer>
   </body>
 </html>
