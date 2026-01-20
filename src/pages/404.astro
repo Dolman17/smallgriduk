@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Not found" description="Page not found" canonicalPath="/404/">
+  <section class="card">
+    <h1 style="margin:0 0 8px;">404 — Page not found</h1>
+    <p class="muted" style="margin:0 0 14px;">
+      Either the link is wrong, or the page has moved into the great datacentre in the sky.
+    </p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a class="chip" href="/">Go home</a>
+      <a class="chip" href="/guides/">Browse guides</a>
+    </div>
+  </section>
+</BaseLayout>

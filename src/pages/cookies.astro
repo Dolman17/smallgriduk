@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Cookies" description="Cookie information for SmallGrid.uk" canonicalPath="/cookies/">
+  <section class="card">
+    <h1 style="margin:0 0 10px;">Cookies</h1>
+    <p class="muted" style="margin:0 0 12px;">
+      Cookies are small files stored on your device. Some are required for site functionality; others help with advertising or analytics.
+    </p>
+
+    <h2 style="margin: 14px 0 8px;">Essential cookies</h2>
+    <p class="muted" style="margin:0;">
+      SmallGrid aims to avoid unnecessary cookies. If we add features that require essential cookies, we’ll document them here.
+    </p>
+
+    <h2 style="margin: 14px 0 8px;">Advertising cookies</h2>
+    <p class="muted" style="margin:0;">
+      If/when ads are enabled (e.g., Google AdSense), third parties may set cookies to measure ad performance and show relevant ads.
+      In the UK/EU, a consent banner may be used to control this.
+    </p>
+
+    <h2 style="margin: 14px 0 8px;">How to control cookies</h2>
+    <ul class="muted" style="margin:0; padding-left: 18px;">
+      <li>You can manage cookies via your browser settings.</li>
+      <li>If a consent banner is present, you can adjust your choices there.</li>
+    </ul>
+
+    <div class="hr"></div>
+    <p class="muted" style="margin:0; font-size: 13px;">
+      Last updated: {new Date().toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "2-digit" })}
+    </p>
+  </section>
+</BaseLayout>

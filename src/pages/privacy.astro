@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Privacy Policy" description="How SmallGrid handles privacy and data." canonicalPath="/privacy/">
+  <section class="card">
+    <h1 style="margin:0 0 10px;">Privacy Policy</h1>
+    <p class="muted" style="margin:0 0 12px;">
+      SmallGrid.uk is a simple informational site. We aim to collect as little personal data as possible.
+    </p>
+
+    <h2 style="margin: 14px 0 8px;">What we collect</h2>
+    <ul class="muted" style="margin:0; padding-left: 18px;">
+      <li><strong>Server logs:</strong> like most websites, hosting providers may log IP address, browser type, and pages viewed for security and performance.</li>
+      <li><strong>Emails you send us:</strong> if you email, we’ll receive your address and message content.</li>
+    </ul>
+
+    <h2 style="margin: 14px 0 8px;">Advertising</h2>
+    <p class="muted" style="margin:0;">
+      This site may display advertising (e.g., Google AdSense). Advertising providers may use cookies or similar technologies
+      to show relevant ads. See the Cookies page for details and consent information.
+    </p>
+
+    <h2 style="margin: 14px 0 8px;">Analytics</h2>
+    <p class="muted" style="margin:0;">
+      If we add analytics in the future, we’ll aim for privacy-friendly options and update this policy.
+    </p>
+
+    <h2 style="margin: 14px 0 8px;">Contact</h2>
+    <p class="muted" style="margin:0;">
+      Questions? Email <a href="mailto:hello@smallgrid.uk">hello@smallgrid.uk</a>.
+    </p>
+
+    <div class="hr"></div>
+    <p class="muted" style="margin:0; font-size: 13px;">
+      Last updated: {new Date().toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "2-digit" })}
+    </p>
+  </section>
+</BaseLayout>

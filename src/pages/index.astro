@@ -1,16 +1,71 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
+const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
+const guides = guidesAll
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const featured = guides.slice(0, 6);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title="Small, efficient homelabs"
+  description="Guides for building low-power, quiet homelabs and Jellyfin servers with practical, reliable setups."
+  canonicalPath="/"
+>
+  <section class="card" style="padding: 18px;">
+    <h1 style="margin: 0 0 8px;">Build a homelab that doesn’t take over your life (or electric bill).</h1>
+    <p class="muted" style="margin: 0;">
+      SmallGrid is a practical guide to low-power Jellyfin servers, mini PC homelabs, simple networking, and backups that actually restore.
+      No enterprise cosplay. No 47-container “hello world”. Just working systems.
+    </p>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+      <a class="chip" href="/guides/">Browse Guides</a>
+      <a class="chip" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
+      <a class="chip" href="/guides/mini-pc-under-200/">Budget Mini PC Build</a>
+    </div>
+  </section>
+
+  <section style="margin-top: 18px;">
+    <h2 style="margin: 0 0 10px;">Latest guides</h2>
+    <div class="grid">
+      {featured.map((post) => (
+        <article class="card">
+          <h3 style="margin: 0 0 8px;">
+            <a href={`/guides/${post.slug}/`}>{post.data.title}</a>
+          </h3>
+          <p class="muted" style="margin: 0 0 10px;">{post.data.description}</p>
+          <div>
+            {post.data.tags.slice(0, 4).map((t) => (
+              <span class="pill">#{t}</span>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div style="margin-top: 14px;">
+      <a class="chip" href="/guides/">View all guides →</a>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top: 18px;">
+    <h2 style="margin: 0 0 8px;">The SmallGrid approach</h2>
+    <div class="grid" style="margin-top: 10px;">
+      <div class="card">
+        <h3 style="margin: 0 0 6px;">Low power</h3>
+        <p class="muted" style="margin:0;">Prefer mini PCs, Quick Sync, sane transcoding, and “good enough” performance.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin: 0 0 6px;">Low drama</h3>
+        <p class="muted" style="margin:0;">Simple setups you can maintain when you’re tired, busy, or both.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin: 0 0 6px;">Secure by default</h3>
+        <p class="muted" style="margin:0;">Remote access via Tailscale, not open ports and hope.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

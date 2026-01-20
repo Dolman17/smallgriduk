@@ -7,7 +7,6 @@ const guides = defineCollection({
     pubDate: z.date(),
     updatedDate: z.date().optional(),
     tags: z.array(z.string()).default([]),
-    readingTime: z.number().optional(),
     draft: z.boolean().default(false),
   }),
 });

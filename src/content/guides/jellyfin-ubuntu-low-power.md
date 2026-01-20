@@ -1,20 +1,25 @@
 ---
 title: "Jellyfin on Ubuntu (Low-Power Setup That Just Works)"
-description: "A practical step-by-step install with sane defaults, permissions, media folders, and remote access via Tailscale."
+description: "A practical Jellyfin install with sane folder permissions, libraries, and optional hardware transcoding."
 pubDate: 2026-01-20
-tags: ["jellyfin", "ubuntu", "low-power", "tailscale"]
+tags: ["jellyfin", "ubuntu", "low-power", "media"]
 ---
 
-## What this guide covers
-- Install Jellyfin
-- Set up media folders + permissions properly
-- Enable hardware acceleration (optional)
-- Remote access without opening ports (Tailscale)
+## Goal
+Install Jellyfin on Ubuntu with a setup that’s reliable, efficient, and easy to maintain.
 
-## Prereqs
-- Ubuntu 22.04/24.04
-- A box that stays on (mini PC / NUC / old desktop)
+## What you’ll need
+- Ubuntu 22.04+ (server or desktop)
 - SSH access
+- A media disk/folder (local or network share)
 
-## Step 1 — Install Jellyfin
-...
+## Install Jellyfin
+Run:
+
+```bash
+sudo apt update
+sudo apt install -y apt-transport-https ca-certificates curl gnupg
+curl -fsSL https://repo.jellyfin.org/jellyfin_team.gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/jellyfin.gpg
+echo "deb [signed-by=/usr/share/keyrings/jellyfin.gpg] https://repo.jellyfin.org/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/jellyfin.list
+sudo apt update
+sudo apt install -y jellyfin
