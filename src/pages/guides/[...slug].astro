@@ -18,8 +18,13 @@ const published = entry.data.pubDate.toLocaleDateString("en-GB", {
   month: "short",
   day: "2-digit",
 });
+
 const updated = entry.data.updatedDate
-  ? entry.data.updatedDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })
+  ? entry.data.updatedDate.toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    })
   : null;
 ---
 
@@ -28,28 +33,39 @@ const updated = entry.data.updatedDate
   description={entry.data.description}
   canonicalPath={`/guides/${entry.slug}/`}
 >
-  <article class="card" style="padding: 18px;">
-    <div class="muted" style="font-size: 13px;">
-      Published {published}{updated ? ` · Updated ${updated}` : ""}
+  <article class="card" style="padding: 20px;">
+    <div class="kicker">
+      📘 SmallGrid guide
+      <span style="opacity:.7;">
+        · Published {published}
+        {updated ? ` · Updated ${updated}` : ""}
+      </span>
     </div>
-    <h1 style="margin: 6px 0 10px;">{entry.data.title}</h1>
-    <p class="muted" style="margin:0 0 14px;">{entry.data.description}</p>
 
-    <div style="margin-bottom: 14px;">
-      {(entry.data.tags || []).map((t) => <span class="pill">#{t}</span>)}
-    </div>
+    <h1 style="margin: 6px 0 10px;">{entry.data.title}</h1>
+    <p style="margin:0 0 12px; color: var(--muted);">
+      {entry.data.description}
+    </p>
+
+    {(entry.data.tags && entry.data.tags.length > 0) && (
+      <div style="margin-bottom: 12px;">
+        {entry.data.tags.map((tag: string) => (
+          <span class="pill">#{tag}</span>
+        ))}
+      </div>
+    )}
 
     <div class="hr"></div>
 
-    <div class="content">
+    <div class="prose">
       <Content />
     </div>
 
     <div class="hr"></div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <a class="chip" href="/guides/">← Back to Guides</a>
-      <a class="chip" href="/contact/">Ask a question</a>
+      <a class="btn" href="/guides/">← Back to all guides</a>
+      <a class="btn primary" href="/contact/">Ask a question</a>
     </div>
   </article>
 </BaseLayout>

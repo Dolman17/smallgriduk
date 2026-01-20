@@ -1,0 +1,132 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Recommended Gear"
+  description="Opinionated, low-faff hardware suggestions for small, efficient homelabs and Jellyfin servers."
+  canonicalPath="/recommended-gear/"
+>
+  <section class="card">
+    <div class="kicker">🛠️ Opinionated picks</div>
+    <h1>Recommended gear for a SmallGrid-style homelab</h1>
+    <p>
+      These are not the “absolute best” parts on paper — they’re the kind of hardware that
+      tends to work well for quiet, low-power homelabs and Jellyfin setups without becoming high-maintenance.
+    </p>
+    <p>
+      No sponsorships, no hard sell. Treat this as a sanity checklist, not a shopping list.
+    </p>
+  </section>
+
+  <section class="grid" style="margin-top: 16px;">
+    <article class="card">
+      <div class="kicker">🔌 Core box</div>
+      <h2>Mini PCs for homelab & Jellyfin</h2>
+      <p>
+        Look for small desktops or mini PCs with:
+      </p>
+      <ul>
+        <li>4+ cores (8th gen Intel or newer, or equivalent AMD)</li>
+        <li>Integrated graphics (Intel Quick Sync is great for Jellyfin)</li>
+        <li>At least one NVMe slot</li>
+        <li>16&nbsp;GB RAM as a comfortable baseline</li>
+      </ul>
+      <p>
+        Good used candidates: Intel NUCs, Dell OptiPlex Micro, HP EliteDesk Mini, Lenovo Tiny.
+        They’re quiet, everywhere on the used market, and don’t fry your power bill.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="kicker">💾 Storage</div>
+      <h2>SSD + HDD combo that doesn’t screech</h2>
+      <p>
+        A simple, effective layout:
+      </p>
+      <ul>
+        <li>NVMe SSD for OS and active services (VMs, containers)</li>
+        <li>1–2 large 5400/5900&nbsp;RPM HDDs for bulk media and archives</li>
+        <li>USB or NAS-based storage for backups</li>
+      </ul>
+      <p>
+        Prefer NAS/“quiet” drives for always-on spinning rust, and avoid mixing one
+        super-loud drive into an otherwise quiet setup if you value your ears.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="kicker">📦 Enclosures</div>
+      <h2>External enclosures that stay civilised</h2>
+      <p>
+        When you outgrow internal bays, external storage keeps things flexible:
+      </p>
+      <ul>
+        <li>Single-drive USB 3.x enclosure for simple expansion &amp; backups</li>
+        <li>2–4 bay DAS if you need more spindles on one cable</li>
+        <li>A separate NAS if you want the noisy bits out of the main room</li>
+      </ul>
+      <p>
+        Prioritise enclosures with decent reviews for noise and thermals —
+        bad ones can resonate like a cheap guitar body.
+      </p>
+    </article>
+  </section>
+
+  <section class="grid" style="margin-top: 16px;">
+    <article class="card">
+      <div class="kicker">🔇 Noise control</div>
+      <h2>Cheap parts that make a big difference</h2>
+      <ul>
+        <li>Rubber feet or a dense mouse mat under your server / NAS</li>
+        <li>Short, tidy cables to stop blocking airflow</li>
+        <li>Dust filters you will actually clean every few months</li>
+      </ul>
+      <p>
+        Vibration damping and clean airflow often matter more than the exact model
+        of fan you’re using, especially for small homelabs.
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="kicker">🔌 Power & safety</div>
+      <h2>Power that doesn’t get exciting</h2>
+      <ul>
+        <li>A modest UPS for graceful shutdowns during power cuts</li>
+        <li>Decent surge protection on extensions</li>
+        <li>Labels on power bricks so you know what belongs to what</li>
+      </ul>
+      <p>
+        You don’t need a datacentre UPS — just enough time for your box to decide
+        “this is fine, I’ll shut down cleanly now.”
+      </p>
+    </article>
+
+    <article class="card">
+      <div class="kicker">🧩 Extras</div>
+      <h2>Nice-to-have add-ons</h2>
+      <ul>
+        <li>A small, quiet switch if you’re wiring more rooms</li>
+        <li>Colour-coded or labelled Ethernet cables</li>
+        <li>A USB flash drive kept aside purely for OS installers</li>
+      </ul>
+      <p>
+        None of these are required, but they all push your homelab closer to
+        “tool I rely on” instead of “project I’m constantly fixing.”
+      </p>
+    </article>
+  </section>
+
+  <section class="card" style="margin-top: 16px;">
+    <h2>How to use this list</h2>
+    <p>
+      Treat this page as a set of constraints: low power, quiet by default,
+      easy to back up, and reasonably future-proof without going overboard.
+    </p>
+    <p>
+      When in doubt, buy the thing you can maintain while tired —
+      not the thing you’ll have to babysit every weekend.
+    </p>
+    <a class="btn" href="/start/">See how this fits into the full setup →</a>
+  </section>
+</BaseLayout>

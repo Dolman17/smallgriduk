@@ -1,0 +1,128 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const guides = await getCollection("guides", ({ data }) => !data.draft);
+
+// Helper to safely find guides by slug (filename)
+const bySlug = (slug: string) => guides.find((g) => g.slug === slug);
+
+const jellyfinGuide = bySlug("jellyfin-ubuntu-low-power");
+const tailscaleGuide = bySlug("jellyfin-tailscale-remote-access");
+const miniPcGuide = bySlug("mini-pc-under-200");
+const proxmoxGuide = bySlug("proxmox-one-node-starter");
+const backupsGuide = bySlug("backups-3-2-1-home-server");
+const quietStorageGuide = bySlug("quiet-storage-without-noise");
+---
+
+<BaseLayout
+  title="Start Here"
+  description="A practical path to build a small, low-power homelab with backups, Jellyfin, and safe remote access."
+  canonicalPath="/start/"
+>
+  <section class="card">
+    <div class="kicker">🧭 Start here</div>
+    <h1>How to build a SmallGrid-style homelab</h1>
+    <p>
+      This is the opinionated path to a quiet, low-power homelab that doesn’t become a second job:
+      pick sensible hardware, set up backups, add Jellyfin, then layer on Proxmox and remote access.
+    </p>
+  </section>
+
+  <section class="grid" style="margin-top: 16px;">
+    <article class="card">
+      <div class="kicker">Step 1</div>
+      <h2>Choose a small, efficient box</h2>
+      <p>
+        Start with a used mini PC or small form-factor machine instead of a noisy rack.
+        You want decent CPU, iGPU (for media), and low idle power.
+      </p>
+      {miniPcGuide && (
+        <a class="btn primary" href={`/guides/${miniPcGuide.slug}/`}>
+          Pick a mini PC under £200 →
+        </a>
+      )}
+    </article>
+
+    <article class="card">
+      <div class="kicker">Step 2</div>
+      <h2>Set up backups before you get attached</h2>
+      <p>
+        Before you migrate everything, give yourself a way back. A simple 3-2-1 backup
+        with a USB disk and an offsite copy is enough to avoid sad-face data loss.
+      </p>
+      {backupsGuide && (
+        <a class="btn" href={`/guides/${backupsGuide.slug}/`}>
+          3-2-1 for home servers →
+        </a>
+      )}
+    </article>
+
+    <article class="card">
+      <div class="kicker">Step 3</div>
+      <h2>Add Jellyfin for media</h2>
+      <p>
+        Turn your box into a low-power media server with sane permissions,
+        tidy libraries, and optional hardware transcoding.
+      </p>
+      {jellyfinGuide && (
+        <a class="btn" href={`/guides/${jellyfinGuide.slug}/`}>
+          Jellyfin on Ubuntu (low-power) →
+        </a>
+      )}
+    </article>
+  </section>
+
+  <section class="grid" style="margin-top: 16px;">
+    <article class="card">
+      <div class="kicker">Step 4</div>
+      <h2>Add safe remote access</h2>
+      <p>
+        Don’t open ports to the internet if you don’t have to. Use a mesh VPN
+        like Tailscale to reach your services from anywhere without exposing them publicly.
+      </p>
+      {tailscaleGuide && (
+        <a class="btn" href={`/guides/${tailscaleGuide.slug}/`}>
+          Remote access with Tailscale →
+        </a>
+      )}
+    </article>
+
+    <article class="card">
+      <div class="kicker">Step 5</div>
+      <h2>Move to Proxmox (when you’re ready)</h2>
+      <p>
+        Once you’re comfortable, put Proxmox underneath your services. A simple one-node
+        setup gives you clean VM/container separation and proper backups.
+      </p>
+      {proxmoxGuide && (
+        <a class="btn" href={`/guides/${proxmoxGuide.slug}/`}>
+          Proxmox for normal humans →
+        </a>
+      )}
+    </article>
+
+    <article class="card">
+      <div class="kicker">Step 6</div>
+      <h2>Keep it quiet and low-power</h2>
+      <p>
+        Place the hardware somewhere sane, dampen vibration, and choose drives and enclosures
+        that won’t make you hate being in the same room.
+      </p>
+      {quietStorageGuide && (
+        <a class="btn" href={`/guides/${quietStorageGuide.slug}/`}>
+          Quiet storage without datacentre noise →
+        </a>
+      )}
+    </article>
+  </section>
+
+  <section class="card" style="margin-top: 16px;">
+    <h2>Where to go next</h2>
+    <p>
+      From here you can add Home Assistant, DNS-level ad blocking, monitoring,
+      and more — but the core pattern stays the same: small, efficient, backed up, and boringly reliable.
+    </p>
+    <a class="btn" href="/guides/">Browse all guides →</a>
+  </section>
+</BaseLayout>
