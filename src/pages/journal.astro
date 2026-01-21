@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const entriesAll = await getCollection("journal", ({ data }) => !data.draft);
+const entries = entriesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const allTags = Array.from(
+  new Set(entries.flatMap((e) => e.data.tags || []))
+).sort((a, b) => a.localeCompare(b));
+---
+
+<BaseLayout
+  title="Journal"
+  description="A weekly log of building my SmallGrid homelab — what worked, what broke, and what I kept boring on purpose."
+  canonicalPath="/journal/"
+>
+  <section class="card">
+    <h1 style="margin:0 0 8px;">Homelab Journal</h1>
+    <p class="muted" style="margin:0;">
+      Weekly progress notes from building a small, efficient homelab at home. Less theory. More “did this actually work?”.
+    </p>
+
+    {allTags.length > 0 && (
+      <div style="margin-top: 12px;">
+        <div class="muted" style="font-size: 13px;">Popular tags</div>
+        <div>
+          {allTags.map((t) => <span class="pill">#{t}</span>)}
+        </div>
+      </div>
+    )}
+  </section>
+
+  <section style="margin-top: 16px;">
+    <div class="grid">
+      {entries.map((entry) => (
+        <article class="card">
+          <h2 style="margin: 0 0 8px; font-size: 18px;">
+            <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
+          </h2>
+          <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
+            {entry.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
+            {entry.data.updatedDate ? ` · Updated ${entry.data.updatedDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}` : ""}
+          </div>
+          <p class="muted" style="margin:0 0 10px;">{entry.data.description}</p>
+          <div>
+            {(entry.data.tags || []).slice(0, 6).map((t) => (
+              <span class="pill">#{t}</span>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
