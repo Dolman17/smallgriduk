@@ -6,7 +6,6 @@ export async function getStaticPaths() {
   const guides = await getCollection("guides");
 
   return guides.map((guide) => ({
-    // Astro expects a string/number/undefined for route params.
     params: { slug: guide.slug },
     props: { guide },
   }));
@@ -18,50 +17,185 @@ interface Props {
 
 const { guide } = Astro.props as Props;
 
-// Frontmatter lives on guide.data (NOT on the render() return)
 const data = guide.data;
-
-// Render gives you the compiled Markdown component
 const { Content } = await guide.render();
 
-// Derive a readable date string (fallback to "now" to avoid build failures)
 const pubDate =
   data?.pubDate instanceof Date
     ? data.pubDate
     : new Date(data?.pubDate ?? Date.now());
+
+// Optional (you can add later to frontmatter; won't break if missing)
+const authorName = data?.author ?? "SmallGrid";
+const authorAvatar = data?.authorAvatar ?? "/images/authors/smallgrid.png";
+
+const tags: string[] = Array.isArray(data?.tags) ? data.tags : [];
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+
+// Build a canonical-ish URL for sharing (works on Cloudflare Pages)
+const shareUrl = Astro.url?.toString() ?? "";
+const shareTitle = data?.title ?? "SmallGrid Guide";
+const shareDescription = data?.description ?? "";
+
+const enc = encodeURIComponent;
+const shareLinks = {
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${enc(shareUrl)}`,
+  x: `https://twitter.com/intent/tweet?url=${enc(shareUrl)}&text=${enc(shareTitle)}`,
+  pinterest: `https://pinterest.com/pin/create/button/?url=${enc(shareUrl)}&description=${enc(
+    `${shareTitle} — ${shareDescription}`.trim()
+  )}`,
+  email: `mailto:?subject=${enc(shareTitle)}&body=${enc(`${shareTitle}\n\n${shareUrl}`)}`,
+};
 ---
 
-<BaseLayout title={data.title} description={data.description}>
+<BaseLayout title={data.title} description={data.description} canonicalPath={`/guides/${guide.slug}/`}>
   <header class="article-header">
     <p class="article-kicker">Guide · SmallGrid</p>
 
-    <h1 class="article-title">
-      {data.title}
-    </h1>
+    <h1 class="article-title">{data.title}</h1>
 
-    <div class="article-meta">
-      <span class="article-meta-item">
-        <span>Updated</span>
-        <time datetime={pubDate.toISOString()}>
-          {pubDate.toLocaleDateString("en-GB", {
-            year: "numeric",
-            month: "short",
-            day: "2-digit",
-          })}
-        </time>
-      </span>
+    <div class="guide-topline">
+      <div class="guide-byline">
+        <img class="guide-avatar" src={authorAvatar} alt="" width="36" height="36" loading="lazy" />
+        <span class="guide-byline-text">
+          <span class="muted">by</span> <span class="guide-author">{authorName}</span>
+        </span>
+      </div>
 
-      {data.tags && Array.isArray(data.tags) && data.tags.length > 0 && (
-        <ul class="article-tags">
-          {data.tags.map((tag: string) => (
-            <li class="tag-pill">{tag}</li>
-          ))}
-        </ul>
-      )}
+      <div class="guide-meta-chips">
+        <span class="chip">
+          <span class="chip-label">Updated</span>
+          <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        </span>
+
+        {tags.slice(0, 6).map((tag) => (
+          <span class="chip chip-tag">#{tag}</span>
+        ))}
+      </div>
+    </div>
+
+    <div class="guide-toolbar" data-guide-slug={guide.slug}>
+      <div class="guide-share">
+        <a class="icon-btn" href={shareLinks.facebook} target="_blank" rel="noreferrer" aria-label="Share on Facebook" title="Share on Facebook">
+          f
+        </a>
+        <a class="icon-btn" href={shareLinks.x} target="_blank" rel="noreferrer" aria-label="Share on X" title="Share on X">
+          x
+        </a>
+        <a class="icon-btn" href={shareLinks.pinterest} target="_blank" rel="noreferrer" aria-label="Share on Pinterest" title="Share on Pinterest">
+          p
+        </a>
+        <a class="icon-btn" href={shareLinks.email} aria-label="Share by email" title="Share by email">
+          @
+        </a>
+        <button class="icon-btn" type="button" data-action="copy" aria-label="Copy link" title="Copy link">
+          ⧉
+        </button>
+      </div>
+
+      <div class="guide-actions">
+        <button class="btn btn-primary" type="button" data-action="print">
+          Save as PDF
+        </button>
+
+        <button class="btn btn-ghost" type="button" data-action="status" aria-live="polite">
+          Not Started
+        </button>
+
+        <button class="heart-btn" type="button" data-action="favorite" aria-pressed="false" aria-label="Save this guide">
+          ♥
+        </button>
+      </div>
+    </div>
+
+    <div class="guide-note" role="note">
+      Heads up: SmallGrid doesn’t do affiliate fluff. If we ever use affiliate links in the future, we’ll say so clearly on the page.
     </div>
   </header>
 
   <hr class="article-divider" />
 
-  <Content />
+  <article class="article-body">
+    <Content />
+  </article>
+
+  <script is:inline>
+    (() => {
+      const root = document.querySelector(".guide-toolbar");
+      if (!root) return;
+
+      const slug = root.getAttribute("data-guide-slug") || "guide";
+      const keyStatus = `sg:guide:status:${slug}`;
+      const keyFav = `sg:guide:fav:${slug}`;
+
+      const statusBtn = root.querySelector('[data-action="status"]');
+      const favBtn = root.querySelector('[data-action="favorite"]');
+      const copyBtn = root.querySelector('[data-action="copy"]');
+      const printBtn = root.querySelector('[data-action="print"]');
+
+      const statuses = ["Not Started", "In Progress", "Done"];
+
+      function setStatus(label) {
+        if (!statusBtn) return;
+        statusBtn.textContent = label;
+        try { localStorage.setItem(keyStatus, label); } catch (_) {}
+      }
+
+      function getStatus() {
+        try { return localStorage.getItem(keyStatus); } catch (_) { return null; }
+      }
+
+      function setFav(isFav) {
+        if (!favBtn) return;
+        favBtn.classList.toggle("is-faved", isFav);
+        favBtn.setAttribute("aria-pressed", String(isFav));
+        try { localStorage.setItem(keyFav, isFav ? "1" : "0"); } catch (_) {}
+      }
+
+      function getFav() {
+        try { return localStorage.getItem(keyFav) === "1"; } catch (_) { return false; }
+      }
+
+      // Init from storage
+      const savedStatus = getStatus();
+      if (savedStatus && statuses.includes(savedStatus)) setStatus(savedStatus);
+      else setStatus("Not Started");
+
+      setFav(getFav());
+
+      statusBtn?.addEventListener("click", () => {
+        const current = statusBtn.textContent || "Not Started";
+        const idx = statuses.indexOf(current);
+        const next = statuses[(idx + 1) % statuses.length];
+        setStatus(next);
+      });
+
+      favBtn?.addEventListener("click", () => {
+        setFav(!favBtn.classList.contains("is-faved"));
+      });
+
+      copyBtn?.addEventListener("click", async () => {
+        const url = window.location.href;
+        try {
+          await navigator.clipboard.writeText(url);
+          copyBtn.textContent = "✓";
+          setTimeout(() => (copyBtn.textContent = "⧉"), 900);
+        } catch (_) {
+          // fallback: best-effort
+          copyBtn.textContent = "…";
+          setTimeout(() => (copyBtn.textContent = "⧉"), 900);
+        }
+      });
+
+      printBtn?.addEventListener("click", () => {
+        window.print();
+      });
+    })();
+  </script>
 </BaseLayout>

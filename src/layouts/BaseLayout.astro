@@ -1,38 +1,78 @@
 ---
 import "../styles/global.css";
 
-export interface Props {
-  title?: string;
-  description?: string;
-}
-
 const {
-  title = "SmallGrid · Low-Power Homelabs That Just Work",
-  description = "Practical, low-power homelab guides for Jellyfin, Proxmox, backups, and remote access that actually work at home.",
+  title = "SmallGrid.uk",
+  description = "Small, practical tools for real-world problems.",
+  ogImage = "brand/smallgrid-logo.svg",
 } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+
+// Base-path safe URLs (works on / and on subpaths like /smallgrid/)
+const base = import.meta.env.BASE_URL;
+const iconSvg = `${base}brand/smallgrid-icon.svg`;
+const iconMonoSvg = `${base}brand/smallgrid-icon-mono.svg`;
+const wordmarkSvg = `${base}brand/smallgrid-wordmark.svg`;
+const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.replace(/^\//, "")}`;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalUrl.toString()} />
+
+    <!-- Favicons (SVG-first) -->
+    <link rel="icon" type="image/svg+xml" href={iconSvg} />
+    <link rel="mask-icon" href={iconMonoSvg} color="#064e3b" />
+
+    <!-- Social -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl.toString()} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
   </head>
+
   <body>
     <div class="site-root">
       <header class="site-header">
         <div class="site-header-inner">
-          <a href="/" class="site-logo">
-            <span class="site-logo-main">SmallGrid</span>
-            <span class="site-logo-sub">Low-Power Homelabs</span>
+          <a class="site-logo" href={base} aria-label="SmallGrid.uk home">
+            <span class="site-logo-main" style="display:flex; align-items:center; gap:10px;">
+              <img
+                src={iconSvg}
+                width="22"
+                height="22"
+                alt="SmallGrid icon"
+                decoding="async"
+                loading="eager"
+              />
+              <img
+                src={wordmarkSvg}
+                alt="SmallGrid.uk"
+                decoding="async"
+                loading="eager"
+                style="height: 20px; width: auto;"
+              />
+            </span>
+            <span class="site-logo-sub">Tiny tools. Solid systems.</span>
           </a>
 
-          <nav class="site-nav">
-            <a href="/guides" class="site-nav-link">Guides</a>
-            {/* Add more top-level links here later if needed */}
+          <nav class="site-nav" aria-label="Primary">
+            <a class="site-nav-link" href={`${base}tutorials/`}>Tutorials</a>
+            <a class="site-nav-link" href={`${base}guides/`}>Guides</a>
+            <a class="site-nav-link" href={`${base}about/`}>About</a>
           </nav>
         </div>
       </header>
@@ -48,7 +88,17 @@ const {
       <footer class="site-footer">
         <div class="site-footer-inner">
           <p class="site-footer-text">
-            © {new Date().getFullYear()} SmallGrid · Low-power homelabs that actually fit in a house.
+            <img
+              src={iconMonoSvg}
+              width="16"
+              height="16"
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              loading="lazy"
+              style="vertical-align: -3px; margin-right: 6px;"
+            />
+            © {new Date().getFullYear()} SmallGrid.uk
           </p>
         </div>
       </footer>

@@ -1,0 +1,181 @@
+/* ---- SmallGrid.uk global styles (PiMyLifeUp-ish) ---- */
+
+:root {
+  --bg: #f3f4f6;        /* light grey page background */
+  --card: #ffffff;      /* white content card */
+  --ink: #0f172a;       /* slate-900 */
+  --muted: #334155;     /* slate-700 */
+  --border: #e5e7eb;    /* gray-200 */
+  --link: #2563eb;      /* blue-600 */
+  --link-hover: #1d4ed8;/* blue-700 */
+
+  --radius: 14px;
+  --wrap: 980px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+img { max-width: 100%; height: auto; }
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+a:hover { color: var(--link-hover); text-decoration: underline; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 18px;
+}
+
+/* Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(243, 244, 246, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  gap: 18px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.brand:hover { text-decoration: none; }
+
+.brand__icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
+.brand__wordmark {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+
+.site-nav {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  color: var(--muted);
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.site-nav a:hover {
+  color: var(--ink);
+  background: rgba(15, 23, 42, 0.04);
+  text-decoration: none;
+}
+
+/* Main page/card */
+.page {
+  padding: 24px 0 34px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px;
+  box-shadow: 0 10px 25px rgba(2, 6, 23, 0.06);
+}
+
+/* Basic article typography */
+.card h1, .card h2, .card h3 {
+  line-height: 1.2;
+  margin: 1.2em 0 0.5em;
+}
+
+.card h1 { font-size: 2rem; letter-spacing: -0.02em; }
+.card h2 { font-size: 1.45rem; letter-spacing: -0.01em; }
+.card h3 { font-size: 1.15rem; }
+
+.card p { margin: 0.85em 0; color: var(--ink); }
+.card ul, .card ol { margin: 0.85em 0; padding-left: 1.2em; }
+
+.card code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95em;
+}
+
+.card pre {
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+/* Footer */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 18px 0 26px;
+  color: var(--muted);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.footer-links {
+  display: inline-flex;
+  gap: 12px;
+}
+
+.footer-links a {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.footer-links a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .brand__wordmark { height: 22px; }
+  .card { padding: 18px; }
+}

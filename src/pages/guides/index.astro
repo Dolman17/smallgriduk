@@ -3,54 +3,66 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
 const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
-const guides = guidesAll
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const guides = guidesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-const allTags = Array.from(
-  new Set(guides.flatMap((g) => g.data.tags || []))
-).sort((a, b) => a.localeCompare(b));
+const allTags = Array.from(new Set(guides.flatMap((g) => g.data.tags || []))).sort((a, b) =>
+  a.localeCompare(b)
+);
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" });
 ---
 
 <BaseLayout
-  title="Guides"
-  description="Low-power homelab and Jellyfin guides: mini PCs, networking, backups, and sane defaults."
+  title="Guides · SmallGrid"
+  description="Practical tutorials for quiet, low-power homelabs: Jellyfin, mini PCs, simple networking, and backups."
   canonicalPath="/guides/"
 >
-  <section class="card">
-    <h1 style="margin:0 0 8px;">Guides</h1>
-    <p class="muted" style="margin:0;">
-      Practical tutorials for quiet, low-power homelabs: Jellyfin, mini PC builds, simple networking, and backups.
+  <header class="article-header">
+    <p class="article-kicker">Guides · SmallGrid</p>
+    <h1 class="article-title">Guides</h1>
+    <p class="article-lede">
+      Practical and opinionated setups for small, efficient homelabs. No port-forwarding heroics. No rack cosplay.
     </p>
 
     {allTags.length > 0 && (
-      <div style="margin-top: 12px;">
-        <div class="muted" style="font-size: 13px;">Popular tags</div>
-        <div>
-          {allTags.map((t) => <span class="pill">#{t}</span>)}
-        </div>
+      <div class="article-meta" style="margin-top: 0.6rem;">
+        <span class="article-meta-item">Popular tags</span>
+        <ul class="article-tags">
+          {allTags.map((tag) => (
+            <li class="tag-pill">#{tag}</li>
+          ))}
+        </ul>
       </div>
     )}
-  </section>
+  </header>
 
-  <section style="margin-top: 16px;">
-    <div class="grid">
-      {guides.map((post) => (
-        <article class="card">
-          <h2 style="margin: 0 0 8px; font-size: 18px;">
-            <a href={`/guides/${post.slug}/`}>{post.data.title}</a>
-          </h2>
-          <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
-            {post.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
-            {post.data.updatedDate ? ` · Updated ${post.data.updatedDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}` : ""}
-          </div>
-          <p class="muted" style="margin:0 0 10px;">{post.data.description}</p>
-          <div>
+  <hr class="article-divider" />
+
+  <section class="guide-grid" aria-label="All guides">
+    {guides.map((post) => (
+      <article class="guide-card">
+        <h2 class="guide-card-title">
+          <a class="guide-card-link" href={`/guides/${post.slug}/`}>
+            {post.data.title}
+          </a>
+        </h2>
+
+        <div class="guide-card-meta">
+          <span>{formatDate(post.data.pubDate)}</span>
+          {post.data.updatedDate ? <span>· Updated {formatDate(post.data.updatedDate)}</span> : null}
+        </div>
+
+        <p class="guide-card-desc">{post.data.description}</p>
+
+        {(post.data.tags || []).length ? (
+          <ul class="guide-card-tags">
             {(post.data.tags || []).slice(0, 6).map((t) => (
-              <span class="pill">#{t}</span>
+              <li class="tag-pill">#{t}</li>
             ))}
-          </div>
-        </article>
-      ))}
-    </div>
+          </ul>
+        ) : null}
+      </article>
+    ))}
   </section>
 </BaseLayout>

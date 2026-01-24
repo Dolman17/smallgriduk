@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-label="SmallGrid icon monochrome">
+  <rect x="18" y="18" width="220" height="220" rx="54" fill="#FFFFFF"></rect>
+  <rect x="18.5" y="18.5" width="219" height="219" rx="53.5" stroke="#E2E8F0"></rect>
+
+  <g transform="translate(64,64)" fill="#0F172A">
+    <rect x="0" y="0" width="34" height="34" rx="10" opacity="0.18"></rect>
+    <rect x="47" y="0" width="34" height="34" rx="10" opacity="0.35"></rect>
+    <rect x="94" y="0" width="34" height="34" rx="10" opacity="0.18"></rect>
+
+    <rect x="0" y="47" width="34" height="34" rx="10" opacity="0.18"></rect>
+    <rect x="47" y="47" width="34" height="34" rx="10" opacity="0.18"></rect>
+    <rect x="94" y="47" width="34" height="34" rx="10" opacity="0.50"></rect>
+
+    <rect x="0" y="94" width="34" height="34" rx="10" opacity="0.50"></rect>
+    <rect x="47" y="94" width="34" height="34" rx="10" opacity="0.35"></rect>
+    <rect x="94" y="94" width="34" height="34" rx="10" opacity="0.18"></rect>
+
+    <circle cx="111" cy="17" r="9"></circle>
+    <circle cx="111" cy="17" r="5" fill="#FFFFFF"></circle>
+
+    <path d="M111 17
+             C 94 17, 80 17, 70 17
+             C 54 17, 47 24, 47 36
+             C 47 58, 86 58, 109 70
+             C 130 80, 126 120, 76 124
+             C 45 126, 28 125, 17 124" stroke="#0F172A" stroke-opacity="0.25" stroke-width="7" fill="none" stroke-linecap="round"></path>
+  </g>
+</svg>
