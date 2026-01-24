@@ -6,7 +6,9 @@ export async function getStaticPaths() {
   const guides = await getCollection("guides");
 
   return guides.map((guide) => ({
-    params: { slug: guide.slug.split("/") },
+    // Astro expects a string/number/undefined for route params.
+    // For `[...slug]`, return the slug string (not an array).
+    params: { slug: guide.slug },
     props: { guide },
   }));
 }
