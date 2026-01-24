@@ -1,61 +1,57 @@
 ---
 import "../styles/global.css";
 
-const { title, description, canonicalPath } = Astro.props;
+export interface Props {
+  title?: string;
+  description?: string;
+}
 
-const site = {
-  name: "SmallGrid",
-  domain: "smallgrid.uk",
-  tagline: "Small, efficient, low-power homelabs that don’t become a second job.",
-};
-
-const pageTitle = title ? `${title} | ${site.name}` : `${site.name} | ${site.tagline}`;
-const metaDesc = description ?? site.tagline;
-
-const canonicalUrl = canonicalPath
-  ? `https://${site.domain}${canonicalPath}`
-  : `https://${site.domain}${Astro.url.pathname}`;
+const {
+  title = "SmallGrid · Low-Power Homelabs That Just Work",
+  description = "Practical, low-power homelab guides for Jellyfin, Proxmox, backups, and remote access that actually work at home.",
+} = Astro.props;
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{pageTitle}</title>
-    <meta name="description" content={metaDesc} />
-    <link rel="canonical" href={canonicalUrl} />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
-
   <body>
-    <header class="header">
-      <div class="header-inner">
-        <div class="brand">
-          <a href="/">SmallGrid</a>
-          <small>low-power homelabs • Jellyfin • sane defaults</small>
+    <div class="site-root">
+      <header class="site-header">
+        <div class="site-header-inner">
+          <a href="/" class="site-logo">
+            <span class="site-logo-main">SmallGrid</span>
+            <span class="site-logo-sub">Low-Power Homelabs</span>
+          </a>
+
+          <nav class="site-nav">
+            <a href="/guides" class="site-nav-link">Guides</a>
+            {/* Add more top-level links here later if needed */}
+          </nav>
         </div>
+      </header>
 
-        <nav class="nav">
-          <a class="btn" href="/guides/">Guides</a>
-          <a class="btn" href="/journal/">Journal</a>
-          <a class="btn" href="/about/">About</a>
-          <a class="btn" href="/privacy/">Privacy</a>
-          <a class="btn primary" href="/contact/">Contact</a>
-        </nav>
-      </div>
-    </header>
+      <main class="page-shell">
+        <div class="page-inner">
+          <article class="article-card">
+            <slot />
+          </article>
+        </div>
+      </main>
 
-    <main class="wrap">
-      <slot />
-    </main>
-
-    <div class="hr"></div>
-
-    <footer class="footer">
-      <div>© {new Date().getFullYear()} SmallGrid.uk</div>
-      <div>
-        <a href="/privacy/">Privacy</a> · <a href="/cookies/">Cookies</a>
-      </div>
-    </footer>
+      <footer class="site-footer">
+        <div class="site-footer-inner">
+          <p class="site-footer-text">
+            © {new Date().getFullYear()} SmallGrid · Low-power homelabs that actually fit in a house.
+          </p>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>

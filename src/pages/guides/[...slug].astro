@@ -1,71 +1,61 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection, render } from "astro:content";
+import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
-  const guides = await getCollection("guides", ({ data }) => !data.draft);
-  return guides.map((entry) => ({
-    params: { slug: entry.slug },
-    props: { entry },
+  const guides = await getCollection("guides");
+
+  return guides.map((guide) => ({
+    params: { slug: guide.slug.split("/") },
+    props: { guide },
   }));
 }
 
-const { entry } = Astro.props;
-const { Content } = await render(entry);
+interface Props {
+  guide: any;
+}
 
-const published = entry.data.pubDate.toLocaleDateString("en-GB", {
-  year: "numeric",
-  month: "short",
-  day: "2-digit",
-});
+const { guide } = Astro.props as Props;
+const { Content, data } = await guide.render();
 
-const updated = entry.data.updatedDate
-  ? entry.data.updatedDate.toLocaleDateString("en-GB", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-    })
-  : null;
+// Derive a readable date string
+const pubDate =
+  data.pubDate instanceof Date
+    ? data.pubDate
+    : new Date(data.pubDate ?? Date.now());
 ---
 
-<BaseLayout
-  title={entry.data.title}
-  description={entry.data.description}
-  canonicalPath={`/guides/${entry.slug}/`}
->
-  <article class="card" style="padding: 20px;">
-    <div class="kicker">
-      📘 SmallGrid guide
-      <span style="opacity:.7;">
-        · Published {published}
-        {updated ? ` · Updated ${updated}` : ""}
+<BaseLayout title={data.title} description={data.description}>
+  <header class="article-header">
+    <p class="article-kicker">Guide · SmallGrid</p>
+
+    <h1 class="article-title">
+      {data.title}
+    </h1>
+
+    <div class="article-meta">
+      <span class="article-meta-item">
+        <span>Updated</span>
+        <time datetime={pubDate.toISOString()}>
+          {pubDate.toLocaleDateString("en-GB", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+          })}
+        </time>
       </span>
+
+      {data.tags && Array.isArray(data.tags) && data.tags.length > 0 && (
+        <ul class="article-tags">
+          {data.tags.map((tag: string) => (
+            <li class="tag-pill">{tag}</li>
+          ))}
+        </ul>
+      )}
     </div>
+  </header>
 
-    <h1 style="margin: 6px 0 10px;">{entry.data.title}</h1>
-    <p style="margin:0 0 12px; color: var(--muted);">
-      {entry.data.description}
-    </p>
+  <hr class="article-divider" />
 
-    {(entry.data.tags && entry.data.tags.length > 0) && (
-      <div style="margin-bottom: 12px;">
-        {entry.data.tags.map((tag: string) => (
-          <span class="pill">#{tag}</span>
-        ))}
-      </div>
-    )}
-
-    <div class="hr"></div>
-
-    <div class="prose">
-      <Content />
-    </div>
-
-    <div class="hr"></div>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-      <a class="btn" href="/guides/">← Back to all guides</a>
-      <a class="btn primary" href="/contact/">Ask a question</a>
-    </div>
-  </article>
+  <Content />
 </BaseLayout>
