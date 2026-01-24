@@ -7,7 +7,6 @@ export async function getStaticPaths() {
 
   return guides.map((guide) => ({
     // Astro expects a string/number/undefined for route params.
-    // For `[...slug]`, return the slug string (not an array).
     params: { slug: guide.slug },
     props: { guide },
   }));
@@ -18,13 +17,18 @@ interface Props {
 }
 
 const { guide } = Astro.props as Props;
-const { Content, data } = await guide.render();
 
-// Derive a readable date string
+// Frontmatter lives on guide.data (NOT on the render() return)
+const data = guide.data;
+
+// Render gives you the compiled Markdown component
+const { Content } = await guide.render();
+
+// Derive a readable date string (fallback to "now" to avoid build failures)
 const pubDate =
-  data.pubDate instanceof Date
+  data?.pubDate instanceof Date
     ? data.pubDate
-    : new Date(data.pubDate ?? Date.now());
+    : new Date(data?.pubDate ?? Date.now());
 ---
 
 <BaseLayout title={data.title} description={data.description}>
