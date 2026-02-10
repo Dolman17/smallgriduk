@@ -3,6 +3,7 @@ title: "Jellyfin on Ubuntu (Low-Power Setup That Just Works)"
 description: "A practical Jellyfin install with sane folder permissions, libraries, and optional hardware transcoding."
 pubDate: 2026-01-20
 tags: ["jellyfin", "ubuntu", "low-power", "media"]
+cover: "/images/guides/jellyfin-hero.svg"
 ---
 
 ## Goal

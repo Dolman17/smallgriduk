@@ -3,6 +3,7 @@ title: "Proxmox for Normal Humans: One-Node Starter Setup"
 description: "A clean one-node Proxmox setup for small homelabs: simple layout, backups, and low-power defaults."
 pubDate: 2026-01-20
 tags: ["proxmox", "virtualisation", "homelab", "low-power"]
+cover: "/images/guides/proxmox-hero.svg"
 ---
 
 ## Goal

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="OS choices hero image">
+  <rect width="1200" height="400" fill="#071923" />
+  <rect width="1200" height="400" fill="#7c3aed" opacity="0.08" />
+  <g transform="translate(80,72)" fill="#fff">
+    <text x="0" y="28" font-family="Sora, Arial, sans-serif" font-size="36" font-weight="700">Home Server OS Choices</text>
+    <text x="0" y="64" font-family="Source Sans 3, Arial" font-size="16" fill="#e9e6ff">Choosing the right OS for small, reliable servers</text>
+
+    <g transform="translate(0,108)">
+      <rect x="0" y="0" width="140" height="120" rx="10" fill="#071926" />
+      <rect x="180" y="0" width="140" height="120" rx="10" fill="#071926" />
+      <rect x="360" y="0" width="140" height="120" rx="10" fill="#071926" />
+      <text x="0" y="160" font-family="Source Sans 3, Arial" font-size="14" fill="#cbd5ff">Ubuntu · Proxmox · NAS</text>
+    </g>
+  </g>
+</svg>

@@ -3,6 +3,7 @@ title: "Updates Without Drama: Keeping Your Homelab Patched Safely"
 description: "A simple update routine for homelabs that keeps things secure without breaking everything every weekend."
 pubDate: 2026-01-21
 tags: ["updates", "maintenance", "homelab", "security"]
+cover: "/images/guides/updates-hero.svg"
 ---
 
 ## Goal

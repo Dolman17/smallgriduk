@@ -3,6 +3,7 @@ title: "First Things to Self-Host: A Sane Starter Stack"
 description: "A practical starter stack for a small homelab: services that are worth running yourself and won’t eat your time."
 pubDate: 2026-01-21
 tags: ["homelab", "self-hosting", "beginner", "stack"]
+cover: "/images/guides/starter-hero.svg"
 ---
 
 ## Goal

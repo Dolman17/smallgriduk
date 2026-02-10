@@ -170,6 +170,27 @@ img {
   margin-bottom: 0.8rem;
 }
 
+/* Subtle animated underline for section headings */
+.article-card h2 {
+  position: relative;
+  padding-bottom: 6px;
+}
+.article-card h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--sg-accent), var(--sg-accent-strong));
+  transition: width 260ms cubic-bezier(.2,.8,.2,1);
+}
+.article-card h2:hover::after,
+.article-card h2:focus-within::after {
+  width: 36%;
+}
+
 .article-card h3 {
   font-family: var(--sg-font-display);
   font-size: 1.1rem;
@@ -181,6 +202,91 @@ img {
   line-height: 1.7;
   margin: 0.4rem 0 0.6rem;
 }
+
+/* Article hero (cover image + quick meta row) */
+.article-hero {
+  border-radius: 0.7rem;
+  overflow: hidden;
+  margin: 1rem 0 1.25rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.02));
+}
+.cover-image {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+.article-hero-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+}
+.reading-time {
+  font-size: 0.95rem;
+  color: var(--sg-text-muted);
+  background: rgba(15,23,42,0.03);
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+}
+
+/* Table of contents */
+.article-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 980px) {
+  .article-grid {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    align-items: start;
+  }
+
+  .toc {
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    padding: 1rem;
+    border-radius: 0.8rem;
+    background: var(--sg-surface-raise);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    box-shadow: var(--sg-shadow-soft);
+    font-size: 0.95rem;
+  }
+}
+
+.toc h4 {
+  margin: 0 0 0.6rem 0;
+  font-weight: 700;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.toc-list a {
+  color: var(--sg-text-muted);
+  text-decoration: none;
+}
+
+.toc-list a:hover {
+  color: var(--sg-accent-strong);
+}
+
+/* Smooth scrolling and active TOC link */
+html { scroll-behavior: smooth; }
+.toc-list a.active {
+  color: var(--sg-accent-strong);
+  font-weight: 700;
+}
+
+
 
 .article-card ul,
 .article-card ol {
