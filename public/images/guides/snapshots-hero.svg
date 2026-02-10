@@ -1,8 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="Snapshots hero image">
-  <rect width="1200" height="400" fill="#061427"/>
-  <rect x="0" y="0" width="1200" height="400" fill="#7c3aed" opacity="0.08"/>
-  <g transform="translate(80,80)" fill="#fff" font-family="Sora, Arial, sans-serif">
-    <text x="0" y="48" font-size="42" font-weight="700">Test Environment Snapshots</text>
-    <text x="0" y="98" font-size="20">Using snapshots as a safety net for experiments</text>
+  <rect width="1200" height="400" fill="#061427" />
+  <rect width="1200" height="400" fill="#7c3aed" opacity="0.08" />
+  <g transform="translate(80,72)" fill="#fff">
+    <text x="0" y="28" font-family="Sora, Arial, sans-serif" font-size="36" font-weight="700">Test Environment Snapshots</text>
+    <text x="0" y="64" font-family="Source Sans 3, Arial" font-size="16" fill="#eae5ff">Using snapshots as a safety net for experiments</text>
+
+    <g transform="translate(520,48)">
+      <rect x="0" y="0" width="240" height="160" rx="12" fill="#071427" opacity="0.9" />
+      <g transform="translate(20,20)" fill="#fff">
+        <rect x="0" y="0" width="60" height="12" rx="6" fill="#a78bfa" />
+        <rect x="0" y="28" width="120" height="10" rx="6" fill="#c7b2ff" />
+        <rect x="0" y="52" width="180" height="10" rx="6" fill="#efe7ff" />
+      </g>
+    </g>
   </g>
 </svg>
