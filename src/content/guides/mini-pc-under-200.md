@@ -3,6 +3,7 @@ title: "Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab"
 description: "How to choose a used or budget mini PC that can run Jellyfin, Docker, and a small homelab without murdering your power bill."
 pubDate: 2026-01-21
 tags: ["hardware", "mini-pc", "low-power", "homelab"]
+cover: "/images/guides/mini-pc-hero.svg"
 ---
 
 ## Goal

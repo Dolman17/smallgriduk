@@ -3,6 +3,7 @@ title: "Quiet Storage: Add Disks Without Turning Your Home Into a Datacentre"
 description: "How to expand storage quietly: enclosures, placement, power, and why vibration is the real villain."
 pubDate: 2026-01-20
 tags: ["storage", "nas", "quiet", "low-power"]
+cover: "/images/guides/quiet-storage-hero.svg"
 ---
 
 ## Goal

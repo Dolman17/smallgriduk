@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="Updates hero image">
+  <rect width="1200" height="400" fill="#041018"/>
+  <rect x="0" y="0" width="1200" height="400" fill="#16a34a" opacity="0.10"/>
+  <g transform="translate(80,80)" fill="#fff" font-family="Sora, Arial, sans-serif">
+    <text x="0" y="48" font-size="42" font-weight="700">Updates Without Drama</text>
+    <text x="0" y="98" font-size="20">Keeping homelabs secure and stable</text>
+  </g>
+</svg>

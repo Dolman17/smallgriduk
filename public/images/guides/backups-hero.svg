@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="Backups hero image">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#0f766e" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#06b6d4" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="400" fill="#0f172a"/>
+  <rect x="0" y="0" width="1200" height="400" fill="url(#g)" opacity="0.18"/>
+  <g transform="translate(80,60)" fill="#fff" font-family="Sora, Arial, sans-serif">
+    <rect x="0" y="0" width="480" height="280" rx="18" fill="#ffffff" opacity="0.06" />
+    <text x="28" y="60" font-size="42" font-weight="700">Backups 3-2-1</text>
+    <text x="28" y="110" font-size="20">Home server backups that are simple and reliable</text>
+  </g>
+</svg>

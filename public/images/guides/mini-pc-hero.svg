@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="Mini PC hero image">
+  <defs>
+    <linearGradient id="g4" x1="0" x2="1">
+      <stop offset="0" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="400" fill="#08131a"/>
+  <rect x="0" y="0" width="1200" height="400" fill="url(#g4)" opacity="0.12"/>
+  <g transform="translate(80,60)" fill="#fff" font-family="Sora, Arial, sans-serif">
+    <text x="28" y="60" font-size="42" font-weight="700">Mini PCs under £200</text>
+    <text x="28" y="110" font-size="20">Affordable, low-power options for compact homelabs</text>
+  </g>
+</svg>

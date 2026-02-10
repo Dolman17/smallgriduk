@@ -3,6 +3,7 @@ title: "Remote Jellyfin Without Port Forwarding: Tailscale + SmallGrid Setup"
 description: "Use Tailscale to reach your Jellyfin server from anywhere without opening ports or wrestling with DDNS."
 pubDate: 2026-01-21
 tags: ["jellyfin", "tailscale", "remote-access", "security"]
+cover: "/images/guides/tailscale-hero.svg"
 ---
 
 ##Goal

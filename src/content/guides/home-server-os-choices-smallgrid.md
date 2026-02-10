@@ -3,6 +3,7 @@ title: "Which OS for a Home Server? Proxmox vs Bare Metal vs NAS Distros"
 description: "A practical comparison of Proxmox, plain Linux, and NAS-focused distros for small, low-power homelabs."
 pubDate: 2026-01-21
 tags: ["os", "proxmox", "nas", "homelab"]
+cover: "/images/guides/os-choices-hero.svg"
 ---
 
 ## Goal

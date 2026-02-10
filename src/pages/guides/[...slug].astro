@@ -60,24 +60,50 @@ const shareLinks = {
 
     <h1 class="article-title">{data.title}</h1>
 
+    {data.cover ? (
+      <div class="article-hero">
+        <img class="cover-image" src={data.cover} alt={data.title} loading="lazy" />
+        <div class="article-hero-meta">
+          <div class="guide-byline">
+            <img class="guide-avatar" src={authorAvatar} alt="" width="36" height="36" loading="lazy" />
+            <span class="guide-byline-text">
+              <span class="muted">by</span> <span class="guide-author">{authorName}</span>
+            </span>
+          </div>
+
+          <div style="margin-left:auto; display:flex; gap:0.6rem; align-items:center;">
+            <div class="reading-time" id="reading-time">…</div>
+            <div class="guide-meta-chips" aria-hidden>
+              <span class="chip">
+                <span class="chip-label">Updated</span>
+                <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null}
+
     <div class="guide-topline">
-      <div class="guide-byline">
-        <img class="guide-avatar" src={authorAvatar} alt="" width="36" height="36" loading="lazy" />
-        <span class="guide-byline-text">
-          <span class="muted">by</span> <span class="guide-author">{authorName}</span>
-        </span>
-      </div>
+        <div style="display:none;"> <!-- kept for accessibility/fallback -->
+          <div class="guide-byline">
+            <img class="guide-avatar" src={authorAvatar} alt="" width="36" height="36" loading="lazy" />
+            <span class="guide-byline-text">
+              <span class="muted">by</span> <span class="guide-author">{authorName}</span>
+            </span>
+          </div>
 
-      <div class="guide-meta-chips">
-        <span class="chip">
-          <span class="chip-label">Updated</span>
-          <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-        </span>
+          <div class="guide-meta-chips">
+            <span class="chip">
+              <span class="chip-label">Updated</span>
+              <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+            </span>
 
-        {tags.slice(0, 6).map((tag) => (
-          <span class="chip chip-tag">#{tag}</span>
-        ))}
-      </div>
+            {tags.slice(0, 6).map((tag) => (
+              <span class="chip chip-tag">#{tag}</span>
+            ))}
+          </div>
+        </div>
     </div>
 
     <div class="guide-toolbar" data-guide-slug={guide.slug}>
@@ -121,9 +147,18 @@ const shareLinks = {
 
   <hr class="article-divider" />
 
-  <article class="article-body">
-    <Content />
-  </article>
+  <div class="article-grid">
+    <article class="article-body">
+      <Content />
+    </article>
+
+    <aside class="toc" aria-label="Contents">
+      <h4>Contents</h4>
+      <nav>
+        <ul class="toc-list" id="toc-list"></ul>
+      </nav>
+    </aside>
+  </div>
 
   <script is:inline>
     (() => {
@@ -196,6 +231,60 @@ const shareLinks = {
       printBtn?.addEventListener("click", () => {
         window.print();
       });
+    
+      // Generate reading time and table of contents
+      (function () {
+        try {
+          const content = document.querySelector('.article-body');
+          if (!content) return;
+
+          // Reading time: ~200 WPM
+          const text = content.textContent || '';
+          const words = text.trim().split(/\s+/).filter(Boolean).length;
+          const minutes = Math.max(1, Math.round(words / 200));
+          const rt = document.getElementById('reading-time');
+          if (rt) rt.textContent = `${minutes} min read`;
+
+          // Table of contents
+          const tocList = document.getElementById('toc-list');
+          if (!tocList) return;
+          const headings = content.querySelectorAll('h2, h3');
+          headings.forEach((h) => {
+            if (!h.id) {
+              h.id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            }
+            const li = document.createElement('li');
+            li.style.marginLeft = h.tagName.toLowerCase() === 'h3' ? '0.6rem' : '0';
+            const a = document.createElement('a');
+            a.href = `#${h.id}`;
+            a.textContent = h.textContent;
+            a.setAttribute('data-target', h.id);
+            li.appendChild(a);
+            tocList.appendChild(li);
+          });
+
+          // Active-section highlighting using IntersectionObserver
+          const tocLinks = Array.from(tocList.querySelectorAll('a'));
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                const id = entry.target.id;
+                const link = tocList.querySelector(`a[data-target="${id}"]`);
+                if (!link) return;
+                if (entry.isIntersecting) {
+                  tocLinks.forEach((l) => l.classList.remove('active'));
+                  link.classList.add('active');
+                }
+              });
+            },
+            { root: null, rootMargin: '0px 0px -60% 0px', threshold: 0 }
+          );
+
+          headings.forEach((h) => observer.observe(h));
+        } catch (e) {
+          // ignore small failures
+        }
+      })();
     })();
   </script>
 </BaseLayout>

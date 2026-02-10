@@ -3,6 +3,7 @@ title: "Backups That Don’t Lie: 3-2-1 for Home Servers"
 description: "A simple backup strategy for homelabs that focuses on restores, not vibes."
 pubDate: 2026-01-20
 tags: ["backups", "security", "homelab"]
+cover: "/images/guides/backups-hero.svg"
 ---
 
 ## Goal

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="Proxmox hero image">
+  <defs>
+    <linearGradient id="g3" x1="0" x2="1">
+      <stop offset="0" stop-color="#0ea5a4" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="400" fill="#071422"/>
+  <rect x="0" y="0" width="1200" height="400" fill="url(#g3)" opacity="0.12"/>
+  <g transform="translate(80,60)" fill="#fff" font-family="Sora, Arial, sans-serif">
+    <rect x="0" y="0" width="520" height="260" rx="18" fill="#ffffff" opacity="0.045" />
+    <text x="28" y="60" font-size="42" font-weight="700">Proxmox — One node</text>
+    <text x="28" y="110" font-size="20">Getting started with Proxmox on small hardware</text>
+  </g>
+</svg>

@@ -3,6 +3,7 @@ title: "How Much Power Is My Homelab Using? (And What It Costs)"
 description: "Measure and estimate power usage for your home server, and turn watts into monthly cost in real money."
 pubDate: 2026-01-21
 tags: ["power", "low-power", "homelab", "costs"]
+cover: "/images/guides/power-hero.svg"
 ---
 
 ## Goal
