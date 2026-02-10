@@ -22,8 +22,8 @@ This is not a shopping list; it’s a **checklist** so you can sanity-check anyt
 
 For a SmallGrid-style homelab box, start with:
 
-- **Intel 8th gen (Coffee Lake)** or newer  
-- **AMD Ryzen 3000 series mobile** or newer  
+- **Intel 8th gen (Coffee Lake)** or newer
+- **AMD Ryzen 3000 series mobile** or newer
 
 That gets you:
 
@@ -190,5 +190,5 @@ If it:
 - takes 16 GB RAM
 - boots from SSD
 
-…it’s probably a perfectly good homelab brain, even if it’s not flashy.  
-Spend the rest of the budget on storage and backups, not RGB.  
+…it’s probably a perfectly good homelab brain, even if it’s not flashy.
+Spend the rest of the budget on storage and backups, not RGB.

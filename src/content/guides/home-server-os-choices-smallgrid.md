@@ -109,8 +109,8 @@ Cons:
 
 Ask:
 
-1. Is **running multiple OSes** (VMs) important to me?  
-2. Is **storage** the main event, or just “I need somewhere to put media”?  
+1. Is **running multiple OSes** (VMs) important to me?
+2. Is **storage** the main event, or just “I need somewhere to put media”?
 3. How much complexity do I want to carry around in my head?
 
 Rough guidance:
@@ -171,7 +171,7 @@ You can move between options:
 - From NAS distro → something else:
   - export data, build new box, rsync over
 
-Don’t over-optimise for the **ultimate future state**.  
+Don’t over-optimise for the **ultimate future state**.
 Pick what you’re happy to live with for the next 1–2 years.
 
 ---

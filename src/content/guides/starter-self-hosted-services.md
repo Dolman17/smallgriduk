@@ -22,16 +22,16 @@ This is a **starter stack**, not a “30 containers and 4 reverse proxies” sit
 
 Here’s a simple set of services that play nicely together:
 
-1. **Media** – Jellyfin  
-2. **Backups** – something to push data off the box (restic / Borg / plain rsync)  
-3. **Network-level sanity** – Pi-hole or AdGuard Home  
-4. **Remote access** – Tailscale  
-5. **Sync** – Syncthing for your files across devices  
+1. **Media** – Jellyfin
+2. **Backups** – something to push data off the box (restic / Borg / plain rsync)
+3. **Network-level sanity** – Pi-hole or AdGuard Home
+4. **Remote access** – Tailscale
+5. **Sync** – Syncthing for your files across devices
 
 You can run all of these on:
 
-- one mini PC, or  
-- one Proxmox VM / LXC with Docker  
+- one mini PC, or
+- one Proxmox VM / LXC with Docker
 
 ---
 

@@ -77,7 +77,7 @@ const formatDate = (d: Date) =>
 
   <section class="guide-grid" aria-label="All tutorials">
     {tutorials.map((post) => (
-      <article class="guide-card" data-tags={(post.data.tags || []).join(" ")}> 
+      <article class="guide-card" data-tags={(post.data.tags || []).join(" ")}>
         <h2 class="guide-card-title">
           <a class="guide-card-link" href={`/guides/${post.slug}/`}>
             {post.data.title}

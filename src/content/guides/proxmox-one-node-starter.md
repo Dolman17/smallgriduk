@@ -29,9 +29,9 @@ We’re aiming for:
 
 High level:
 
-- Proxmox host: “hypervisor” only  
-- VM #1: main services (Docker/containers or classic services)  
-- Optional: VM #2 for experiments so you don’t break production  
+- Proxmox host: “hypervisor” only
+- VM #1: main services (Docker/containers or classic services)
+- Optional: VM #2 for experiments so you don’t break production
 
 ---
 
@@ -236,9 +236,9 @@ $ sudo apt install -y htop git curl</code></pre>
 
 From here, this VM can become your **“everything server”**:
 
-- Docker/Compose for apps  
-- Jellyfin, Home Assistant, Pi-hole, etc.  
-- Tailscale for secure remote access  
+- Docker/Compose for apps
+- Jellyfin, Home Assistant, Pi-hole, etc.
+- Tailscale for secure remote access
 
 You can keep adding services, and if you ever need to move them, you move the **VM**, not the host.
 
@@ -270,8 +270,8 @@ This is where Proxmox shines: you can back up entire VMs and containers.
 
 Pick somewhere for backups to live:
 
-- A **second local disk** mounted as a directory storage  
-- A **NAS share** mounted via NFS/CIFS  
+- A **second local disk** mounted as a directory storage
+- A **NAS share** mounted via NFS/CIFS
 
 In the web UI:
 
@@ -328,10 +328,10 @@ If you’ve followed along, you now have:
 
 From here you can:
 
-- add more VMs/containers as needed  
-- snapshot before upgrades  
-- migrate to a nicer box later by backing up/restoring VMs  
+- add more VMs/containers as needed
+- snapshot before upgrades
+- migrate to a nicer box later by backing up/restoring VMs
 
-All without your homelab turning into a pile of half-remembered installs on bare metal.  
+All without your homelab turning into a pile of half-remembered installs on bare metal.
 This is Proxmox for normal humans, not data-centre cosplay.
 ```

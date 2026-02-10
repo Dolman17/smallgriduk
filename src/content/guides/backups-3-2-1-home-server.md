@@ -10,9 +10,9 @@ cover: "/images/guides/backups-hero.svg"
 
 Give your homelab a backup plan that:
 
-- survives disk failures and user mistakes  
-- doesn’t require a degree in ZFS arcana  
-- is simple enough that you’ll actually keep it running  
+- survives disk failures and user mistakes
+- doesn’t require a degree in ZFS arcana
+- is simple enough that you’ll actually keep it running
 
 The focus is **restores**, not vibes.
 
@@ -22,15 +22,15 @@ The focus is **restores**, not vibes.
 
 The classic rule:
 
-- **3 copies** of your data  
-- **2 different media** (e.g. disk + cloud, or disk + NAS)  
-- **1 offsite** (not in the same building)  
+- **3 copies** of your data
+- **2 different media** (e.g. disk + cloud, or disk + NAS)
+- **1 offsite** (not in the same building)
 
 Translated for a home server, that becomes something like:
 
-- live data on your server/NAS  
-- a second copy on a local USB disk or another machine  
-- a third copy in the cloud or on a drive that lives somewhere else  
+- live data on your server/NAS
+- a second copy on a local USB disk or another machine
+- a third copy in the cloud or on a drive that lives somewhere else
 
 ---
 
@@ -40,20 +40,20 @@ Not everything is equally precious.
 
 **High priority (must survive):**
 
-- Photos, documents, personal projects  
-- Password vaults, 2FA backup codes  
-- App configs you’d hate to recreate (Proxmox config, Docker compose, etc.)  
+- Photos, documents, personal projects
+- Password vaults, 2FA backup codes
+- App configs you’d hate to recreate (Proxmox config, Docker compose, etc.)
 
 **Medium priority (nice to have):**
 
-- Media library metadata (Jellyfin DB, watch history)  
-- Small config files and scripts  
+- Media library metadata (Jellyfin DB, watch history)
+- Small config files and scripts
 
 **Low priority (replaceable):**
 
-- Linux ISOs  
-- Downloaded installers  
-- Movies/TV you can re-rip or re-download if the worst happens  
+- Linux ISOs
+- Downloaded installers
+- Movies/TV you can re-rip or re-download if the worst happens
 
 SmallGrid rule: **be ruthless** — backing up 1–2 TB of precious stuff is fine; 40 TB of “might watch again” usually isn’t.
 
@@ -63,9 +63,9 @@ SmallGrid rule: **be ruthless** — backing up 1–2 TB of precious stuff is fin
 
 A simple pattern you can adopt or adapt:
 
-- **Primary:** your server/NAS (e.g. `/srv/data`, `/mnt/pool`)  
-- **Secondary:** a USB backup disk plugged into the server (nightly backup)  
-- **Offsite:** monthly backup to cloud storage or a rotated USB disk you keep elsewhere  
+- **Primary:** your server/NAS (e.g. `/srv/data`, `/mnt/pool`)
+- **Secondary:** a USB backup disk plugged into the server (nightly backup)
+- **Offsite:** monthly backup to cloud storage or a rotated USB disk you keep elsewhere
 
 You don’t need to start perfect. Start with **Primary + Secondary**, then add offsite when you’re ready.
 
@@ -75,9 +75,9 @@ You don’t need to start perfect. Start with **Primary + Secondary**, then add 
 
 We’ll assume:
 
-- your data lives at `/srv/data`  
-- your USB backup disk is mounted at `/mnt/backup`  
-- you’re on Ubuntu or a similar Linux distro  
+- your data lives at `/srv/data`
+- your USB backup disk is mounted at `/mnt/backup`
+- you’re on Ubuntu or a similar Linux distro
 
 ### 1.1 Label and mount the backup disk
 
@@ -147,9 +147,9 @@ sudo chmod +x /usr/local/sbin/backup-data.sh
 
 **What this does:**
 
-- copies everything from `/srv/data/` to `/mnt/backup/data/`  
-- removes files on the backup that were deleted from the source (`--delete`)  
-- logs to `/var/log/backup-data.log`  
+- copies everything from `/srv/data/` to `/mnt/backup/data/`
+- removes files on the backup that were deleted from the source (`--delete`)
+- logs to `/var/log/backup-data.log`
 
 ---
 
@@ -176,13 +176,13 @@ Now you’ve got an automatic **second copy** on a different disk.
 
 This is the part that saves you from:
 
-- fire / theft  
-- “oops, I knocked the server and backup disk off the same shelf”  
+- fire / theft
+- “oops, I knocked the server and backup disk off the same shelf”
 
 Two practical options:
 
-1. **Cloud backup tool** (e.g. restic, borg + remote repo, rclone to object storage)  
-2. **Rotated USB disk** you plug in once a month and store elsewhere  
+1. **Cloud backup tool** (e.g. restic, borg + remote repo, rclone to object storage)
+2. **Rotated USB disk** you plug in once a month and store elsewhere
 
 ### 2.1 Example: offsite with `restic` + cloud storage
 
@@ -277,9 +277,9 @@ If you’ve never restored from it, it isn’t a backup. It’s a hope.
 
 Pick a **non-critical** folder or a couple of files.
 
-1. Copy them somewhere safe temporarily.  
-2. Delete them from `/srv/data/...`.  
-3. Restore from `/mnt/backup/data/...`.  
+1. Copy them somewhere safe temporarily.
+2. Delete them from `/srv/data/...`.
+3. Restore from `/mnt/backup/data/...`.
 
 Example:
 
@@ -290,8 +290,8 @@ sudo rsync -avh /mnt/backup/data/projects/example/ /srv/data/projects/example/
 
 Check:
 
-- do the files come back?  
-- do permissions look sane?  
+- do the files come back?
+- do permissions look sane?
 
 If yes, you’ve just proven the local backup works.
 
@@ -323,12 +323,12 @@ If you can see and use the files, your offsite backup is more than a checkbox.
 
 You’re in decent shape if you can answer **yes** to most of these:
 
-- [ ] I know **where** my important data lives (paths written down).  
-- [ ] I have a **local backup disk** and it’s actually mounted.  
-- [ ] Backups run **automatically** (cron/systemd timers).  
-- [ ] I have an **offsite copy** (cloud or rotated drive).  
-- [ ] I have successfully restored at least **one test folder**.  
-- [ ] I know how to restore the **whole thing** if the server dies.  
+- [ ] I know **where** my important data lives (paths written down).
+- [ ] I have a **local backup disk** and it’s actually mounted.
+- [ ] Backups run **automatically** (cron/systemd timers).
+- [ ] I have an **offsite copy** (cloud or rotated drive).
+- [ ] I have successfully restored at least **one test folder**.
+- [ ] I know how to restore the **whole thing** if the server dies.
 
 ---
 
@@ -336,8 +336,8 @@ You’re in decent shape if you can answer **yes** to most of these:
 
 Don’t wait for the “perfect” setup:
 
-1. Get a single USB disk + nightly `rsync` working.  
-2. Add offsite when you’re comfortable.  
-3. Iterate: split out important data, add configs, refine retention.  
+1. Get a single USB disk + nightly `rsync` working.
+2. Add offsite when you’re comfortable.
+3. Iterate: split out important data, add configs, refine retention.
 
-Your future self, staring at a dead disk, will not care which backup tool you chose — only whether you can bring your data back. This plan makes “yes” the default.  
+Your future self, staring at a dead disk, will not care which backup tool you chose — only whether you can bring your data back. This plan makes “yes” the default.

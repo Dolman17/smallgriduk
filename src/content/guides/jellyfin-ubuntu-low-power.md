@@ -10,8 +10,8 @@ cover: "/images/guides/jellyfin-hero.svg"
 
 Install Jellyfin on Ubuntu with a setup that’s:
 
-- reliable  
-- low-maintenance  
+- reliable
+- low-maintenance
 - friendly to low-power hardware
 
 …and doesn’t turn into a weekend-long troubleshooting session.
@@ -259,15 +259,15 @@ See the follow-up guide:
 
 By now you should have:
 
-- Jellyfin running on Ubuntu  
-- media in `/mnt/media/...` with sane permissions  
-- libraries set up and scanning  
+- Jellyfin running on Ubuntu
+- media in `/mnt/media/...` with sane permissions
+- libraries set up and scanning
 - optional hardware transcoding configured (or safely ignored for now)
 
 From here, you can start refining:
 
-- better metadata  
-- multiple user accounts for family  
-- backups of Jellyfin’s config and database  
+- better metadata
+- multiple user accounts for family
+- backups of Jellyfin’s config and database
 
 You now have a **low-power, low-drama** media server instead of a mysterious box that sometimes works.

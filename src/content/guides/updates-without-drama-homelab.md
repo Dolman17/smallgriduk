@@ -22,11 +22,11 @@ Have a **repeatable update routine** that:
 
 Weekly or bi-weekly is plenty for most home setups:
 
-1. Check status / disk space  
-2. Update OS packages  
-3. Update containers / apps  
-4. Restart what needs restarting  
-5. Quick smoke-test of key services  
+1. Check status / disk space
+2. Update OS packages
+3. Update containers / apps
+4. Restart what needs restarting
+5. Quick smoke-test of key services
 
 Try to do it at **roughly the same time** so your household knows when “TV might reset”.
 
