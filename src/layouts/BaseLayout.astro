@@ -27,6 +27,13 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl.toString()} />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+    />
+
     <!-- Favicons (SVG-first) -->
     <link rel="icon" type="image/svg+xml" href={iconSvg} />
     <link rel="mask-icon" href={iconMonoSvg} color="#064e3b" />

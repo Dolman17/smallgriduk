@@ -1,0 +1,133 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const tutorialsAll = await getCollection("guides", ({ data }) => !data.draft);
+const tutorials = tutorialsAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const allTags = Array.from(new Set(tutorials.flatMap((g) => g.data.tags || []))).sort((a, b) =>
+  a.localeCompare(b)
+);
+
+// Pick a few featured tutorials by slug (falls back to first items)
+const featuredSlugs = [
+  "backups-3-2-1-home-server",
+  "jellyfin-ubuntu-low-power",
+  "proxmox-one-node-starter",
+];
+
+const featured = featuredSlugs
+  .map((s) => tutorials.find((t) => t.slug === s))
+  .filter(Boolean)
+  .slice(0, 3);
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" });
+---
+
+<BaseLayout
+  title="Tutorials · SmallGrid"
+  description="Step-by-step tutorials for small, efficient homelabs: backups, Jellyfin, networking, and low-power media servers."
+  canonicalPath="/tutorials/"
+>
+  <header class="article-header">
+    <p class="article-kicker">Tutorials · SmallGrid</p>
+    <h1 class="article-title">Tutorials</h1>
+    <p class="article-lede">
+      Practical, step-by-step tutorials to help you set up and maintain small, efficient home servers.
+    </p>
+
+    {allTags.length > 0 && (
+      <div class="article-meta" style="margin-top: 0.6rem;">
+        <span class="article-meta-item">Popular tags</span>
+        <ul class="article-tags tutorial-filter">
+          <li><button data-tag="all" class="tag-pill active">All</button></li>
+          {allTags.map((tag) => (
+            <li><button data-tag={tag} class="tag-pill">#{tag}</button></li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </header>
+
+  <hr class="article-divider" />
+
+  {featured.length ? (
+    <section class="guide-grid" aria-label="Featured tutorials">
+      {featured.map((post) => (
+        <article class="guide-card featured">
+          <h2 class="guide-card-title">
+            <a class="guide-card-link" href={`/guides/${post.slug}/`}>
+              {post.data.title}
+            </a>
+          </h2>
+
+          <div class="guide-card-meta">
+            <span>{formatDate(post.data.pubDate)}</span>
+            {post.data.updatedDate ? <span>· Updated {formatDate(post.data.updatedDate)}</span> : null}
+          </div>
+
+          <p class="guide-card-desc">{post.data.description}</p>
+        </article>
+      ))}
+    </section>
+  ) : null}
+
+  <hr class="article-divider" />
+
+  <section class="guide-grid" aria-label="All tutorials">
+    {tutorials.map((post) => (
+      <article class="guide-card" data-tags={(post.data.tags || []).join(" ")}> 
+        <h2 class="guide-card-title">
+          <a class="guide-card-link" href={`/guides/${post.slug}/`}>
+            {post.data.title}
+          </a>
+        </h2>
+
+        <div class="guide-card-meta">
+          <span>{formatDate(post.data.pubDate)}</span>
+          {post.data.updatedDate ? <span>· Updated {formatDate(post.data.updatedDate)}</span> : null}
+        </div>
+
+        <p class="guide-card-desc">{post.data.description}</p>
+
+        {(post.data.tags || []).length ? (
+          <ul class="guide-card-tags">
+            {(post.data.tags || []).slice(0, 6).map((t) => (
+              <li class="tag-pill">#{t}</li>
+            ))}
+          </ul>
+        ) : null}
+      </article>
+    ))}
+  </section>
+
+  <script>
+    (function () {
+      function showTag(tag) {
+        const cards = document.querySelectorAll('.guide-card');
+        cards.forEach(function (c) {
+          if (tag === 'all') {
+            c.style.display = '';
+          } else {
+            const tags = (c.getAttribute('data-tags') || '').split(' ').filter(Boolean);
+            c.style.display = tags.indexOf(tag) !== -1 ? '' : 'none';
+          }
+        });
+
+        document.querySelectorAll('.tutorial-filter button').forEach(function (b) {
+          b.classList.toggle('active', b.getAttribute('data-tag') === tag);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.tutorial-filter button').forEach(function (b) {
+          b.addEventListener('click', function (e) {
+            e.preventDefault();
+            showTag(b.getAttribute('data-tag'));
+          });
+        });
+      });
+    })();
+  </script>
+</BaseLayout>
