@@ -1,6 +1,6 @@
 ---
 title: "Backups That Don’t Lie: 3-2-1 for Home Servers"
-description: "A simple backup strategy for homelabs that focuses on restores, not vibes."
+description: "A simple home server backup strategy built around 3-2-1, automatic copies, offsite protection, and tested restores."
 pubDate: 2026-01-20
 tags: ["backups", "security", "homelab"]
 cover: "/images/guides/backups-hero.svg"
@@ -8,117 +8,154 @@ cover: "/images/guides/backups-hero.svg"
 
 ## Goal
 
-Give your homelab a backup plan that:
+Build a backup plan that:
 
-- survives disk failures and user mistakes
-- doesn’t require a degree in ZFS arcana
-- is simple enough that you’ll actually keep it running
+- protects important files
+- survives disk failure
+- gives you a way back after mistakes
+- includes at least one offsite copy
+- proves itself with restore tests
 
-The focus is **restores**, not vibes.
+The focus is restores, not backup theatre.
+
+If you have never restored from it, it is not a backup. It is a hope.
 
 ---
 
-## 3-2-1 in one minute
+## The default recommendation
 
-The classic rule:
+Start simple:
 
-- **3 copies** of your data
-- **2 different media** (e.g. disk + cloud, or disk + NAS)
-- **1 offsite** (not in the same building)
+```text
+Primary copy:   live data on your server
+Second copy:    local USB disk or another local machine
+Third copy:     cloud storage or rotated disk kept elsewhere
+```
 
-Translated for a home server, that becomes something like:
+That is the home-server version of 3-2-1:
 
-- live data on your server/NAS
-- a second copy on a local USB disk or another machine
-- a third copy in the cloud or on a drive that lives somewhere else
+- **3 copies** of important data
+- **2 different storage locations or media**
+- **1 copy away from the main server**
+
+You do not need a perfect setup on day one.
+
+Start with one local backup that runs automatically. Then add the offsite copy.
 
 ---
 
 ## What actually needs backing up?
 
-Not everything is equally precious.
+Not everything deserves the same effort.
 
-**High priority (must survive):**
+### High priority
 
-- Photos, documents, personal projects
-- Password vaults, 2FA backup codes
-- App configs you’d hate to recreate (Proxmox config, Docker compose, etc.)
+Back these up properly:
 
-**Medium priority (nice to have):**
+- photos
+- documents
+- personal projects
+- password vault exports or recovery codes
+- service configuration
+- Docker Compose files
+- scripts you rely on
+- Proxmox backup files or VM configs
 
-- Media library metadata (Jellyfin DB, watch history)
-- Small config files and scripts
+### Medium priority
 
-**Low priority (replaceable):**
+Useful, but not always critical:
 
+- Jellyfin metadata
+- watch history
+- application databases
+- monitoring history
+- notes and documentation
+
+### Low priority
+
+Usually replaceable:
+
+- downloaded installers
+- temporary files
 - Linux ISOs
-- Downloaded installers
-- Movies/TV you can re-rip or re-download if the worst happens
+- media you can recreate or re-rip
 
-SmallGrid rule: **be ruthless** — backing up 1–2 TB of precious stuff is fine; 40 TB of “might watch again” usually isn’t.
-
----
-
-## The SmallGrid 3-2-1 layout (practical)
-
-A simple pattern you can adopt or adapt:
-
-- **Primary:** your server/NAS (e.g. `/srv/data`, `/mnt/pool`)
-- **Secondary:** a USB backup disk plugged into the server (nightly backup)
-- **Offsite:** monthly backup to cloud storage or a rotated USB disk you keep elsewhere
-
-You don’t need to start perfect. Start with **Primary + Secondary**, then add offsite when you’re ready.
+SmallGrid rule: back up what hurts to lose first.
 
 ---
 
-## 1. Local backup to USB disk (nightly)
+## Example backup layout
 
-We’ll assume:
+A practical home server layout might look like this:
 
-- your data lives at `/srv/data`
-- your USB backup disk is mounted at `/mnt/backup`
-- you’re on Ubuntu or a similar Linux distro
+```text
+/srv/data/               live important data
+/mnt/backup/data/        local USB backup copy
+cloud or rotated disk    offsite copy
+```
 
-### 1.1 Label and mount the backup disk
+This guide uses these example paths:
 
-Format the disk (danger: this wipes it):
+```text
+Source:      /srv/data/
+Local backup /mnt/backup/data/
+Log file:    /var/log/backup-data.log
+```
 
-~~~bash
-sudo lsblk
-# Identify the right disk (e.g. /dev/sdb)
+Change the paths to match your own server.
 
-sudo mkfs.ext4 /dev/sdX   # replace sdX with your actual device
+---
+
+## Step 1: Prepare a local backup disk
+
+First, identify the backup disk.
+
+```bash
+lsblk -o NAME,SIZE,MODEL,MOUNTPOINT
+```
+
+Be careful. Formatting the wrong disk destroys data.
+
+After you have identified the correct disk, create a filesystem if needed.
+
+Example only:
+
+```bash
+sudo mkfs.ext4 /dev/sdX
 sudo e2label /dev/sdX BACKUP1
-~~~
+```
 
-Create a mount point and mount it:
+Replace `/dev/sdX` with the actual backup disk.
 
-~~~bash
+Create a mount point:
+
+```bash
 sudo mkdir -p /mnt/backup
 sudo mount /dev/sdX /mnt/backup
-~~~
+```
 
-Optional (recommended): add an `/etc/fstab` entry using the disk’s UUID so it auto-mounts on boot.
+For a permanent setup, mount by UUID in `/etc/fstab` rather than relying on `/dev/sdX` staying the same.
+
+Check UUIDs with:
+
+```bash
+blkid
+```
 
 ---
 
-### 1.2 Create a simple backup script
+## Step 2: Create a local backup script
 
-Use `rsync` for a straightforward snapshot-style backup.
+Create the script:
 
-Create `/usr/local/sbin/backup-data.sh`:
+```bash
+sudo nano /usr/local/sbin/backup-data.sh
+```
 
-<div class="terminal">
-  <div class="terminal__bar">
-    <div class="terminal__dots">
-      <span class="terminal__dot red"></span>
-      <span class="terminal__dot amber"></span>
-      <span class="terminal__dot green"></span>
-    </div>
-    <div class="terminal__title">/usr/local/sbin/backup-data.sh</div>
-  </div>
+Paste this:
 
-  <pre><code>#!/usr/bin/env bash
+```bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 SRC="/srv/data/"
@@ -136,98 +173,131 @@ rsync -avh --delete \
   --exclude="*.tmp" \
   "$SRC" "$DEST" | tee -a "$LOG"
 
-echo "$(timestamp) - Backup finished" | tee -a "$LOG"</code></pre>
-</div>
+echo "$(timestamp) - Backup finished" | tee -a "$LOG"
+```
 
 Make it executable:
 
-~~~bash
+```bash
 sudo chmod +x /usr/local/sbin/backup-data.sh
-~~~
+```
 
-**What this does:**
+Run it once manually:
 
-- copies everything from `/srv/data/` to `/mnt/backup/data/`
-- removes files on the backup that were deleted from the source (`--delete`)
-- logs to `/var/log/backup-data.log`
+```bash
+sudo /usr/local/sbin/backup-data.sh
+```
+
+Check the result:
+
+```bash
+ls -la /mnt/backup/data
+sudo tail -n 50 /var/log/backup-data.log
+```
 
 ---
 
-### 1.3 Schedule it nightly (cron)
+## Step 3: Schedule the local backup
 
 Edit root’s crontab:
 
-~~~bash
+```bash
 sudo crontab -e
-~~~
+```
 
-Add:
+Add a nightly backup job:
 
-~~~cron
-# Run backup every day at 02:30
+```cron
+# Run local backup every day at 02:30
 30 2 * * * /usr/local/sbin/backup-data.sh
-~~~
+```
 
-Now you’ve got an automatic **second copy** on a different disk.
+Now you have an automatic second copy on another disk.
+
+That is not the full 3-2-1 setup yet, but it is already better than hoping the main disk never fails.
 
 ---
 
-## 2. Offsite backup (monthly, minimum)
+## Step 4: Add an offsite copy
 
-This is the part that saves you from:
+An offsite copy protects you from problems that affect the server and the local backup at the same time.
 
-- fire / theft
-- “oops, I knocked the server and backup disk off the same shelf”
+Practical options:
 
-Two practical options:
+- cloud backup using `restic`, `borg`, or `rclone`
+- a USB disk rotated to another location
+- another machine in a trusted location
+- object storage used only for encrypted backups
 
-1. **Cloud backup tool** (e.g. restic, borg + remote repo, rclone to object storage)
-2. **Rotated USB disk** you plug in once a month and store elsewhere
+For a simple start, use either:
 
-### 2.1 Example: offsite with `restic` + cloud storage
+```text
+Local USB backup every night
+Offsite backup weekly or monthly
+```
 
-We’ll keep it generic; you plug in your provider details.
+or:
 
-Set environment variables (e.g. in `/root/.restic-env`):
+```text
+Local USB backup every night
+Rotated USB disk once a month
+```
 
-<div class="terminal">
-  <div class="terminal__bar">
-    <div class="terminal__dots">
-      <span class="terminal__dot red"></span>
-      <span class="terminal__dot amber"></span>
-      <span class="terminal__dot green"></span>
-    </div>
-    <div class="terminal__title">/root/.restic-env</div>
-  </div>
+The important part is that at least one copy is away from the main server.
 
-  <pre><code>export RESTIC_REPOSITORY="s3:https://YOUR-S3-ENDPOINT/YOUR-BUCKET"
+---
+
+## Step 5: Example offsite backup with restic
+
+This example uses `restic` because it supports encryption and snapshots.
+
+Install it:
+
+```bash
+sudo apt update
+sudo apt install -y restic
+```
+
+Create an environment file:
+
+```bash
+sudo nano /root/.restic-env
+```
+
+Example content:
+
+```bash
+export RESTIC_REPOSITORY="s3:https://YOUR-S3-ENDPOINT/YOUR-BUCKET"
 export RESTIC_PASSWORD="choose-a-strong-password"
 export AWS_ACCESS_KEY_ID="YOUR_KEY"
-export AWS_SECRET_ACCESS_KEY="YOUR_SECRET"</code></pre>
-</div>
+export AWS_SECRET_ACCESS_KEY="YOUR_SECRET"
+```
 
-Source it and initialise the repo:
+Protect the file:
 
-~~~bash
+```bash
+sudo chmod 600 /root/.restic-env
+```
+
+Initialise the repository:
+
+```bash
 sudo -i
 source /root/.restic-env
 restic init
 exit
-~~~
+```
 
-Create `/usr/local/sbin/backup-offsite.sh`:
+Create the offsite backup script:
 
-<div class="terminal">
-  <div class="terminal__bar">
-    <div class="terminal__dots">
-      <span class="terminal__dot red"></span>
-      <span class="terminal__dot amber"></span>
-      <span class="terminal__dot green"></span>
-    </div>
-    <div class="terminal__title">/usr/local/sbin/backup-offsite.sh</div>
-  </div>
+```bash
+sudo nano /usr/local/sbin/backup-offsite.sh
+```
 
-  <pre><code>#!/usr/bin/env bash
+Paste this:
+
+```bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 source /root/.restic-env
@@ -241,103 +311,158 @@ restic backup "$SRC" --verbose | tee -a "$LOG"
 
 echo "$(date) - Pruning old snapshots" | tee -a "$LOG"
 
-restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 | tee -a "$LOG"
+restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune | tee -a "$LOG"
 
-echo "$(date) - Offsite backup finished" | tee -a "$LOG"</code></pre>
-</div>
+echo "$(date) - Offsite backup finished" | tee -a "$LOG"
+```
 
 Make it executable:
 
-~~~bash
+```bash
 sudo chmod +x /usr/local/sbin/backup-offsite.sh
-~~~
+```
 
-Schedule it monthly (or weekly if your data changes a lot):
+Run it manually first:
 
-~~~bash
+```bash
+sudo /usr/local/sbin/backup-offsite.sh
+```
+
+Then schedule it:
+
+```bash
 sudo crontab -e
-~~~
+```
 
-Add:
+Example monthly job:
 
-~~~cron
+```cron
 # Run offsite backup on the 1st of each month at 03:30
 30 3 1 * * /usr/local/sbin/backup-offsite.sh
-~~~
+```
 
-Now you’ve got an **offsite copy** automatically maintained.
+If your important data changes often, run the offsite backup weekly instead.
 
 ---
 
-## 3. The only rule that matters: test restores
+## Step 6: Test a local restore
 
-If you’ve never restored from it, it isn’t a backup. It’s a hope.
+Pick a non-critical folder or a small test file.
 
-### 3.1 Test a local restore
+Do not test restores for the first time during a real emergency.
 
-Pick a **non-critical** folder or a couple of files.
+Example restore from the local backup:
 
-1. Copy them somewhere safe temporarily.
-2. Delete them from `/srv/data/...`.
-3. Restore from `/mnt/backup/data/...`.
-
-Example:
-
-~~~bash
-# Example: restore a single folder
+```bash
 sudo rsync -avh /mnt/backup/data/projects/example/ /srv/data/projects/example/
-~~~
+```
 
 Check:
 
-- do the files come back?
-- do permissions look sane?
+- did the files come back?
+- do permissions look sensible?
+- can the application still read them?
 
-If yes, you’ve just proven the local backup works.
+If yes, your local backup is more than a checkbox.
 
 ---
 
-### 3.2 Test an offsite restore (dry run first)
+## Step 7: Test an offsite restore
 
 With `restic`, list snapshots:
 
-~~~bash
+```bash
 sudo -i
 source /root/.restic-env
 restic snapshots
-~~~
+```
 
-Restore a small test folder into a temporary path:
+Restore a small test folder into a temporary location:
 
-~~~bash
+```bash
 restic restore latest --target /tmp/restic-restore-test --include "/srv/data/projects/example"
 ls -R /tmp/restic-restore-test
 exit
-~~~
+```
 
-If you can see and use the files, your offsite backup is more than a checkbox.
+If you can see and use the restored files, your offsite copy is working.
 
----
+Clean up the test folder after checking it:
 
-## 4. Backup checklist (SmallGrid edition)
-
-You’re in decent shape if you can answer **yes** to most of these:
-
-- [ ] I know **where** my important data lives (paths written down).
-- [ ] I have a **local backup disk** and it’s actually mounted.
-- [ ] Backups run **automatically** (cron/systemd timers).
-- [ ] I have an **offsite copy** (cloud or rotated drive).
-- [ ] I have successfully restored at least **one test folder**.
-- [ ] I know how to restore the **whole thing** if the server dies.
+```bash
+sudo rm -rf /tmp/restic-restore-test
+```
 
 ---
 
-## 5. Start small, then level up
+## Backup checklist
 
-Don’t wait for the “perfect” setup:
+You are in decent shape if you can answer yes to these:
 
-1. Get a single USB disk + nightly `rsync` working.
-2. Add offsite when you’re comfortable.
-3. Iterate: split out important data, add configs, refine retention.
+- [ ] I know where my important data lives.
+- [ ] I have a local backup disk or local backup target.
+- [ ] Backups run automatically.
+- [ ] I have at least one copy away from the main server.
+- [ ] I have restored at least one test file or folder.
+- [ ] I know how to rebuild the service if the server dies.
+- [ ] Backup logs are somewhere I can check.
 
-Your future self, staring at a dead disk, will not care which backup tool you chose — only whether you can bring your data back. This plan makes “yes” the default.
+---
+
+## Common mistakes
+
+### Backing up only the easy stuff
+
+Media is obvious because it is large. Config is easy to forget because it is small.
+
+Do not forget service config, Compose files, scripts, and notes.
+
+### Keeping the backup disk plugged in forever
+
+A permanently attached backup disk is convenient, but it can be affected by some of the same problems as the server.
+
+That is why the offsite or rotated copy matters.
+
+### Never checking logs
+
+A backup job that silently fails is worse than no backup because it gives false confidence.
+
+Check logs occasionally:
+
+```bash
+sudo tail -n 100 /var/log/backup-data.log
+sudo tail -n 100 /var/log/backup-offsite.log
+```
+
+### Never testing restore
+
+A restore test is the difference between a real backup and wishful thinking.
+
+---
+
+## Next steps
+
+Useful related guides:
+
+- [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/)
+- [Proxmox for Normal Humans: One-Node Starter Setup](/guides/proxmox-one-node-starter/)
+- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
+- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
+- [Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab](/guides/mini-pc-under-200/)
+
+---
+
+## Recap
+
+A practical 3-2-1 backup setup is:
+
+```text
+Live data on the server
+Local automatic backup
+Offsite or rotated copy
+Regular restore tests
+```
+
+Start with a nightly local backup. Then add the offsite copy. Then prove the whole thing by restoring a small folder.
+
+Your future self will not care which backup tool you chose. They will care whether the files come back.
