@@ -29,23 +29,21 @@ const sections = [
     ],
   },
   {
-    title: "Proxmox and safety nets",
-    description: "Use Proxmox, snapshots, clones, and backups without pretending your home server is an enterprise rack.",
+    title: "Proxmox, backups, and safety nets",
+    description: "Use Proxmox, backups, snapshots, and restore tests without turning your home server into a maintenance project.",
     slugs: [
       "proxmox-one-node-starter",
-      "proxmox-lxc-vs-vm",
+      "backups-3-2-1-home-server",
       "test-environment-snapshots-safety-net",
-      "backups-before-snapshots",
     ],
   },
   {
-    title: "Power, storage, and hardware",
+    title: "Power and hardware",
     description: "Choose efficient hardware, measure running costs, and avoid turning a small server into a noisy electricity bill.",
     slugs: [
       "measure-power-usage-homelab",
-      "quiet-storage-without-datacentre-noise",
       "mini-pc-under-200",
-      "one-mini-pc-homelab-blueprint",
+      "jellyfin-direct-play-vs-transcoding",
     ],
   },
 ];
@@ -55,9 +53,8 @@ const featuredGuides = sections.map((section) => ({
   guides: section.slugs.map((slug) => bySlug.get(slug)).filter(Boolean),
 }));
 
-const remainingGuides = guides.filter(
-  (guide) => !new Set(sections.flatMap((section) => section.slugs)).has(guide.slug)
-);
+const featuredSlugs = new Set(sections.flatMap((section) => section.slugs));
+const remainingGuides = guides.filter((guide) => !featuredSlugs.has(guide.slug));
 
 const formatDate = (d: Date) =>
   d.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" });
@@ -84,7 +81,7 @@ const formatDate = (d: Date) =>
       SmallGrid is about home servers that do useful things without becoming a second job. The best starting point is usually a single reliable mini PC, sensible backups, private remote access, and services you actually use.
     </p>
     <p>
-      These tutorials are grouped by practical job: media server, Proxmox, backups, power usage, and quiet hardware.
+      These tutorials are grouped by practical job: media server, Proxmox, backups, power usage, and low-power hardware.
     </p>
   </section>
 
@@ -151,7 +148,7 @@ const formatDate = (d: Date) =>
       If you are new to this, start with Jellyfin or a simple mini PC homelab. Then add backups before you add more services. Snapshots are useful, but they are not backups.
     </p>
     <p>
-      The default SmallGrid approach: one reliable machine, private remote access, measured power usage, clear recovery steps, and no exposed services unless there is a real reason.
+      The default SmallGrid approach: one reliable machine, private remote access, measured power usage, clear recovery steps, and no unnecessary complexity.
     </p>
   </section>
 </BaseLayout>
