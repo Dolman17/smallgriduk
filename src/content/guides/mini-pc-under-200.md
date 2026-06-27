@@ -1,6 +1,6 @@
 ---
 title: "Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab"
-description: "How to choose a used or budget mini PC that can run Jellyfin, Docker, and a small homelab without murdering your power bill."
+description: "How to choose a used or budget mini PC for Jellyfin, Docker, Proxmox, backups, and a small low-power homelab."
 pubDate: 2026-01-21
 tags: ["hardware", "mini-pc", "low-power", "homelab"]
 cover: "/images/guides/mini-pc-hero.svg"
@@ -8,187 +8,288 @@ cover: "/images/guides/mini-pc-hero.svg"
 
 ## Goal
 
-Pick a **mini PC under ~£200** that can:
+Pick a mini PC under about £200 that can:
 
-- run Jellyfin, a few Docker containers, and maybe a lightweight VM
-- idle at low power (not 60–80 W all day)
-- not sound like a jet engine
+- run Jellyfin
+- host a few Docker services
+- handle a light Proxmox setup
+- stay quiet
+- idle at low power
+- avoid becoming another noisy desktop under the desk
 
-This is not a shopping list; it’s a **checklist** so you can sanity-check anything you find on eBay / CEX / FB Marketplace.
-
----
-
-## 1. CPU & generation: how “old” is okay?
-
-For a SmallGrid-style homelab box, start with:
-
-- **Intel 8th gen (Coffee Lake)** or newer
-- **AMD Ryzen 3000 series mobile** or newer
-
-That gets you:
-
-- modern instruction set support
-- decent performance-per-watt
-- often an iGPU that can help with Jellyfin
-
-A few rough tiers that usually work well:
-
-- **Intel i5 / i7 U-series** (laptop/NUC):
-  - Good for Jellyfin + a handful of services
-- **Ryzen 5 / 7 U-series**:
-  - Similar; sometimes better iGPU for general use
-
-Avoid:
-
-- very old Core 2 / 2nd–4th gen Core i5/i7 unless they’re basically free and you don’t care about power.
+This is not a shopping list. It is a practical checklist so you can judge used mini PCs on eBay, CEX, Facebook Marketplace, or wherever you are looking.
 
 ---
 
-## 2. RAM: don’t starve the poor thing
+## The default recommendation
+
+For a first SmallGrid-style homelab, buy boring used business hardware.
+
+Good examples are small office mini PCs from Dell, HP, Lenovo, Fujitsu, or Intel NUC-style machines.
+
+A sensible starting target is:
+
+```text
+CPU:      Intel 8th gen Core i5 or newer, or similar Ryzen
+RAM:      16GB if possible
+Storage:  256GB to 512GB SSD
+Network:  Gigabit Ethernet
+Power:    roughly 5W to 20W idle if well configured
+```
+
+Spend money on RAM, SSD, and backups before chasing flashy hardware.
+
+---
+
+## CPU and generation
+
+For a low-power homelab box, start with:
+
+- Intel 8th gen Core or newer
+- AMD Ryzen 3000 mobile or newer
+
+That usually gets you:
+
+- decent performance per watt
+- enough CPU for several small services
+- better idle behaviour than old desktops
+- useful integrated graphics for media tasks
+
+Good rough options:
+
+| CPU type | Good for |
+|---|---|
+| Intel i5 U-series | quiet Jellyfin and Docker box |
+| Intel T-series desktop chip | small Proxmox node or heavier services |
+| Ryzen 5 or Ryzen 7 mobile | general homelab use with good efficiency |
+| Intel N100/N150-style systems | very low-power light services |
+
+Avoid very old desktop hardware unless it is free or nearly free. An old tower can cost more in electricity than you saved buying it.
+
+For measuring the difference, see [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/).
+
+---
+
+## RAM
 
 Absolute minimum:
 
-- **8 GB** if you’re doing *very* light stuff
+```text
+8GB
+```
 
 Comfortable baseline:
 
-- **16 GB** – enough for:
-  - Jellyfin
-  - 3–5 Docker apps
-  - a small VM or LXC for experiments
+```text
+16GB
+```
 
-If the mini PC has **two RAM slots**, that’s ideal:
+16GB is enough for:
 
-- You can start with 1×8 and upgrade to 2×8 later
-- Dual channel gives you better iGPU performance
+- Jellyfin
+- Tailscale
+- a few Docker containers
+- monitoring
+- a small VM or LXC test environment
 
----
+If the mini PC has two RAM slots, that is useful. You can start with one stick and upgrade later.
 
-## 3. Storage: fast inside, big outside
-
-Pattern that works well:
-
-- **Internal NVMe or SATA SSD** (256–512 GB)
-  - OS, Docker, Proxmox / VMs, configs
-- **External HDD / NAS** for bulk media and backups
-
-Don’t feel pressured to cram huge HDDs inside a tiny box:
-
-- it makes cooling harder
-- can add vibration and noise
-
-If the mini PC has room for a 2.5" drive as well as NVMe, treat that as a bonus for:
-
-- a local backup disk
-- overflow storage
+For Proxmox, 16GB is a much nicer starting point than 8GB.
 
 ---
 
-## 4. iGPU: why it matters for Jellyfin
+## Storage
 
-For media stuff, the integrated GPU is your quiet friend.
+A good mini PC storage layout is simple:
 
-Look for:
+```text
+Internal SSD/NVMe: operating system, apps, VM disks, configs
+External HDD/NAS:  bulk media, backups, archives
+```
 
-- **Intel iGPU with Quick Sync** (almost any 4th gen+ Core)
-- **Modern AMD APU** if you’re more on the AMD side
+Do not force huge hard drives into a tiny box just because it looks neat.
 
-You don’t need it if:
+Large drives can add:
 
-- you plan to direct play everything
-- or all clients are on the same LAN with friendly codecs
+- heat
+- vibration
+- noise
+- power draw
+- awkward cabling
 
-But in practice, a decent iGPU lets you:
+A 256GB or 512GB SSD is fine for the operating system and services. Put large media libraries somewhere sensible.
 
-- transcode the odd awkward file
-- keep CPU and power usage lower under load
+For Jellyfin, the media can live on external storage as long as permissions are set correctly. See [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
 
 ---
 
-## 5. Ports & networking: the boring but important bits
+## Integrated graphics and Jellyfin
+
+For Jellyfin, the integrated GPU can matter.
+
+Intel Quick Sync is useful when Jellyfin needs to transcode video. But the better first target is direct play.
+
+Direct play means the client plays the file directly and the server does much less work.
+
+You do not need powerful hardware if:
+
+- your clients can direct play your files
+- most viewing happens at home
+- you are not converting multiple streams at once
+
+For the full explanation, see [Jellyfin Direct Play vs Transcoding: What Actually Matters](/guides/jellyfin-direct-play-vs-transcoding/).
+
+---
+
+## Ports and networking
 
 Checklist:
 
-- **At least 1× Gigabit Ethernet**
-  - 2× is nice but not mandatory
-- **2× USB-A** minimum
-  - one for external storage
-  - one spare for emergencies
-- **USB-C** is a bonus but not required
-- **HDMI/DisplayPort**:
-  - you might need to plug in a screen for troubleshooting
+- at least one Gigabit Ethernet port
+- two or more USB ports
+- HDMI or DisplayPort for emergency troubleshooting
+- internal SSD support
+- simple power brick or standard power supply
 
-Wi-Fi is nice, but for homelabs, you really want:
+Wired Ethernet is strongly preferred for the main server.
 
-- **wired Ethernet** for the main connection
+Wi-Fi is fine for laptops and tablets. For the always-on box, use a cable if you can.
 
 ---
 
-## 6. Idle power and noise: what you’re aiming for
+## Idle power and noise
 
-Rough, real-world targets for a “good” mini PC:
+A good mini PC often idles somewhere around:
 
-- **Idle:** 5–15 W
-- **Light load:** 20–35 W
-- **Full stress:** you don’t care as much; that’s rare in normal use
+```text
+5W to 20W
+```
 
-If you can keep the machine:
+Light normal use might be:
 
-- physically away from your head
-- on rubber feet or a mouse mat
-- in a cool, ventilated spot
+```text
+15W to 35W
+```
 
-…it’ll be almost invisible day-to-day.
+Do not obsess over peak power. Most home servers spend far more time idle or lightly loaded.
+
+Noise matters too. A technically powerful mini PC is annoying if the fan constantly ramps up in the room where you work or sleep.
+
+Practical noise tips:
+
+- clean dust from used machines
+- give the box airflow
+- keep it off soft carpet
+- use rubber feet or a mat if there is vibration
+- avoid tiny overheating boxes with bad cooling
 
 ---
 
-## 7. Example “good enough” specs
+## Example good-enough specs
 
-If you see something like this under ~£200, it’s worth a look:
+A good first mini PC might look like this:
 
-- **CPU:** Intel i5-8500T / i5-8500U / i5-8250U (or newer)
-- **RAM:** 16 GB
-- **Storage:** 256–512 GB SSD (NVMe or SATA)
-- **NIC:** 1× Gigabit Ethernet
-- **Case:** small, vented, with a single quiet fan
+```text
+CPU:      Intel i5-8500T, i5-8250U, or newer equivalent
+RAM:      16GB
+Storage:  256GB or 512GB SSD
+Network:  Gigabit Ethernet
+Case:     small, vented, quiet fan
+```
 
-That’s more than enough for:
+That is enough for:
 
-- Jellyfin with light transcoding
-- 5–10 Docker containers
+- Jellyfin
 - Tailscale
-- a small monitoring stack
-- maybe Proxmox with a couple of VMs / LXC containers
+- a few Docker apps
+- light monitoring
+- a small Proxmox setup
+- experiments and test VMs
+
+If you want to run Proxmox from the start, read [Proxmox for Normal Humans: One-Node Starter Setup](/guides/proxmox-one-node-starter/).
 
 ---
 
-## 8. Things to watch out for on listings
+## Things to watch out for in listings
 
-When browsing used gear:
+### No RAM or no SSD
 
-- “No RAM / no SSD”:
-  - often fine if the barebones price is cheap
-- “Fan noisy under load”:
-  - common on tiny boxes; can sometimes be mitigated by:
-    - cleaning dust
-    - re-pasting
-    - adjusting fan curves in BIOS (if available)
+This can be fine if the price is low enough.
 
-Be wary of:
+Just price the missing parts before buying.
 
-- Passive “mini PCs” with underpowered CPUs and 4 GB RAM – fine as routers, not great as Jellyfin + homelab cores.
+### Tiny passive boxes
+
+Passive cooling sounds attractive, but very small passive systems can throttle or struggle under sustained load.
+
+They can be good for light services, but check CPU, RAM, and storage limits carefully.
+
+### Old office desktops
+
+They can work, but check idle power.
+
+A cheap old desktop that idles at 60W can cost more over time than a slightly more expensive mini PC.
+
+### Weak storage options
+
+Some tiny boxes have limited internal storage support.
+
+Check whether the machine supports NVMe, SATA, or both.
+
+### Missing power adapter
+
+Replacement power adapters can remove the saving from a cheap listing.
+
+Check total cost, not just the headline price.
 
 ---
 
-## 9. Recap: the SmallGrid mini PC rule
+## What to buy first
 
-If it:
+A sensible starter bundle is:
 
-- idles low
-- stays quiet
-- has a modern-enough CPU and iGPU
-- takes 16 GB RAM
-- boots from SSD
+```text
+Mini PC with 16GB RAM
+256GB or 512GB SSD
+Gigabit Ethernet
+External USB backup disk
+```
 
-…it’s probably a perfectly good homelab brain, even if it’s not flashy.
-Spend the rest of the budget on storage and backups, not RGB.
+That is enough to start useful projects without overbuilding.
+
+Good first projects:
+
+- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
+- [Remote Jellyfin with Tailscale: Private Access Setup](/guides/jellyfin-tailscale-remote-access/)
+- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
+
+---
+
+## Next steps
+
+Useful related guides:
+
+- [Start Here: Build a Small, Useful Homelab](/start/)
+- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
+- [Jellyfin Direct Play vs Transcoding: What Actually Matters](/guides/jellyfin-direct-play-vs-transcoding/)
+- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
+- [Proxmox for Normal Humans: One-Node Starter Setup](/guides/proxmox-one-node-starter/)
+- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
+
+---
+
+## Recap
+
+A good mini PC homelab box is not exciting. That is the point.
+
+Look for:
+
+- low idle power
+- enough CPU for your services
+- 16GB RAM if possible
+- SSD storage
+- Gigabit Ethernet
+- quiet cooling
+- easy upgrade options
+
+If it runs quietly, sips power, and gives you a reliable place for Jellyfin, backups, and a few services, it is doing the job.
