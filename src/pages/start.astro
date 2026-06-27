@@ -2,127 +2,151 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
-const guides = await getCollection("guides", ({ data }) => !data.draft);
+const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
+const guides = guidesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const guideBySlug = new Map(guides.map((guide) => [guide.slug, guide]));
 
-// Helper to safely find guides by slug (filename)
-const bySlug = (slug: string) => guides.find((g) => g.slug === slug);
+const findGuide = (slug: string) => guideBySlug.get(slug);
 
-const jellyfinGuide = bySlug("jellyfin-ubuntu-low-power");
-const tailscaleGuide = bySlug("jellyfin-tailscale-remote-access");
-const miniPcGuide = bySlug("mini-pc-under-200");
-const proxmoxGuide = bySlug("proxmox-one-node-starter");
-const backupsGuide = bySlug("backups-3-2-1-home-server");
-const quietStorageGuide = bySlug("quiet-storage-without-noise");
+const pathSteps = [
+  {
+    label: "Step 1",
+    title: "Choose one reliable mini PC",
+    body: "Start with one small, efficient machine instead of building a cluster you do not need yet. Low idle power, enough RAM, and boring reliability matter more than raw benchmark numbers.",
+    guide: findGuide("mini-pc-under-200"),
+    linkText: "Choose a mini PC under £200 →",
+  },
+  {
+    label: "Step 2",
+    title: "Install one useful service",
+    body: "Pick a first service that gives you an immediate result. For most people, Jellyfin is a good starting point because it is useful, visible, and easy to understand.",
+    guide: findGuide("jellyfin-ubuntu-low-power"),
+    linkText: "Install Jellyfin on Ubuntu →",
+  },
+  {
+    label: "Step 3",
+    title: "Fix permissions properly",
+    body: "A lot of home server problems are not application problems. They are folder, user, group, and mount problems. Get the basics right before adding more services.",
+    guide: findGuide("jellyfin-ubuntu-folder-permissions"),
+    linkText: "Fix Jellyfin folder permissions →",
+  },
+  {
+    label: "Step 4",
+    title: "Add backups before you get attached",
+    body: "Snapshots are useful, but they are not backups. Make sure your important files and service configs can survive a dead disk, failed upgrade, or accidental deletion.",
+    guide: findGuide("backups-3-2-1-home-server"),
+    linkText: "Set up 3-2-1 backups →",
+  },
+  {
+    label: "Step 5",
+    title: "Use private remote access",
+    body: "Do not expose services to the internet just because a guide says it is possible. For most home labs, Tailscale-style private access is the better default.",
+    guide: findGuide("jellyfin-tailscale-remote-access"),
+    linkText: "Use Tailscale with Jellyfin →",
+  },
+  {
+    label: "Step 6",
+    title: "Measure power before optimising",
+    body: "Low power is not guesswork. Measure idle and normal-use watts, then decide whether hardware changes are worth it.",
+    guide: findGuide("measure-power-usage-homelab"),
+    linkText: "Measure homelab power usage →",
+  },
+];
+
+const usefulNext = [
+  findGuide("test-environment-snapshots-safety-net"),
+  findGuide("quiet-storage-without-datacentre-noise"),
+  findGuide("proxmox-one-node-starter"),
+  findGuide("proxmox-lxc-vs-vm"),
+].filter(Boolean);
 ---
 
 <BaseLayout
-  title="Start Here"
-  description="A practical path to build a small, low-power homelab with backups, Jellyfin, and safe remote access."
+  title="Start Here: Build a Small, Useful Homelab"
+  description="A practical beginner path for building a small, low-power homelab with Jellyfin, backups, private remote access, and sensible hardware."
   canonicalPath="/start/"
 >
   <section class="card">
     <div class="kicker">🧭 Start here</div>
-    <h1>How to build a SmallGrid-style homelab</h1>
+    <h1>Build a small, useful homelab without making it a second job.</h1>
     <p>
-      This is the opinionated path to a quiet, low-power homelab that doesn’t become a second job:
-      pick sensible hardware, set up backups, add Jellyfin, then layer on Proxmox and remote access.
+      SmallGrid is for practical home servers: quiet hardware, useful services, safe remote access, and backups that actually restore. Start small, make it reliable, then expand only when the next thing earns its place.
+    </p>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+      <a class="btn primary" href="/tutorials/">Browse tutorials</a>
+      <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
+      <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage</a>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top: 16px;">
+    <div class="kicker">Default recommendation</div>
+    <h2>The SmallGrid starter setup</h2>
+    <p>
+      Start with one used mini PC, one SSD, one useful service, a basic backup routine, and private remote access. Do not build a cluster, buy a rack, expose ports, or add ten dashboards before the first service is working.
+    </p>
+    <p>
+      The boring version is usually the best version: one reliable box, clear folders, measured power use, simple recovery, and no clever complexity unless it solves a real problem.
     </p>
   </section>
 
   <section class="grid" style="margin-top: 16px;">
-    <article class="card">
-      <div class="kicker">Step 1</div>
-      <h2>Choose a small, efficient box</h2>
-      <p>
-        Start with a used mini PC or small form-factor machine instead of a noisy rack.
-        You want decent CPU, iGPU (for media), and low idle power.
-      </p>
-      {miniPcGuide && (
-        <a class="btn primary" href={`/guides/${miniPcGuide.slug}/`}>
-          Pick a mini PC under £200 →
-        </a>
-      )}
-    </article>
-
-    <article class="card">
-      <div class="kicker">Step 2</div>
-      <h2>Set up backups before you get attached</h2>
-      <p>
-        Before you migrate everything, give yourself a way back. A simple 3-2-1 backup
-        with a USB disk and an offsite copy is enough to avoid sad-face data loss.
-      </p>
-      {backupsGuide && (
-        <a class="btn" href={`/guides/${backupsGuide.slug}/`}>
-          3-2-1 for home servers →
-        </a>
-      )}
-    </article>
-
-    <article class="card">
-      <div class="kicker">Step 3</div>
-      <h2>Add Jellyfin for media</h2>
-      <p>
-        Turn your box into a low-power media server with sane permissions,
-        tidy libraries, and optional hardware transcoding.
-      </p>
-      {jellyfinGuide && (
-        <a class="btn" href={`/guides/${jellyfinGuide.slug}/`}>
-          Jellyfin on Ubuntu (low-power) →
-        </a>
-      )}
-    </article>
+    {pathSteps.map((step) => (
+      <article class="card hover">
+        <div class="kicker">{step.label}</div>
+        <h2>{step.title}</h2>
+        <p>{step.body}</p>
+        {step.guide && (
+          <a class="btn" href={`/guides/${step.guide.slug}/`}>
+            {step.linkText}
+          </a>
+        )}
+      </article>
+    ))}
   </section>
 
-  <section class="grid" style="margin-top: 16px;">
-    <article class="card">
-      <div class="kicker">Step 4</div>
-      <h2>Add safe remote access</h2>
-      <p>
-        Don’t open ports to the internet if you don’t have to. Use a mesh VPN
-        like Tailscale to reach your services from anywhere without exposing them publicly.
-      </p>
-      {tailscaleGuide && (
-        <a class="btn" href={`/guides/${tailscaleGuide.slug}/`}>
-          Remote access with Tailscale →
-        </a>
-      )}
-    </article>
-
-    <article class="card">
-      <div class="kicker">Step 5</div>
-      <h2>Move to Proxmox (when you’re ready)</h2>
-      <p>
-        Once you’re comfortable, put Proxmox underneath your services. A simple one-node
-        setup gives you clean VM/container separation and proper backups.
-      </p>
-      {proxmoxGuide && (
-        <a class="btn" href={`/guides/${proxmoxGuide.slug}/`}>
-          Proxmox for normal humans →
-        </a>
-      )}
-    </article>
-
-    <article class="card">
-      <div class="kicker">Step 6</div>
-      <h2>Keep it quiet and low-power</h2>
-      <p>
-        Place the hardware somewhere sane, dampen vibration, and choose drives and enclosures
-        that won’t make you hate being in the same room.
-      </p>
-      {quietStorageGuide && (
-        <a class="btn" href={`/guides/${quietStorageGuide.slug}/`}>
-          Quiet storage without datacentre noise →
-        </a>
-      )}
-    </article>
+  <section class="card" style="margin-top: 16px;">
+    <div class="kicker">What not to do first</div>
+    <h2>Avoid the usual homelab trap</h2>
+    <p>
+      Do not start with Kubernetes, a three-node cluster, public reverse proxies, GPU transcoding, and ten services you have never used. That path looks impressive but creates maintenance before value.
+    </p>
+    <p>
+      Build one thing that works. Back it up. Learn how to restore it. Then add the next thing.
+    </p>
   </section>
+
+  {usefulNext.length ? (
+    <section style="margin-top: 16px;">
+      <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+        <h2>Useful next guides</h2>
+        <a class="btn" href="/guides/">View all guides →</a>
+      </div>
+
+      <div class="grid" style="margin-top: 10px;">
+        {usefulNext.map((guide) => (
+          <article class="card hover">
+            <h3 style="margin-top: 0;">
+              <a href={`/guides/${guide.slug}/`}>{guide.data.title}</a>
+            </h3>
+            <p>{guide.data.description}</p>
+            <div>
+              {(guide.data.tags ?? []).slice(0, 4).map((tag) => (
+                <span class="pill">#{tag}</span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ) : null}
 
   <section class="card" style="margin-top: 16px;">
     <h2>Where to go next</h2>
     <p>
-      From here you can add Home Assistant, DNS-level ad blocking, monitoring,
-      and more — but the core pattern stays the same: small, efficient, backed up, and boringly reliable.
+      Use the tutorials page as the main map through the site. It groups the guides by practical job: Jellyfin, Proxmox, backups, power usage, storage, and hardware.
     </p>
-    <a class="btn" href="/guides/">Browse all guides →</a>
+    <a class="btn primary" href="/tutorials/">Open the tutorials hub →</a>
   </section>
 </BaseLayout>
