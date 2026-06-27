@@ -438,12 +438,19 @@ sudo tail -n 100 /var/log/backup-offsite.log
 
 A restore test is the difference between a real backup and wishful thinking.
 
+### Confusing snapshots with backups
+
+Snapshots are useful before risky changes, but they are not the same as restorable backup copies.
+
+For the full comparison, see [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/).
+
 ---
 
 ## Next steps
 
 Useful related guides:
 
+- [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/)
 - [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/)
 - [Proxmox for Normal Humans: One-Node Starter Setup](/guides/proxmox-one-node-starter/)
 - [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
