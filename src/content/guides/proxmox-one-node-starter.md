@@ -1,6 +1,6 @@
 ---
 title: "Proxmox for Normal Humans: One-Node Starter Setup"
-description: "A clean one-node Proxmox setup for small homelabs: simple layout, backups, and low-power defaults."
+description: "A clean one-node Proxmox setup for small homelabs: simple layout, backups, test VMs, and low-power defaults."
 pubDate: 2026-01-20
 tags: ["proxmox", "virtualisation", "homelab", "low-power"]
 cover: "/images/guides/proxmox-hero.svg"
@@ -8,330 +8,381 @@ cover: "/images/guides/proxmox-hero.svg"
 
 ## Goal
 
-Set up a **single Proxmox node** that can:
+Set up a single Proxmox node that can:
 
-- run a few services (Jellyfin, Home Assistant, Pi-hole, etc.)
-- stay low-power and quiet
-- be backed up and restored without wizardry
+- run a few useful services
+- stay simple and low-power
+- keep the Proxmox host clean
+- back up and restore VMs or containers
+- give you a safe place to experiment
 
-…and **not** turn into a “what does this random service do?” science experiment.
+The aim is not to build a miniature data centre. The aim is one reliable box that makes your homelab easier to manage.
 
 ---
 
-## The SmallGrid layout
+## The default recommendation
 
-We’re aiming for:
+Start with one Proxmox node.
 
-- **1 node** (don’t overthink clusters)
-- **1 “core services” VM** (or a small set of VMs/containers)
-- **Backups** to an external disk or NAS
-- A host that stays **lean and boring** (all the fun lives in VMs/containers)
+Do not build a cluster first. Do not split every tiny service into its own complicated pattern. Do not install lots of apps directly on the Proxmox host.
 
-High level:
+A good starter layout is:
 
-- Proxmox host: “hypervisor” only
-- VM #1: main services (Docker/containers or classic services)
-- Optional: VM #2 for experiments so you don’t break production
+```text
+Proxmox host
+  ├─ core-services VM
+  ├─ test VM or container
+  └─ backup storage
+```
+
+Keep the host boring. Put the interesting work inside VMs or containers.
 
 ---
 
 ## What you’ll need
 
-- A machine that can run Proxmox VE:
-  - x86_64 CPU (Intel/AMD)
-  - 8–16 GB RAM minimum (more is nicer)
-  - SSD/NVMe for system + VM storage
-- A wired network connection
-- Another device with a web browser on the same LAN
+Minimum sensible hardware:
 
-Optional but ideal:
+- x86_64 Intel or AMD machine
+- 8GB RAM minimum
+- 16GB RAM or more if you want multiple VMs
+- SSD or NVMe boot drive
+- wired Ethernet
+- another computer with a browser
 
-- A second disk (for backups or extra VM storage)
-- A UPS if your power is flaky
+Nice to have:
 
----
+- second disk for backups or VM storage
+- UPS if power cuts are common
+- a low-power mini PC if this will run all day
 
-## 1. Install Proxmox VE
-
-### 1.1 Download and write the ISO
-
-Go to the Proxmox website and download the latest **Proxmox VE ISO**.
-
-Use your favourite tool (Rufus / Ventoy / BalenaEtcher) to write it to a USB stick, then:
-
-1. Boot your server from the USB
-2. Choose **“Install Proxmox VE”**
-
-Follow the installer steps:
-
-- Accept the license
-- Choose the install disk (usually your main SSD)
-- Set:
-  - Country / time zone / keyboard
-  - **Strong root password**
-  - Email address (for alerts)
-- Set the **management IP** (static is best if your network allows it)
-
-After installation, the server reboots and you’ll see a console with a URL like:
-
-- `https://192.168.1.50:8006`
+For hardware guidance, see [Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab](/guides/mini-pc-under-200/).
 
 ---
 
-## 2. First login and basic updates
+## Step 1: Install Proxmox VE
 
-From another machine on the same LAN, open:
+Download the Proxmox VE ISO from the Proxmox website.
 
-- `https://YOUR-PROXMOX-IP:8006`
+Write it to a USB stick using a tool such as Rufus, Ventoy, or BalenaEtcher.
 
-You’ll get a browser warning about a self-signed cert. Continue anyway (you can fix certificates later).
+Then:
 
-Log in as:
+1. Boot the server from the USB stick.
+2. Choose **Install Proxmox VE**.
+3. Accept the licence.
+4. Choose the install disk.
+5. Set country, time zone, and keyboard.
+6. Set a strong root password.
+7. Set the management network details.
 
-- **User:** `root`
-- **Password:** the one you set during install
+A static IP is ideal if your network allows it.
 
-You’ll see the Proxmox web UI.
+After installation, the server will reboot and show a management URL similar to:
 
-### 2.1 Update Proxmox
+```text
+https://192.168.1.50:8006
+```
 
-You can update from the web UI, but it’s often clearer via SSH.
+Use your own Proxmox IP, not the example address.
 
-On your machine:
+---
 
-~~~bash
+## Step 2: Log in and update Proxmox
+
+From another computer on the same network, open:
+
+```text
+https://YOUR-PROXMOX-IP:8006
+```
+
+You may see a browser certificate warning. That is normal for a new Proxmox install using its default certificate.
+
+Log in with:
+
+```text
+User: root
+Password: the password you set during install
+Realm: Linux PAM standard authentication
+```
+
+Update the host from the shell.
+
+```bash
 ssh root@YOUR-PROXMOX-IP
-~~~
+apt update
+apt full-upgrade -y
+reboot
+```
 
-Once in:
-
-<div class="terminal">
-  <div class="terminal__bar">
-    <div class="terminal__dots">
-      <span class="terminal__dot red"></span>
-      <span class="terminal__dot amber"></span>
-      <span class="terminal__dot green"></span>
-    </div>
-    <div class="terminal__title">Update Proxmox packages</div>
-  </div>
-
-  <pre><code># Refresh package lists
-# (you may see enterprise repo warnings if you don't have a subscription)
-$ apt update
-
-# Upgrade packages
-$ apt full-upgrade -y
-
-# Reboot if the kernel was updated
-$ reboot</code></pre>
-</div>
-
-Log back into the web UI after the reboot.
+After the reboot, log back into the web interface.
 
 ---
 
-## 3. Keep the host lean (SmallGrid rule)
+## Step 3: Keep the host lean
 
-Proxmox is the *hypervisor*, not your app server.
+Treat Proxmox as the foundation, not the app server.
 
-So:
+The host should mainly:
 
-- Don’t install random services on the Proxmox host
-- Don’t run Docker directly on the host
-- Don’t treat it like a normal Ubuntu server
+- manage VMs and containers
+- handle storage
+- handle networking
+- run Proxmox backups
 
-Use VMs or containers for workloads. The host should basically just:
+Avoid installing everyday services directly on the Proxmox host.
 
-- manage VMs/containers
-- handle storage + networking
-- run backups
+For example, avoid putting Jellyfin, Home Assistant, Docker apps, and monitoring tools directly on the host. Put them inside a VM or container instead.
 
-Think of it as the “boring and reliable foundation”.
-
----
-
-## 4. Storage layout: simple, not fancy
-
-For a starter setup:
-
-- **Local system disk**: Proxmox + VM storage
-- Optional **second disk**:
-  - extra VM storage **or**
-  - backup target
-
-From the Proxmox web UI:
-
-1. Click your node (left sidebar)
-2. Go to **Disks** → make sure disks look as expected
-3. Go to **Datacenter → Storage** to see storage pools
-
-A simple layout:
-
-- `local` – for ISO images and templates
-- `local-lvm` or `local-zfs` – for VM disks
-
-You can create an extra **Directory** storage on a second disk if you want a place for backups or container data.
+This makes upgrades, snapshots, backups, and restores easier to reason about.
 
 ---
 
-## 5. Create your “core services” VM
+## Step 4: Understand the storage layout
 
-We’ll create one VM to hold your main services.
+A basic Proxmox install usually creates storage entries such as:
 
-### 5.1 Upload an ISO
+```text
+local       ISO images, container templates, backups if enabled
+local-lvm   VM and container disks
+```
 
-1. In the left sidebar, click your **node**
-2. Go to **local → ISO Images**
-3. Click **Upload** and upload an Ubuntu Server ISO (or your preferred distro)
+Some installs use ZFS instead of LVM, depending on what you selected during installation.
 
-### 5.2 Create the VM
+For a simple starter setup, this is fine:
 
-1. Click **Create VM** (top right of the UI)
-2. Give it a name, e.g. `core-services`
-3. Choose the ISO you uploaded as the install media
-4. Set:
-   - **System**: default is usually fine
-   - **Disks**: e.g. 40–80 GB as a starting point
-   - **CPU**: 2–4 cores
-   - **Memory**: 4–8 GB for a mixed-services box
-   - **Network**: default bridge (`vmbr0`) is fine
+```text
+System SSD/NVMe: Proxmox and VM disks
+Second disk:     backups or extra VM storage
+External/NAS:    optional backup target
+```
 
-Finish and start the VM.
+In the Proxmox web UI:
 
-Open the **Console** tab and install the OS as you would on bare metal.
+1. Select your node.
+2. Open **Disks**.
+3. Confirm the disks look correct.
+4. Open **Datacenter → Storage**.
+5. Check which storage locations allow VM disks, ISO images, and backups.
+
+Do not redesign storage on day one unless you have a clear reason.
 
 ---
 
-## 6. SSH into the VM and set it up
+## Step 5: Create a core services VM
 
-Once the VM OS is installed and booted, ensure it has:
+A core services VM is a simple place to run the apps you actually use.
 
-- a static IP (via your DHCP server or inside the VM)
-- SSH server installed
+Examples:
 
-From your main machine:
+- Jellyfin
+- Docker Compose apps
+- Home Assistant
+- AdGuard Home or Pi-hole
+- Syncthing
+- small monitoring tools
 
-~~~bash
+### Upload an Ubuntu Server ISO
+
+In the Proxmox web UI:
+
+1. Select your node.
+2. Open **local → ISO Images**.
+3. Click **Upload**.
+4. Upload the Ubuntu Server ISO.
+
+### Create the VM
+
+Click **Create VM** and use sensible starter settings:
+
+```text
+Name:      core-services
+CPU:       2 to 4 cores
+Memory:    4GB to 8GB
+Disk:      40GB to 80GB
+Network:   default bridge, usually vmbr0
+```
+
+Install Ubuntu Server inside the VM as normal.
+
+Once installed, give the VM a predictable IP address, either through your router’s DHCP reservation feature or inside the VM.
+
+---
+
+## Step 6: Set up the VM basics
+
+SSH into the VM:
+
+```bash
 ssh user@CORE-VM-IP
-~~~
+```
 
-Do your usual base setup:
+Update packages:
 
-<div class="terminal">
-  <div class="terminal__bar">
-    <div class="terminal__dots">
-      <span class="terminal__dot red"></span>
-      <span class="terminal__dot amber"></span>
-      <span class="terminal__dot green"></span>
-    </div>
-    <div class="terminal__title">Initial VM configuration</div>
-  </div>
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y curl git htop
+```
 
-  <pre><code>$ sudo apt update
-$ sudo apt upgrade -y
+From here, this VM can become your main service box.
 
-# Install some basics
-$ sudo apt install -y htop git curl</code></pre>
-</div>
+If you are starting with Jellyfin, use [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/).
 
-From here, this VM can become your **“everything server”**:
-
-- Docker/Compose for apps
-- Jellyfin, Home Assistant, Pi-hole, etc.
-- Tailscale for secure remote access
-
-You can keep adding services, and if you ever need to move them, you move the **VM**, not the host.
+If you want private remote access, see [Remote Jellyfin with Tailscale: Private Access Setup](/guides/jellyfin-tailscale-remote-access/).
 
 ---
 
-## 7. Optional: use containers (LXC) for lightweight services
+## Step 7: Use containers when they make sense
 
-If you’d rather split things up:
+Proxmox can run both VMs and LXC containers.
 
-- Use one LXC container for each service class (e.g. `media`, `monitoring`, `dns`), or
-- One “core” container and one “playground” container
+A simple rule:
 
-From the Proxmox UI:
+| Option | Good for | Trade-off |
+|---|---|---|
+| VM | Strong isolation, full OS, Docker hosts | Uses more RAM and disk |
+| LXC container | Lightweight Linux services | Slightly more host-coupled |
 
-1. Go to **Create CT**
-2. Choose a template (Debian/Ubuntu templates can be downloaded from the **Templates** tab under a storage)
-3. Assign CPU/RAM
-4. Give it a static IP (or DHCP)
+For beginners, a VM is often easier to understand.
 
-Containers are lighter than VMs, but don’t isolate as strongly. For most homelabs, they’re perfectly fine.
+Once you are comfortable, LXC containers are useful for small services such as DNS, monitoring, or lightweight web tools.
+
+Do not worry about the perfect choice. A working service in a VM is better than a theoretical perfect design that never gets finished.
 
 ---
 
-## 8. Backups (don’t skip this)
+## Step 8: Add backups early
 
-This is where Proxmox shines: you can back up entire VMs and containers.
+Backups are where Proxmox becomes genuinely useful.
 
-### 8.1 Set up backup storage
+You can back up entire VMs and containers from the web interface.
 
-Pick somewhere for backups to live:
+Choose a backup target, such as:
 
-- A **second local disk** mounted as a directory storage
-- A **NAS share** mounted via NFS/CIFS
+- a second local disk
+- a NAS share
+- an external disk
+- Proxmox Backup Server later, if you want to level up
 
 In the web UI:
 
-1. Go to **Datacenter → Storage → Add**
-2. Choose **Directory** or **NFS**
-3. Point it at your backup path/share
-4. Tick **VZDump backup file** so it can hold backups
+1. Go to **Datacenter → Storage → Add**.
+2. Choose **Directory**, **NFS**, or another suitable type.
+3. Point it at the backup path or share.
+4. Make sure **VZDump backup file** is enabled for that storage.
 
-### 8.2 Create a backup job
+Then create a backup job:
 
-1. Go to **Datacenter → Backup**
-2. Click **Add**
-3. Select:
-   - **Storage**: the backup storage you just added
-   - **Schedule**: e.g. `daily` at 03:00
-   - **Selection mode**: `include` and pick your core VM/CTs
-   - Compression: `zstd` is a good default
+1. Go to **Datacenter → Backup**.
+2. Click **Add**.
+3. Select the backup storage.
+4. Pick a schedule, such as daily at 03:00.
+5. Include your important VMs and containers.
+6. Use `zstd` compression as a sensible default.
 
-Save it.
-
-Proxmox will now create scheduled backups of your VM/containers to that storage.
+For a wider backup strategy, see [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/).
 
 ---
 
-## 9. Test a restore (future-you will thank you)
+## Step 9: Test a restore
 
-Backups are only real once you’ve restored from them.
+A backup is only useful if you can restore it.
 
-### 9.1 Test restore to a different ID
+Test with a small VM or container first.
 
-Pick a smaller VM or container for the test.
+In the Proxmox web UI:
 
-1. Go to **Datacenter → Backup**
-2. Click on a backup in the list
-3. Click **Restore**
-4. Choose:
-   - A **different ID** (so you don’t overwrite the live one)
-   - The same node
-5. Restore and boot the test copy
+1. Go to **Datacenter → Backup**.
+2. Select a backup.
+3. Click **Restore**.
+4. Restore to a different VM ID so you do not overwrite the original.
+5. Boot the restored copy.
+6. Confirm the service works.
 
-If the test VM/container boots and the app works, you’ve proven your backup pipeline.
+If the restored VM boots and the service works, your backup process is real.
 
 ---
 
-## 10. Recap: the one-node Proxmox pattern
+## Step 10: Use snapshots before risky changes
 
-If you’ve followed along, you now have:
+Snapshots are useful before changes such as:
 
-- A **single Proxmox node** on your network
-- A **core services VM** (or a small set of VMs/containers)
-- A storage layout that isn’t overcomplicated
-- **Automated backups** to a separate storage
-- At least one **tested restore**
+- package upgrades
+- application upgrades
+- config changes
+- storage changes
+- network changes
 
-From here you can:
+Create a VM snapshot from the command line:
 
-- add more VMs/containers as needed
-- snapshot before upgrades
-- migrate to a nicer box later by backing up/restoring VMs
-
-All without your homelab turning into a pile of half-remembered installs on bare metal.
-This is Proxmox for normal humans, not data-centre cosplay.
+```bash
+qm snapshot 100 pre-upgrade-2026-06-27
 ```
+
+Create a container snapshot:
+
+```bash
+pct snapshot 101 pre-upgrade-2026-06-27
+```
+
+Snapshots are not backups. They are short-term rollback points.
+
+For a fuller workflow, see [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/).
+
+---
+
+## Common mistakes
+
+### Installing everything on the Proxmox host
+
+This makes future upgrades and restores harder.
+
+Keep apps inside VMs or containers.
+
+### Skipping backups until later
+
+Later usually means after something has already gone wrong.
+
+Create a backup job early, even if it is not perfect.
+
+### Building a cluster too soon
+
+A single reliable node is enough for most home setups.
+
+Learn backup and restore before clustering.
+
+### Keeping old snapshots forever
+
+Snapshots can consume storage and complicate disk usage.
+
+Keep them short-term and remove stale ones.
+
+---
+
+## Next steps
+
+Useful related guides:
+
+- [Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab](/guides/mini-pc-under-200/)
+- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
+- [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/)
+- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
+- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
+
+---
+
+## Recap
+
+A good first Proxmox setup is simple:
+
+```text
+One node
+One core services VM
+A clean host
+Automated backups
+Tested restores
+Snapshots before risky changes
+```
+
+That gives you a practical homelab foundation without turning the setup into a maintenance project.
