@@ -1,0 +1,157 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
+const guides = guidesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const bySlug = new Map(guides.map((guide) => [guide.slug, guide]));
+
+const sections = [
+  {
+    title: "Start here",
+    description: "Good first steps if you are building a small, quiet homelab and want useful results without overcomplicating it.",
+    slugs: [
+      "jellyfin-ubuntu-low-power",
+      "mini-pc-under-200",
+      "measure-power-usage-homelab",
+      "backups-3-2-1-home-server",
+    ],
+  },
+  {
+    title: "Jellyfin tutorials",
+    description: "Set up Jellyfin, fix media folder permissions, avoid unnecessary transcoding, and keep remote access sensible.",
+    slugs: [
+      "jellyfin-ubuntu-low-power",
+      "jellyfin-ubuntu-folder-permissions",
+      "jellyfin-direct-play-vs-transcoding",
+      "jellyfin-tailscale-remote-access",
+    ],
+  },
+  {
+    title: "Proxmox and safety nets",
+    description: "Use Proxmox, snapshots, clones, and backups without pretending your home server is an enterprise rack.",
+    slugs: [
+      "proxmox-one-node-starter",
+      "proxmox-lxc-vs-vm",
+      "test-environment-snapshots-safety-net",
+      "backups-before-snapshots",
+    ],
+  },
+  {
+    title: "Power, storage, and hardware",
+    description: "Choose efficient hardware, measure running costs, and avoid turning a small server into a noisy electricity bill.",
+    slugs: [
+      "measure-power-usage-homelab",
+      "quiet-storage-without-datacentre-noise",
+      "mini-pc-under-200",
+      "one-mini-pc-homelab-blueprint",
+    ],
+  },
+];
+
+const featuredGuides = sections.map((section) => ({
+  ...section,
+  guides: section.slugs.map((slug) => bySlug.get(slug)).filter(Boolean),
+}));
+
+const remainingGuides = guides.filter(
+  (guide) => !new Set(sections.flatMap((section) => section.slugs)).has(guide.slug)
+);
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" });
+---
+
+<BaseLayout
+  title="Tutorials · SmallGrid"
+  description="Beginner-friendly SmallGrid tutorials for Jellyfin, Proxmox, Tailscale, backups, low-power hardware, and practical home servers."
+  canonicalPath="/tutorials/"
+>
+  <header class="article-header">
+    <p class="article-kicker">Tutorials · SmallGrid</p>
+    <h1 class="article-title">SmallGrid tutorials</h1>
+    <p class="article-lede">
+      Practical guides for small, quiet, low-power homelabs. Start with one useful setup, make it reliable, then expand only when it earns its keep.
+    </p>
+  </header>
+
+  <hr class="article-divider" />
+
+  <section class="article-body" aria-label="Tutorial introduction">
+    <h2>Start with useful, boring infrastructure</h2>
+    <p>
+      SmallGrid is about home servers that do useful things without becoming a second job. The best starting point is usually a single reliable mini PC, sensible backups, private remote access, and services you actually use.
+    </p>
+    <p>
+      These tutorials are grouped by practical job: media server, Proxmox, backups, power usage, and quiet hardware.
+    </p>
+  </section>
+
+  <section class="guide-grid" aria-label="Tutorial sections">
+    {featuredGuides.map((section) => (
+      <article class="guide-card">
+        <h2 class="guide-card-title">{section.title}</h2>
+        <p class="guide-card-desc">{section.description}</p>
+
+        {section.guides.length ? (
+          <ul class="guide-card-tags" style="display: grid; gap: 0.65rem; margin-top: 1rem;">
+            {section.guides.map((guide) => (
+              <li style="list-style: none;">
+                <a class="guide-card-link" href={`/guides/${guide.slug}/`}>
+                  {guide.data.title}
+                </a>
+                <div class="guide-card-meta" style="margin-top: 0.2rem;">
+                  <span>{formatDate(guide.data.pubDate)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="guide-card-desc">More tutorials are being added here.</p>
+        )}
+      </article>
+    ))}
+  </section>
+
+  {remainingGuides.length ? (
+    <>
+      <hr class="article-divider" />
+
+      <section aria-label="More tutorials">
+        <header class="article-header" style="margin-bottom: 1rem;">
+          <p class="article-kicker">More guides</p>
+          <h2 class="article-title" style="font-size: clamp(1.8rem, 3vw, 2.4rem);">All other tutorials</h2>
+        </header>
+
+        <section class="guide-grid">
+          {remainingGuides.map((guide) => (
+            <article class="guide-card">
+              <h3 class="guide-card-title">
+                <a class="guide-card-link" href={`/guides/${guide.slug}/`}>
+                  {guide.data.title}
+                </a>
+              </h3>
+              <div class="guide-card-meta">
+                <span>{formatDate(guide.data.pubDate)}</span>
+              </div>
+              <p class="guide-card-desc">{guide.data.description}</p>
+            </article>
+          ))}
+        </section>
+      </section>
+    </>
+  ) : null}
+
+  <hr class="article-divider" />
+
+  <section class="article-body" aria-label="Recommended path">
+    <h2>Recommended path</h2>
+    <p>
+      If you are new to this, start with Jellyfin or a simple mini PC homelab. Then add backups before you add more services. Snapshots are useful, but they are not backups.
+    </p>
+    <p>
+      The default SmallGrid approach: one reliable machine, private remote access, measured power usage, clear recovery steps, and no exposed services unless there is a real reason.
+    </p>
+  </section>
+</BaseLayout>
