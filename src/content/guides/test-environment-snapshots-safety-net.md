@@ -37,6 +37,8 @@ Your live services should be easy to revert or easy to recreate.
 
 Snapshots are useful. They are not a replacement for backups.
 
+For the difference, see [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/).
+
 ---
 
 ## Proxmox snapshots before upgrades
@@ -214,6 +216,8 @@ Use both:
 
 For a practical backup model, see [3-2-1 Backups for Home Servers](/guides/backups-3-2-1-home-server/).
 
+For the full comparison, see [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/).
+
 ---
 
 ## A simple change checklist
@@ -260,6 +264,7 @@ Keep the useful ones, remove the stale ones.
 Useful related guides:
 
 - [Proxmox One-Node Starter Guide](/guides/proxmox-one-node-starter/)
+- [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/)
 - [3-2-1 Backups for Home Servers](/guides/backups-3-2-1-home-server/)
 - [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
 - [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
