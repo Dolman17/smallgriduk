@@ -5,6 +5,16 @@ import { getCollection } from "astro:content";
 const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
 const guides = guidesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const featured = guides.slice(0, 6);
+const guideBySlug = new Map(guides.map((guide) => [guide.slug, guide]));
+
+const findGuide = (slug: string) => guideBySlug.get(slug);
+
+const priorityGuides = [
+  findGuide("jellyfin-ubuntu-low-power"),
+  findGuide("jellyfin-ubuntu-folder-permissions"),
+  findGuide("measure-power-usage-homelab"),
+  findGuide("backups-3-2-1-home-server"),
+].filter(Boolean);
 
 const journalAll = await getCollection("journal", ({ data }) => !data.draft);
 const journalSorted = journalAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -20,18 +30,72 @@ const latestJournal = journalSorted[0];
     <div class="kicker">⚡ SmallGrid philosophy</div>
     <h1>Homelabs that don’t become a second job.</h1>
     <p>
-      Build quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, and
-      backups you can actually restore. No enterprise cosplay. Just sane defaults.
+      Build quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, and backups you can actually restore. No enterprise cosplay. Just sane defaults.
     </p>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/start/">Start here</a>
+      <a class="btn" href="/tutorials/">Tutorials</a>
       <a class="btn" href="/guides/">Browse guides</a>
-      <a class="btn" href="/journal/">Weekly journal</a>
       <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
-      <a class="btn" href="/guides/mini-pc-under-200/">Mini PC under £200</a>
+      <a class="btn" href="/guides/jellyfin-ubuntu-folder-permissions/">Fix Jellyfin permissions</a>
+      <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage</a>
     </div>
   </section>
+
+  <section class="grid" style="margin-top: 16px;">
+    <article class="card hover">
+      <div class="kicker">1 · Start</div>
+      <h2>Follow the beginner path</h2>
+      <p>
+        The quickest route is one reliable mini PC, one useful service, backups, private remote access, and measured power usage.
+      </p>
+      <a class="btn primary" href="/start/">Open Start Here →</a>
+    </article>
+
+    <article class="card hover">
+      <div class="kicker">2 · Tutorials</div>
+      <h2>Use the tutorial hub</h2>
+      <p>
+        Find guides grouped by practical job: Jellyfin, Proxmox, backups, quiet storage, power usage, and low-power hardware.
+      </p>
+      <a class="btn" href="/tutorials/">Browse tutorials →</a>
+    </article>
+
+    <article class="card hover">
+      <div class="kicker">3 · First project</div>
+      <h2>Build a low-power Jellyfin server</h2>
+      <p>
+        Install Jellyfin on Ubuntu, give it access to your media folders, and avoid the usual permissions problems.
+      </p>
+      <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin →</a>
+    </article>
+  </section>
+
+  {priorityGuides.length ? (
+    <section style="margin-top: 16px;">
+      <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+        <h2>Start with these guides</h2>
+        <a class="btn" href="/guides/">View all →</a>
+      </div>
+
+      <div class="grid" style="margin-top: 10px;">
+        {priorityGuides.map((post) => (
+          <article class="card hover">
+            <h3 style="margin-top: 0;">
+              <a href={`/guides/${post.slug}/`}>{post.data.title}</a>
+            </h3>
+            <p>{post.data.description}</p>
+            <div>
+              {(post.data.tags ?? []).slice(0, 4).map((tag) => (
+                <span class="pill">#{tag}</span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ) : null}
 
   {latestJournal && (
     <section style="margin-top: 16px;">
@@ -49,8 +113,8 @@ const latestJournal = journalSorted[0];
           <span class="pill">
             {latestJournal.data.pubDate.toLocaleDateString("en-GB")}
           </span>
-          {(latestJournal.data.tags ?? []).slice(0, 6).map((t) => (
-            <span class="pill">#{t}</span>
+          {(latestJournal.data.tags ?? []).slice(0, 6).map((tag) => (
+            <span class="pill">#{tag}</span>
           ))}
         </div>
       </article>
@@ -71,8 +135,8 @@ const latestJournal = journalSorted[0];
           </h3>
           <p>{post.data.description}</p>
           <div>
-            {(post.data.tags ?? []).slice(0, 4).map((t) => (
-              <span class="pill">#{t}</span>
+            {(post.data.tags ?? []).slice(0, 4).map((tag) => (
+              <span class="pill">#{tag}</span>
             ))}
           </div>
         </article>
@@ -84,7 +148,7 @@ const latestJournal = journalSorted[0];
     <div class="card">
       <div class="kicker">🔌 Low power</div>
       <h2>Efficiency first</h2>
-      <p>Mini PCs, iGPU transcoding, and “good enough” choices that keep wattage and noise down.</p>
+      <p>Mini PCs, iGPU transcoding, and good-enough choices that keep wattage and noise down.</p>
     </div>
     <div class="card">
       <div class="kicker">🧰 Low drama</div>
@@ -93,8 +157,8 @@ const latestJournal = journalSorted[0];
     </div>
     <div class="card">
       <div class="kicker">🛡️ Secure default</div>
-      <h2>Tailscale over port-forwarding</h2>
-      <p>Remote access that isn’t “open ports and pray”. Private networking that just works.</p>
+      <h2>Private remote access</h2>
+      <p>Prefer private networking for remote access unless there is a clear reason to publish a service.</p>
     </div>
   </section>
 </BaseLayout>
