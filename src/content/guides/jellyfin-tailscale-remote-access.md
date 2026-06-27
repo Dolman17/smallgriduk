@@ -1,187 +1,417 @@
 ---
-title: "Remote Jellyfin Without Port Forwarding: Tailscale + SmallGrid Setup"
-description: "Use Tailscale to reach your Jellyfin server from anywhere without opening ports or wrestling with DDNS."
+title: "Remote Jellyfin with Tailscale: Private Access Setup"
+description: "Use Tailscale to reach Jellyfin remotely without DDNS, router changes, or a public reverse proxy."
 pubDate: 2026-01-21
 tags: ["jellyfin", "tailscale", "remote-access", "security"]
 cover: "/images/guides/tailscale-hero.svg"
 ---
 
-##Goal
+## Goal
 
-Reach your Jellyfin server from anywhere (phone, laptop, TV) by:
+Reach your Jellyfin server from your phone, laptop, tablet, or another trusted device when you are away from home.
 
-installing Tailscale on the server and your devices
+The SmallGrid default is:
 
-using the private tailnet IP instead of opening ports
+- install Tailscale on the Jellyfin server
+- install Tailscale on your client devices
+- connect to Jellyfin using the private Tailscale IP or MagicDNS hostname
+- keep the setup simple and private
 
-avoiding DDNS, random reverse proxies, and “hope the router behaves”
-
-No port forwarding, no exposed services.
+This gives you remote access without needing dynamic DNS or a public reverse proxy.
 
 ---
 
-1. What Tailscale actually does here
+## The default recommendation
 
-Tailscale creates a private mesh network (a “tailnet”) between:
+Use Tailscale for private remote access.
 
-your Jellyfin server
+Tailscale creates a private network between your own devices, so you can reach Jellyfin using a private address.
 
-your laptop / phone / other clients
+For most home Jellyfin setups, this is simpler than:
 
-Each device gets a stable private IP, e.g.:
+- dynamic DNS
+- public reverse proxies
+- router-level remote-access rules
+- managing certificates before you have the basics working
 
-100.89.21.37 (Jellyfin server on Tailscale)
+Start with private access first. Polish later.
 
-100.71.10.22 (your phone)
+---
 
-You then connect to Jellyfin over that private IP and port:
+## What Tailscale does here
 
+Tailscale creates a private mesh network called a tailnet.
+
+Your devices join that tailnet:
+
+```text
+Jellyfin server
+Laptop
+Phone
+Tablet
+Other trusted devices
+```
+
+Each device gets a private Tailscale IP address, usually starting with `100.`.
+
+Example:
+
+```text
+Jellyfin server: 100.89.21.37
+Phone:           100.71.10.22
+Laptop:          100.82.44.10
+```
+
+Then you connect to Jellyfin using the server’s private Tailscale address:
+
+```text
 http://100.89.21.37:8096
+```
 
+That works from another network as long as both devices are signed into the same Tailscale network and allowed to communicate.
 
-Even if you’re on 5G in another city.
+---
 
-2. Install Tailscale on your Jellyfin server (Ubuntu)
+## What you’ll need
 
-Assuming Jellyfin is on Ubuntu.
+- Jellyfin already installed and working on your home network
+- SSH or terminal access to the Jellyfin server
+- A Tailscale account
+- Tailscale installed on any remote devices you want to use
 
+If Jellyfin is not installed yet, start with [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/).
+
+If Jellyfin cannot see your media folders, fix that first with [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
+
+---
+
+## Step 1: Confirm Jellyfin works locally
+
+Before adding remote access, make sure Jellyfin works at home.
+
+On a device connected to your home network, open:
+
+```text
+http://YOUR-SERVER-LAN-IP:8096
+```
+
+Example:
+
+```text
+http://192.168.1.50:8096
+```
+
+You should see the Jellyfin login page.
+
+If Jellyfin does not work locally, do not start troubleshooting Tailscale yet. Fix the local Jellyfin setup first.
+
+Check the service on Ubuntu:
+
+```bash
+systemctl status jellyfin --no-pager
+```
+
+---
+
+## Step 2: Install Tailscale on the Jellyfin server
+
+On the Jellyfin server, install Tailscale:
+
+```bash
 curl -fsSL https://tailscale.com/install.sh | sh
+```
 
+Start the Tailscale login process:
+
+```bash
 sudo tailscale up
+```
 
+The command will print a login URL.
 
-The first tailscale up will print a URL.
-Open that URL in a browser, log in with your Tailscale account (Google, Microsoft, GitHub, etc.), and authorise the device.
+Open that URL in a browser, sign in to your Tailscale account, and approve the device.
 
-Once that’s done, check status:
+Once approved, check Tailscale status:
 
+```bash
 tailscale status
+```
 
+You should see this server listed with a private `100.x.x.x` address.
 
-You should see an entry for this server with:
+---
 
-a 100.x.x.x IP
-
-a name like jellyfin-server or similar
-
-3. Grab the Tailscale IP for Jellyfin
+## Step 3: Find the Jellyfin server’s Tailscale IP
 
 Run:
 
+```bash
 tailscale ip
+```
 
+You may see two addresses:
 
-You’ll get something like:
-
+```text
 100.89.21.37
 fd7a:115c:a1e0:ab12:4843:cd96:624d:1234
+```
 
+Use the first one, the `100.x.x.x` IPv4 address.
 
-The first one (100.x.x.x) is what you care about.
+For this guide, the example server IP is:
 
-Call it:
+```text
+100.89.21.37
+```
 
-TAIL_IP_SERVER = 100.89.21.37 (example)
+Your actual address will be different.
 
-4. Install Tailscale on your client devices
-4.1 Laptop / desktop
+---
 
-Download Tailscale for your OS from their site.
+## Step 4: Install Tailscale on your client devices
 
-Install, log in with the same account you used on the server.
+Install Tailscale on the devices you want to use away from home.
 
-Once connected, you can run:
+Common options:
 
+- laptop
+- phone
+- tablet
+- travel device
+- another trusted computer
+
+Sign in with the same Tailscale account you used for the server.
+
+On a laptop or desktop, you can check the connection with:
+
+```bash
 tailscale status
+```
 
+You should see both:
 
-You should see both your laptop and the Jellyfin server in the list.
+- the client device you are using
+- the Jellyfin server
 
-4.2 Phone / tablet
+On mobile, open the Tailscale app and make sure it is connected.
 
-Install the Tailscale app from the iOS/Android store.
+---
 
-Log in with the same account.
+## Step 5: Connect to Jellyfin over Tailscale
 
-Connect.
+On a Tailscale-connected device, open:
 
-All of these devices now share the same private network.
+```text
+http://TAILSCALE-SERVER-IP:8096
+```
 
-5. Connect to Jellyfin over Tailscale
+Using the example address:
 
-On any Tailscale-connected device:
-
-Open a browser.
-
-Go to:
-
-http://TAIL_IP_SERVER:8096
-
-
-Using the example:
-
+```text
 http://100.89.21.37:8096
+```
 
+You should see the normal Jellyfin login page.
 
-You should see the Jellyfin login page just like at home, even if you’re on 4G/5G or a hotel Wi-Fi.
+Log in with your Jellyfin account.
 
-Log in with your usual Jellyfin account.
+If it works on your home Wi-Fi, test it properly by switching your phone to mobile data and trying the same address again.
 
-6. Make the URL less ugly (optional, but nice)
+---
 
-You don’t have to keep typing an IP address.
+## Step 6: Use MagicDNS for a cleaner address
 
-6.1 Use the Tailscale MagicDNS hostname
+Typing an IP address works, but MagicDNS is easier to remember.
 
-In the Tailscale admin page:
+In the Tailscale admin console, enable MagicDNS.
 
-Enable MagicDNS.
+Your server will then have a tailnet hostname, something like:
 
-You’ll see hostnames like:
-
+```text
 jellyfin-server.tailnet-name.ts.net
+```
 
-Then you can use:
+Then you can open Jellyfin using:
 
+```text
 http://jellyfin-server.tailnet-name.ts.net:8096
+```
 
+You still need Tailscale connected on the client device. The hostname is private to your tailnet.
 
-That works from any device on your tailnet.
+---
 
-7. Lock down Jellyfin to local / tailnet only
+## Step 7: Keep the access path simple
 
-If you currently have Jellyfin bound to 0.0.0.0 and exposed via port forwarding, you can:
+The clean setup is:
 
-remove the port forwarding rule from your router
+```text
+Client device → Tailscale → Jellyfin server → Jellyfin on port 8096
+```
 
-keep Jellyfin bound to LAN addresses only (no direct WAN exposure)
+You do not need to add extra layers until there is a real reason.
 
-In Jellyfin’s Networking settings, you can:
+If you previously created router rules, DDNS entries, or reverse proxy rules for Jellyfin, review whether you still need them. For most simple home setups, Tailscale becomes the remote access path.
 
-Make sure it’s listening on your LAN IP and/or 0.0.0.0,
+---
 
-But not exposed via router → internet.
+## Step 8: Check Jellyfin networking settings
 
-Tailscale handles the “from wherever” part.
+In Jellyfin, go to:
 
-8. Multiple services? No problem
+```text
+Dashboard → Networking
+```
 
-Once Tailscale is in place, you can access other self-hosted bits the same way:
+For a basic home setup, the default settings are usually fine.
 
-Proxmox UI: https://TAIL_IP_SERVER:8006
+Avoid changing advanced network settings unless you are fixing a specific problem.
 
-Home Assistant: http://TAIL_IP_SERVER:8123
+The important test is simple: Jellyfin should work locally, and Jellyfin should work through the Tailscale address.
 
-Dockerised dashboards, etc.
+---
 
-Everything stays private to your tailnet.
+## Step 9: Test the setup properly
 
-9. Recap: SmallGrid remote access rule
+Use this checklist:
 
-No random port forwarding.
+```text
+Jellyfin works on the home LAN
+Tailscale is connected on the server
+Tailscale is connected on the client device
+Client can see the server in tailscale status
+http://TAILSCALE-IP:8096 opens Jellyfin
+Mobile data test works
+```
 
-One well-behaved mesh VPN (Tailscale).
+Useful server checks:
 
-Use private IP/hostnames for all your self-hosted services.
+```bash
+systemctl status jellyfin --no-pager
+tailscale status
+tailscale ip
+```
 
-Jellyfin becomes “the thing you watch stuff on”, not “the thing you worry about being on Shodan.”
+Useful client check:
+
+```bash
+tailscale status
+```
+
+If all of those pass, the basic remote access setup is working.
+
+---
+
+## Troubleshooting
+
+### Jellyfin works at home but not over Tailscale
+
+Check that Tailscale is connected on both devices:
+
+```bash
+tailscale status
+```
+
+Then try pinging the server’s Tailscale IP from the client:
+
+```bash
+ping 100.89.21.37
+```
+
+Replace the example IP with your server’s real Tailscale IP.
+
+If ping fails, this is a Tailscale connectivity issue, not a Jellyfin issue.
+
+### Tailscale connects, but Jellyfin does not load
+
+Check Jellyfin is running:
+
+```bash
+systemctl status jellyfin --no-pager
+```
+
+Check the local Jellyfin URL from the server or LAN:
+
+```text
+http://YOUR-SERVER-LAN-IP:8096
+```
+
+If local access fails too, fix Jellyfin before troubleshooting remote access.
+
+### The phone works on Wi-Fi but not on mobile data
+
+Open the Tailscale app and confirm it is connected.
+
+Some phones disconnect VPN-style apps when power saving is enabled. Disable aggressive battery optimisation for Tailscale if needed.
+
+### Streaming is slow remotely
+
+Tailscale gives you access. It does not increase the upload speed from home.
+
+If remote playback buffers, check:
+
+- your home upload speed
+- the media bitrate
+- whether Jellyfin is transcoding
+- client quality settings
+- mobile signal strength
+
+For Jellyfin playback behaviour, see [Jellyfin Direct Play vs Transcoding: What Actually Matters](/guides/jellyfin-direct-play-vs-transcoding/).
+
+---
+
+## What about HTTPS?
+
+For a private Tailscale setup, plain `http://TAILSCALE-IP:8096` is often acceptable for a simple first version because the traffic is travelling through the Tailscale connection.
+
+You can add HTTPS later if you want a cleaner browser experience, but do not make HTTPS the first problem you solve.
+
+First make remote access work privately. Then polish.
+
+---
+
+## Multiple services? Use the same pattern
+
+Once Tailscale works, you can reach other private services in the same way.
+
+Examples:
+
+```text
+Proxmox:        https://TAILSCALE-IP:8006
+Home Assistant: http://TAILSCALE-IP:8123
+Jellyfin:       http://TAILSCALE-IP:8096
+```
+
+Keep a simple list of service URLs somewhere you trust.
+
+The pattern stays the same: connect to Tailscale, then use the private address.
+
+---
+
+## Next steps
+
+Useful related guides:
+
+- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
+- [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
+- [Jellyfin Direct Play vs Transcoding: What Actually Matters](/guides/jellyfin-direct-play-vs-transcoding/)
+- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
+- [3-2-1 Backups for Home Servers](/guides/backups-3-2-1-home-server/)
+
+---
+
+## Recap
+
+Tailscale lets you reach Jellyfin remotely using a private address.
+
+The basic flow is:
+
+```text
+Install Tailscale on server
+Sign in and approve the server
+Install Tailscale on client devices
+Use http://TAILSCALE-IP:8096
+Test from mobile data or another network
+```
+
+For most SmallGrid-style home servers, this is the clean default: private remote access, fewer moving parts, and a setup that is easier to maintain.
