@@ -328,7 +328,9 @@ pct snapshot 101 pre-upgrade-2026-06-27
 
 Snapshots are not backups. They are short-term rollback points.
 
-For a fuller workflow, see [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/).
+For the full comparison, see [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/).
+
+For a fuller experiment workflow, see [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/).
 
 ---
 
@@ -366,6 +368,7 @@ Useful related guides:
 
 - [Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab](/guides/mini-pc-under-200/)
 - [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
+- [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/)
 - [Safe Experiments: Snapshots and Test Environments for Your Homelab](/guides/test-environment-snapshots-safety-net/)
 - [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
 - [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
