@@ -13,7 +13,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const base = import.meta.env.BASE_URL;
 const iconSvg = `${base}brand/smallgrid-icon.svg`;
 const iconMonoSvg = `${base}brand/smallgrid-icon-mono.svg`;
-const wordmarkSvg = `${base}brand/smallgrid-wordmark.svg`;
+const wordmarkDarkSvg = `${base}brand/smallgrid-wordmark-dark.svg`;
 const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.replace(/^\//, "")}`;
 ---
 
@@ -68,7 +68,7 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
               />
               <img
                 class="site-logo-wordmark"
-                src={wordmarkSvg}
+                src={wordmarkDarkSvg}
                 alt="SmallGrid.uk"
                 decoding="async"
                 loading="eager"
