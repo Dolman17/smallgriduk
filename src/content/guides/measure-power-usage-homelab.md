@@ -147,6 +147,8 @@ For a small home server, drives can matter as much as the computer itself.
 
 A mini PC with one SSD can be extremely efficient. The same mini PC attached to several spinning hard drives will use more power, make more noise, and create more heat.
 
+For storage noise and placement, see [Quiet Storage: Add Disks Without Turning Your Home Into a Datacentre](/guides/quiet-storage-without-noise/).
+
 ---
 
 ## Quick wins for lower idle power
@@ -288,10 +290,11 @@ Then calculate cost using the normal-use number, not the peak number.
 
 Useful related guides:
 
-- [Best Mini PC Under £200 for a Homelab](/guides/mini-pc-under-200/)
-- [Quiet Storage Without Datacentre Noise](/guides/quiet-storage-without-datacentre-noise/)
+- [Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab](/guides/mini-pc-under-200/)
+- [Quiet Storage: Add Disks Without Turning Your Home Into a Datacentre](/guides/quiet-storage-without-noise/)
 - [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
-- [3-2-1 Backups for Home Servers](/guides/backups-3-2-1-home-server/)
+- [Jellyfin Direct Play vs Transcoding: What Actually Matters](/guides/jellyfin-direct-play-vs-transcoding/)
+- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
 
 ---
 
