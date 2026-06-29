@@ -6,6 +6,9 @@ const commonSchema = z.object({
   pubDate: z.date(),
   updatedDate: z.date().optional(),
   tags: z.array(z.string()).optional(),
+  cover: z.string().optional(),
+  author: z.string().optional(),
+  authorAvatar: z.string().optional(),
   draft: z.boolean().optional(),
 });
 
