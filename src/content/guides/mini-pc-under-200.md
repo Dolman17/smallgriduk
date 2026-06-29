@@ -3,7 +3,7 @@ title: "Budget Mini PC Home Lab: Picking a Tiny Box That Can Actually Homelab"
 description: "How to choose a used or budget mini PC for a small efficient home lab, Jellyfin, Docker, Proxmox, backups, and low-power home server use."
 pubDate: 2026-01-21
 tags: ["hardware", "mini-pc", "low-power", "homelab"]
-cover: "/images/guides/mini-pc-hero.svg"
+cover: "/images/guides/mini-pc-under-200-hero.webp"
 ---
 
 ## Goal
