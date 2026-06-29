@@ -2,26 +2,58 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="Contact" description="Get in touch with SmallGrid." canonicalPath="/contact/">
+<BaseLayout title="Contact SmallGrid.uk" description="Contact SmallGrid.uk for guide corrections, feedback, privacy questions, advertising queries, and site enquiries." canonicalPath="/contact/">
   <section class="card">
     <h1 style="margin:0 0 10px;">Contact</h1>
     <p class="muted" style="margin:0 0 12px;">
-      Got a question, a correction, or a guide request? Email works best.
+      Got a question, correction, guide request, or site enquiry? Email is the best way to get in touch.
     </p>
 
-    <div class="card">
+    <div class="card" style="margin: 1rem 0;">
       <div class="muted" style="font-size: 13px;">Email</div>
-      <div style="font-size: 16px; margin-top: 4px;">
+      <div style="font-size: 18px; margin-top: 4px; font-weight: 700;">
         <a href="mailto:hello@smallgrid.uk">hello@smallgrid.uk</a>
       </div>
-      <div class="muted" style="font-size: 13px; margin-top: 8px;">
-      </div>
+      <p class="muted" style="font-size: 13px; margin: 8px 0 0;">
+        Please include a clear subject line so the message is easier to route and reply to.
+      </p>
     </div>
 
-    <div class="hr"></div>
+    <h2>What to contact us about</h2>
+    <ul>
+      <li>Corrections or updates to a guide.</li>
+      <li>Suggestions for new tutorials or topics.</li>
+      <li>Questions about home server, Jellyfin, Proxmox, storage, or low-power setup content.</li>
+      <li>Privacy, cookie, or data protection questions.</li>
+      <li>Advertising, sponsorship, or site-related enquiries.</li>
+    </ul>
 
-    <p class="muted" style="margin:0;">
-      If you’re reporting an issue, include: OS, hardware (mini PC model / CPU), and what you were trying to do.
+    <h2>Reporting a technical issue</h2>
+    <p>
+      If you are reporting an issue with a guide or setup, include as much relevant detail as possible. Useful details include:
+    </p>
+    <ul>
+      <li>Your operating system and version.</li>
+      <li>Your hardware, such as mini PC model, CPU, RAM, and storage.</li>
+      <li>The guide or page you were following.</li>
+      <li>The exact step where the issue happened.</li>
+      <li>Any error message shown on screen or in the terminal.</li>
+      <li>What you expected to happen and what actually happened.</li>
+    </ul>
+
+    <h2>Privacy and cookies</h2>
+    <p>
+      For privacy or cookie-related questions, email <a href="mailto:hello@smallgrid.uk">hello@smallgrid.uk</a>. You can also read the <a href="/privacy/">Privacy Policy</a> and <a href="/cookies/">Cookies page</a>.
+    </p>
+
+    <h2>Response times</h2>
+    <p>
+      SmallGrid.uk is a small independent site, so replies may not be immediate. Messages are reviewed when time allows.
+    </p>
+
+    <h2>Important note</h2>
+    <p>
+      SmallGrid.uk provides informational content only. We cannot guarantee support for individual systems, and any changes you make to your own hardware, software, or network are your responsibility.
     </p>
   </section>
 </BaseLayout>
