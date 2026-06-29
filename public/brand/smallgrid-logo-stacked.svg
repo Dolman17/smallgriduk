@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" fill="none" role="img" aria-label="SmallGrid.uk stacked logo">
+  <defs>
+    <linearGradient id="sg-blue" x1="260" y1="150" x2="540" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E88FF" />
+      <stop offset="1" stop-color="#0A66FF" />
+    </linearGradient>
+    <linearGradient id="sg-teal" x1="220" y1="120" x2="580" y2="540" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F5A52" />
+      <stop offset="1" stop-color="#0E3D39" />
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="800" fill="#FFFFFF" />
+  <g transform="translate(250 96)">
+    <rect x="0" y="0" width="300" height="300" rx="72" fill="#FFFFFF" />
+    <rect x="10" y="10" width="280" height="280" rx="63" stroke="url(#sg-teal)" stroke-width="14" />
+    <g transform="translate(76 75)" stroke="url(#sg-teal)" stroke-width="10" stroke-linecap="round">
+      <path d="M0 26H74H148" />
+      <path d="M0 78H74H148" />
+      <path d="M0 130H74H148" />
+      <path d="M0 26V78V130" />
+      <path d="M74 26V78V130" />
+      <path d="M148 26V78V130" />
+    </g>
+    <g transform="translate(55 80)" fill="url(#sg-teal)">
+      <rect x="0" y="0" width="42" height="42" rx="10" />
+      <rect x="148" y="0" width="42" height="42" rx="10" />
+      <rect x="74" y="52" width="42" height="42" rx="10" />
+      <rect x="0" y="104" width="42" height="42" rx="10" />
+      <rect x="148" y="104" width="42" height="42" rx="10" />
+    </g>
+    <g transform="translate(55 80)" fill="url(#sg-blue)">
+      <circle cx="95" cy="21" r="23" />
+      <circle cx="21" cy="73" r="23" />
+      <circle cx="169" cy="73" r="23" />
+      <circle cx="95" cy="125" r="23" />
+    </g>
+  </g>
+
+  <g text-anchor="middle">
+    <text x="400" y="520" font-family="Plus Jakarta Sans, Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="86" font-weight="800" fill="#0E3D39" letter-spacing="-3">SmallGrid</text>
+    <text x="646" y="520" font-family="Plus Jakarta Sans, Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="86" font-weight="800" fill="#0A66FF" letter-spacing="-3">.uk</text>
+    <text x="400" y="600" font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="30" font-weight="500" fill="#0E3D39" letter-spacing="4">Tiny tools. Solid systems.</text>
+  </g>
+</svg>
