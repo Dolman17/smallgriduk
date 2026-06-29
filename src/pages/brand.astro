@@ -1,0 +1,128 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const colors = [
+  { name: "Deep Teal", hex: "#0E3D39", use: "Primary brand, headings, dark surfaces" },
+  { name: "Grid Blue", hex: "#0A66FF", use: "Accent, .uk, highlights, active states" },
+  { name: "Light Gray", hex: "#F2F4F5", use: "Page background, subtle panels" },
+  { name: "Steel Gray", hex: "#6B737B", use: "Muted text, metadata, borders" },
+  { name: "Charcoal", hex: "#1F2428", use: "Body text, code surfaces" },
+];
+---
+
+<BaseLayout
+  title="SmallGrid.uk Brand Guide"
+  description="SmallGrid.uk brand assets, logo variants, colour palette, typography, and usage notes."
+  canonicalPath="/brand/"
+>
+  <header class="article-header">
+    <p class="article-kicker">Brand pack</p>
+    <h1 class="article-title">SmallGrid.uk brand guide</h1>
+    <p class="article-lede">
+      A compact identity system for SmallGrid.uk: tiny tools, solid systems, practical tutorials, and clear technical guidance.
+    </p>
+  </header>
+
+  <hr class="article-divider" />
+
+  <section class="article-body">
+    <h2>Brand in a line</h2>
+    <p>
+      <strong>Small, useful systems. Clear technical guidance.</strong>
+    </p>
+    <p>
+      SmallGrid.uk should feel practical, trustworthy, lightweight, and technically capable without becoming corporate or overcomplicated.
+    </p>
+  </section>
+
+  <section class="article-body">
+    <h2>Brand board</h2>
+    <img
+      class="brand-board"
+      src="/brand/smallgrid-brand-board.svg"
+      alt="SmallGrid.uk brand board showing logos, colours, typography, and brand line"
+      loading="eager"
+      decoding="async"
+    />
+  </section>
+
+  <section class="article-body">
+    <h2>Logo assets</h2>
+    <p>
+      Use the primary horizontal logo for website headers, previews, and general brand use. Use the icon-only mark for favicons, small cards, social avatars, and tight UI spaces.
+    </p>
+
+    <div class="brand-asset-grid">
+      <article class="brand-asset-card">
+        <h3>Primary logo</h3>
+        <img src="/brand/smallgrid-logo.svg" alt="SmallGrid.uk primary horizontal logo" loading="lazy" decoding="async" />
+        <p><code>/brand/smallgrid-logo.svg</code></p>
+      </article>
+
+      <article class="brand-asset-card dark">
+        <h3 style="color:#fff;">Dark logo</h3>
+        <img src="/brand/smallgrid-logo-dark.svg" alt="SmallGrid.uk dark background logo" loading="lazy" decoding="async" />
+        <p style="color:#f2f4f5;"><code>/brand/smallgrid-logo-dark.svg</code></p>
+      </article>
+
+      <article class="brand-asset-card">
+        <h3>Stacked logo</h3>
+        <img src="/brand/smallgrid-logo-stacked.svg" alt="SmallGrid.uk stacked logo" loading="lazy" decoding="async" />
+        <p><code>/brand/smallgrid-logo-stacked.svg</code></p>
+      </article>
+
+      <article class="brand-asset-card">
+        <h3>Icon</h3>
+        <img src="/brand/smallgrid-icon.svg" alt="SmallGrid.uk icon mark" loading="lazy" decoding="async" style="max-height: 160px;" />
+        <p><code>/brand/smallgrid-icon.svg</code></p>
+      </article>
+    </div>
+  </section>
+
+  <section class="article-body">
+    <h2>Colour palette</h2>
+    <div class="brand-swatch-row">
+      {colors.map((color) => (
+        <article class="brand-swatch">
+          <div class="brand-swatch-chip" style={`background:${color.hex};`}></div>
+          <div class="brand-swatch-copy">
+            <strong>{color.name}</strong>
+            <code>{color.hex}</code>
+            <p>{color.use}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="article-body">
+    <h2>Typography</h2>
+    <p>
+      Use <strong>Plus Jakarta Sans</strong> for headings, navigation, and strong display moments. Use <strong>Inter</strong> for body text, guide content, UI labels, and long-form tutorial reading.
+    </p>
+
+    <div class="grid">
+      <article class="card">
+        <div class="kicker">Headings</div>
+        <h3 style="font-family: var(--sg-font-display); margin-top: 0;">Plus Jakarta Sans</h3>
+        <p>Bold, clear, compact, and modern. Good for tutorial titles and brand moments.</p>
+      </article>
+      <article class="card">
+        <div class="kicker">Body</div>
+        <h3 style="font-family: var(--sg-font-body); margin-top: 0;">Inter</h3>
+        <p>Readable for documentation, guides, instructions, and technical explanations.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="article-body">
+    <h2>Usage rules</h2>
+    <ul>
+      <li>Use the horizontal logo when there is enough width.</li>
+      <li>Use the icon when the space is small, such as favicons or square avatars.</li>
+      <li>Keep clear space around the logo. Do not crowd it against card edges.</li>
+      <li>Use Grid Blue sparingly as an accent, not as the whole brand.</li>
+      <li>Keep guide diagrams simple: light backgrounds, white cards, deep teal, and blue highlights.</li>
+    </ul>
+  </section>
+</BaseLayout>
