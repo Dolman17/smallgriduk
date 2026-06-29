@@ -3,7 +3,7 @@ import "../styles/global.css";
 
 const {
   title = "SmallGrid.uk",
-  description = "Small, practical tools for real-world problems.",
+  description = "Small, useful systems. Clear technical guidance.",
   ogImage = "brand/smallgrid-logo.svg",
 } = Astro.props;
 
@@ -31,12 +31,12 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
     />
 
     <!-- Favicons (SVG-first) -->
     <link rel="icon" type="image/svg+xml" href={iconSvg} />
-    <link rel="mask-icon" href={iconMonoSvg} color="#064e3b" />
+    <link rel="mask-icon" href={iconMonoSvg} color="#0E3D39" />
 
     <!-- Social -->
     <meta property="og:title" content={title} />
@@ -56,21 +56,22 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
       <header class="site-header">
         <div class="site-header-inner">
           <a class="site-logo" href={base} aria-label="SmallGrid.uk home">
-            <span class="site-logo-main" style="display:flex; align-items:center; gap:10px;">
+            <span class="site-logo-main">
               <img
+                class="site-logo-icon"
                 src={iconSvg}
-                width="22"
-                height="22"
+                width="28"
+                height="28"
                 alt="SmallGrid icon"
                 decoding="async"
                 loading="eager"
               />
               <img
+                class="site-logo-wordmark"
                 src={wordmarkSvg}
                 alt="SmallGrid.uk"
                 decoding="async"
                 loading="eager"
-                style="height: 20px; width: auto;"
               />
             </span>
             <span class="site-logo-sub">Tiny tools. Solid systems.</span>
@@ -105,7 +106,7 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
               loading="lazy"
               style="vertical-align: -3px; margin-right: 6px;"
             />
-            © {new Date().getFullYear()} SmallGrid.uk
+            © {new Date().getFullYear()} SmallGrid.uk · Tiny tools. Solid systems.
           </p>
         </div>
       </footer>
