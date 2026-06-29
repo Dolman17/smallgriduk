@@ -62,19 +62,20 @@ const usefulNext = [
 ---
 
 <BaseLayout
-  title="Start Here: Build a Small, Useful Homelab"
-  description="A practical beginner path for building a small, low-power homelab with Jellyfin, backups, private remote access, and sensible hardware."
+  title="Start Here: Build a Small Efficient Home Lab"
+  description="A practical starter guide for building a small efficient home lab with a low-power mini PC, Jellyfin, backups, private remote access, and sensible hardware."
   canonicalPath="/start/"
 >
   <section class="card">
     <div class="kicker">🧭 Start here</div>
-    <h1>Build a small, useful homelab without making it a second job.</h1>
+    <h1>Build a small efficient home lab without making it a second job.</h1>
     <p>
-      SmallGrid is for practical home servers: quiet hardware, useful services, safe remote access, and backups that actually restore. Start small, make it reliable, then expand only when the next thing earns its place.
+      SmallGrid is for practical home servers: quiet hardware, useful services, safe remote access, and backups that actually restore. Start with a small efficient home lab, make it reliable, then expand only when the next thing earns its place.
     </p>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/tutorials/">Browse tutorials</a>
+      <a class="btn" href="/recommended-gear/">Recommended gear</a>
       <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
       <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage</a>
     </div>
@@ -82,7 +83,7 @@ const usefulNext = [
 
   <section class="card" style="margin-top: 16px;">
     <div class="kicker">Default recommendation</div>
-    <h2>The SmallGrid starter setup</h2>
+    <h2>The SmallGrid small home server starter setup</h2>
     <p>
       Start with one used mini PC, one SSD, one useful service, a basic backup routine, and private remote access. Do not build a cluster, buy a rack, expose ports, or add ten dashboards before the first service is working.
     </p>
@@ -147,6 +148,9 @@ const usefulNext = [
     <p>
       Use the tutorials page as the main map through the site. It groups the guides by practical job: Jellyfin, Proxmox, backups, power usage, storage, and hardware.
     </p>
-    <a class="btn primary" href="/tutorials/">Open the tutorials hub →</a>
+    <div class="guide-actions" style="margin-top: 1rem;">
+      <a class="btn primary" href="/tutorials/">Open the tutorials hub →</a>
+      <a class="btn" href="/recommended-gear/">Compare home lab equipment →</a>
+    </div>
   </section>
 </BaseLayout>
