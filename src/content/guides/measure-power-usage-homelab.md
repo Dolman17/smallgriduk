@@ -3,7 +3,7 @@ title: "How to Measure Homelab Power Usage Properly"
 description: "Measure your home server power usage, compare smart plugs and plug-in meters, and turn watts into realistic monthly and yearly costs."
 pubDate: 2026-01-21
 tags: ["power", "low-power", "homelab", "costs"]
-cover: "/images/guides/power-hero.svg"
+cover: "/images/guides/measure-power-usage-hero.webp"
 ---
 
 ## Goal
@@ -198,7 +198,7 @@ Be careful. Do not guess the disk name.
 Check disks first:
 
 ```bash
-lsblk -o NAME,SIZE,MODEL,MOUNTPOINT
+lsblk
 ```
 
 Do not set an aggressive spin-down timer on drives that wake constantly. Repeated spin-up and spin-down cycles can be more annoying than the power saving is worth.
