@@ -1,6 +1,6 @@
 ---
 title: "Quiet Storage: Add Disks Without Turning Your Home Into a Datacentre"
-description: "How to expand storage quietly: enclosures, placement, power, and why vibration is the real villain."
+description: "Add storage to a home server quietly with better drive placement, airflow, vibration control, sensible enclosures, and realistic power choices."
 pubDate: 2026-01-20
 tags: ["storage", "nas", "quiet", "low-power"]
 cover: "/images/guides/quiet-storage-hero.svg"
@@ -8,251 +8,432 @@ cover: "/images/guides/quiet-storage-hero.svg"
 
 ## Goal
 
-Add more storage to your homelab **without**:
+Add more storage to your homelab without:
 
-- turning your office into a white-noise generator
-- filling the room with annoying hums and rattles
-- accidentally cooking your drives
+- turning the room into a constant hum
+- making your desk or shelf vibrate
+- overheating hard drives
+- wasting power on storage you rarely use
+- buying rack gear you do not need
 
-Quiet storage is mostly about **vibration, airflow, and placement** — not magic hardware.
+Quiet storage is mostly about placement, vibration, airflow, and sensible expectations.
 
----
-
-## Why storage gets loud (the real enemies)
-
-There are three main culprits:
-
-1. **Vibration**
-   Spinning drives are basically tiny wobble machines. When that vibration couples into:
-   - thin metal cases
-   - cheap desks
-   - floorboards
-
-   …you get hums, rattles, and “why is it buzzing at 2am?”.
-
-2. **Heat**
-   Drives and CPUs get hot → fans spin faster → everything gets louder.
-   Restricted airflow or dust usually makes this much worse.
-
-3. **Resonance**
-   Certain surfaces and cases have “bad frequencies” where even small vibrations get amplified.
-   That’s why just moving the same box to a different shelf sometimes makes it dramatically quieter.
+You do not need a datacentre. You need storage that works without annoying you.
 
 ---
 
-## Step 1: baseline your current noise
-
-Before you change anything, get a feel for the “before”.
-
-- Put your ear near the case and listen:
-  - is it mostly **whoosh** (fans)?
-  - or **brrrrr / rattling** (drives + vibration)?
-- Gently press on the case side or top:
-  - if the noise drops when you press, it’s **vibration** coupling into the case
-
-You can also check drive temps to see if fans are working too hard.
-
-<div class="terminal">
-  <div class="terminal__bar">
-    <div class="terminal__dots">
-      <span class="terminal__dot red"></span>
-      <span class="terminal__dot amber"></span>
-      <span class="terminal__dot green"></span>
-    </div>
-    <div class="terminal__title">Check drive temperatures (smartctl)</div>
-  </div>
-
-  <pre><code>$ sudo smartctl -A /dev/sdX | grep -i temperature    # replace sdX with your drive
-
-# Example output line:
-# 194 Temperature_Celsius     0x0022   035  050  000    25 (Min/Max 20/45)</code></pre>
-</div>
-
-If your drives sit somewhere in the **mid-20s to mid-30s °C** most of the time, you’re usually fine.
-If they’re living in the 40s+ constantly, fans may be working extra hard to keep up.
-
----
-
-## Step 2: decouple and dampen (cheap, big win)
-
-This is the fastest way to drop perceived noise without buying new hardware.
-
-**Simple wins:**
-
-- Put the box on something that absorbs vibration:
-  - rubber feet
-  - a mouse mat
-  - a dense foam pad
-- Avoid hollow or resonant surfaces:
-  - thin IKEA desks are louder than solid wood or a sturdy shelf
-- Move the box:
-  - lower shelves often sound quieter than at ear height
-  - avoid corners where sound bounces
-
-If an external drive/enclosure rattles, try:
-
-- laying it flat vs standing it upright
-- putting it on a bit of foam or rubber
-- moving it off the desk and onto a different, more solid surface
-
-Tiny changes here can be surprisingly effective.
-
----
-
-## Step 3: drive choices that don’t scream
-
-If you’re expanding storage, pick drives that aren’t naturally noisy:
-
-- Prefer **5400–5900 RPM** drives for bulk storage
-- Avoid mixing a single loud 7200 RPM drive in an otherwise quiet box
-- Use NAS/“quiet” lines where possible; they’re often tuned for lower vibration
-
-And, for sanity and reliability:
-
-- Stick to **CMR** drives for general NAS use
-- Avoid cheap, high-capacity **SMR** drives for constant-write workloads (they can get hot, slow, and sad)
-
-You don’t have to replace everything you own — just avoid making new noise with the next purchase.
-
----
-
-## Step 4: external storage strategies (that stay quiet)
-
-Three common options that fit the SmallGrid vibe:
-
-### 4.1 Single-drive USB enclosure
-
-- **Pros:** cheap, simple, easy to move
-- **Cons:** usually one drive, quality of enclosure matters for noise
-
-Good for:
-
-- media storage
-- backing up another box
-- putting the noisy bit somewhere else (another room / cupboard)
-
-### 4.2 DAS (direct-attached storage)
-
-- Multiple drives, one cable
-- Connects via USB/Thunderbolt to your server
-
-Quietness depends on:
-
-- drive selection
-- internal dampening
-- fan quality (if it has fans)
-
-You can put the DAS a little further away from your ears than the main box.
-
-### 4.3 NAS (self-contained network storage)
-
-- Sits somewhere else on your network
-- Can live in a hallway / cupboard / spare room
-
-This is often the best “my office is too loud” solution:
-
-- your main workstation can stay almost silent
-- the noisy spinning bits live in a different physical place
-
----
-
-## Step 5: spin behaviour and power (careful tuning)
-
-Drives don’t need to be spinning 24/7 for light home use.
-But aggressive spin-down settings can cause more problems than they solve.
-
-**Principles:**
-
-- Avoid spindown timers shorter than ~10–20 minutes
-- Too frequent spin-up/down cycles can **wear drives faster** and sound worse
-- For always-in-use workloads (active NAS), it’s often better to keep drives spinning gently
-
-If you want to experiment, you can use `hdparm` — but be conservative and document what you change.
-
-Example (check spindown setting):
-
-~~~bash
-sudo hdparm -B -S /dev/sdX
-~~~
-
-> If you don’t fully understand what a value does, don’t set it.
-> Spindown tuning is “optional advanced mode”, not required for quiet.
-
-A safer first step is making sure **unneeded services** aren’t constantly touching the disk:
-
-- noisy or chatty logging
-- indexing services
-- badly configured monitoring
-
-Reducing pointless disk activity often lowers both power and noise.
-
----
-
-## Step 6: airflow and fan curves (without cooking drives)
-
-Quieter storage also comes from **not needing fans to scream**.
-
-- Keep intake and exhaust vents clear
-- Clean dust filters regularly
-- Make sure cables aren’t blocking front-to-back airflow
-
-If your BIOS or fan controller supports it, set a **reasonable fan curve**:
-
-- fans idle slower at low temps
-- ramp up only when drives/CPU cross a sensible threshold
-
-You’re aiming for:
-
-- **drives** mostly in the 25–40 °C range
-- **fans** spending most of their life at lower duty cycles
-
-Don’t chase silence to the point where everything is roasting. Quiet and cool can coexist.
-
----
-
-## Example quiet layouts (SmallGrid-style)
-
-A few practical patterns that work well:
-
-### Layout A — Desk-friendly box
-
-- Mini PC / NUC on the desk
-- Single USB enclosure with a large 5400 RPM drive
-- Both sitting on a rubber mat
-
-Result: your homelab is **nearby, but not buzzing**.
-
----
-
-### Layout B — NAS in the hallway
-
-- NAS with 2–4 drives in a cupboard or hallway
-- Main PC or mini server in your office, mostly SSD-only
-- Networked over wired Ethernet
-
-Result: all the “spinny, clicky” stuff lives **outside** the room you care about.
-
----
-
-### Layout C — DAS under the stairs
-
-- Proxmox / main server with SSD-only internal storage
-- Multi-bay DAS or external enclosure under the stairs / in a side room
-- Mounted over USB or Thunderbolt to the server
-
-Result: you get big storage and decent performance, but the noise is **off-axis from your ears**.
-
----
-
-## SmallGrid rule
-
-If the storage upgrade makes you dread being in the same room as your server, it’s not an upgrade.
-
-Start with:
-
-- decoupling and damping
-- better placement
-- cooler, smoother airflow
-
-Then only spend money where it actually makes the experience quieter, not just the spec sheet longer.
+## The default recommendation
+
+For a small home server, start with this pattern:
+
+```text
+Mini PC or small server for compute
+SSD for the operating system and services
+One or more larger drives for bulk storage
+Simple local backup or NAS backup target
 ```
+
+Keep noisy storage away from your ears.
+
+If you can, put spinning disks somewhere stable, cool, and out of the room where you work or sleep.
+
+---
+
+## Why storage gets loud
+
+There are three usual causes.
+
+### Vibration
+
+Spinning hard drives vibrate. That vibration can travel into:
+
+- thin metal cases
+- wooden desks
+- shelves
+- floorboards
+- cheap drive enclosures
+
+That is often the low hum people notice at night.
+
+### Heat
+
+Warm drives need more airflow.
+
+More airflow usually means more fan noise.
+
+Bad airflow turns quiet storage into noisy storage because fans work harder to compensate.
+
+### Resonance
+
+Some surfaces amplify vibration.
+
+The same drive enclosure can sound fine on one shelf and annoying on another.
+
+Moving it a few feet, adding rubber feet, or putting it on a heavier surface can make a surprising difference.
+
+---
+
+## Step 1: Work out what noise you actually have
+
+Before buying anything, listen to the current setup.
+
+Ask:
+
+```text
+Is it fan noise?
+Is it drive hum?
+Is it rattling?
+Is it vibration through furniture?
+Is it only loud during backups or scans?
+```
+
+A useful quick test:
+
+1. Put your hand gently on the case or enclosure.
+2. Press lightly on the desk or shelf.
+3. Move the enclosure onto a towel temporarily.
+4. Listen for changes.
+
+If the noise drops when you touch or move the enclosure, vibration is likely part of the problem.
+
+---
+
+## Step 2: Check drive temperatures
+
+Do not solve noise by cooking your drives.
+
+Install SMART tools if needed:
+
+```bash
+sudo apt update
+sudo apt install -y smartmontools
+```
+
+List disks:
+
+```bash
+lsblk -o NAME,SIZE,MODEL,MOUNTPOINT
+```
+
+Check a drive temperature:
+
+```bash
+sudo smartctl -A /dev/sdX | grep -i temperature
+```
+
+Replace `/dev/sdX` with the correct drive.
+
+Example output might include:
+
+```text
+194 Temperature_Celsius     0x0022   035   050   000    Old_age   Always       -       35
+```
+
+As a rough home-server rule, drives sitting around the mid-20s to mid-30s °C are usually comfortable.
+
+Drives living in the 40s all the time may need better airflow or a better location.
+
+---
+
+## Step 3: Reduce vibration first
+
+Vibration fixes are often cheap.
+
+Try:
+
+- rubber feet
+- a dense foam pad
+- a mouse mat under the enclosure
+- moving the drive off a hollow desk
+- moving the enclosure to a heavier shelf
+- tightening loose screws
+- separating drives so they do not rattle together
+
+Avoid fully wrapping drives in foam or fabric. That can trap heat.
+
+The goal is to stop vibration transferring into furniture, not to insulate the drive like a pillow.
+
+---
+
+## Step 4: Improve airflow without adding noise
+
+Good airflow does not always mean loud airflow.
+
+Better options:
+
+- move the enclosure away from walls
+- keep vents clear
+- clean dust from fans and vents
+- use a larger, slower fan if the enclosure supports it
+- avoid stacking drives tightly
+- avoid closed cupboards with no airflow
+
+A quiet fan moving a small amount of air is better than a sealed box getting hot.
+
+If a cupboard is the only location available, check temperatures during a backup or media scan, not just at idle.
+
+---
+
+## Step 5: Choose the right storage type
+
+### SSDs
+
+SSDs are best for:
+
+- operating systems
+- Docker volumes
+- databases
+- small services
+- frequently accessed files
+- anything where silence matters
+
+They are quiet and efficient, but more expensive per terabyte.
+
+### 2.5-inch hard drives
+
+2.5-inch drives are usually quieter than 3.5-inch drives, but often slower and smaller.
+
+They can be useful for light storage, but they are not always the best value.
+
+### 3.5-inch hard drives
+
+3.5-inch drives are good for bulk storage.
+
+They are usually better value per terabyte, but they add:
+
+- more noise
+- more vibration
+- more power draw
+- more heat
+
+Use them where bulk storage matters.
+
+---
+
+## Step 6: Be careful with USB enclosures
+
+USB enclosures are convenient, but quality varies.
+
+Look for:
+
+- decent ventilation
+- stable power supply
+- rubber feet
+- sensible drive mounting
+- UASP support if possible
+- no tiny screaming fan
+
+Avoid the cheapest no-name enclosures for important always-on storage.
+
+A bad enclosure can create more noise and more reliability issues than the drive itself.
+
+For backups, USB disks can be fine. For always-on bulk storage, make sure the enclosure is designed to run for long periods.
+
+---
+
+## Step 7: Put noisy storage somewhere sensible
+
+The best noise fix is sometimes location.
+
+Better locations:
+
+- hallway cupboard with ventilation
+- utility room
+- under-stairs space with airflow
+- solid shelf away from your desk
+- near network gear if it is already out of the way
+
+Bad locations:
+
+- directly on a hollow desk
+- beside your monitor
+- on bedroom furniture
+- in a sealed cupboard
+- on a thin shelf that resonates
+
+Even a quiet drive can become annoying if it is next to your head all day.
+
+---
+
+## Step 8: Think about power use
+
+Each extra drive adds power draw.
+
+A rough guide:
+
+| Storage type | Typical idle behaviour |
+|---|---:|
+| SSD/NVMe | usually under 1–2W |
+| 2.5-inch HDD | often a few watts |
+| 3.5-inch HDD | commonly 3–8W when spinning |
+| Multi-bay enclosure | drive power plus enclosure overhead |
+
+These are rough ranges. Measure your own setup.
+
+For the full method, see [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/).
+
+---
+
+## Step 9: Use spin-down carefully
+
+Drive spin-down can reduce noise and power use, but it is not always the answer.
+
+It works best for drives that are accessed occasionally.
+
+It works badly for drives that wake constantly because of scans, backups, monitoring, or media library activity.
+
+Example with `hdparm`:
+
+```bash
+sudo hdparm -S 120 /dev/sdX
+```
+
+Check disks first:
+
+```bash
+lsblk -o NAME,SIZE,MODEL,MOUNTPOINT
+```
+
+Do not guess the drive name.
+
+A drive that spins up and down all day can be more annoying than one that stays quietly spinning.
+
+---
+
+## Step 10: Separate live data from backups
+
+Quiet storage does not remove the need for backups.
+
+A useful layout is:
+
+```text
+SSD:                 operating system and services
+Bulk HDD:            media and large files
+Backup disk/NAS:     backup copy
+Offsite/cloud copy:  important data only
+```
+
+Do not treat one big quiet disk as your whole recovery plan.
+
+For backup planning, see [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/).
+
+---
+
+## Good quiet-storage patterns
+
+### One mini PC plus one USB backup disk
+
+Good for beginners.
+
+```text
+Mini PC with SSD
+USB disk used for backup
+Important data copied elsewhere
+```
+
+Low noise, simple setup, easy to understand.
+
+### Mini PC plus NAS in another room
+
+Good when storage needs grow.
+
+```text
+Mini PC runs services
+NAS stores media and backups
+Storage noise lives away from desk
+```
+
+More moving parts, but better placement options.
+
+### Small server with internal drives
+
+Good if you want everything in one box.
+
+```text
+One case
+SSD for system
+One or more HDDs for bulk storage
+Large slow fans
+Stable shelf or floor placement
+```
+
+Choose the case carefully. Cheap thin cases can make vibration worse.
+
+---
+
+## Common mistakes
+
+### Buying too much storage too early
+
+Unused spinning disks still create noise, heat, and power draw.
+
+Buy for the next realistic stage, not an imaginary future archive.
+
+### Putting drives on a hollow desk
+
+Desks can amplify vibration.
+
+Move the enclosure, add rubber feet, or use a heavier surface.
+
+### Chasing silence but ignoring heat
+
+A silent sealed box is not a good storage plan.
+
+Quiet airflow beats trapped heat.
+
+### Assuming SSDs solve everything
+
+SSDs solve noise well, but they do not remove the need for backups.
+
+### Using snapshots instead of backups
+
+Snapshots help with rollback. They are not a replacement for backup copies.
+
+See [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/).
+
+---
+
+## FAQ
+
+### Should I use SSDs for everything?
+
+Use SSDs where silence, speed, and low idle power matter. Use hard drives where large capacity matters more than noise.
+
+### Are USB hard drives okay for a home server?
+
+They can be fine for backups and light use. For always-on storage, use a decent enclosure with good power and ventilation.
+
+### Should I spin down my hard drives?
+
+Only if the drives are not waking constantly. For frequently accessed drives, spin-down can become more annoying than helpful.
+
+### Is a NAS quieter than USB storage?
+
+Not automatically. A NAS can be quieter if it is placed away from you and has good cooling. A noisy NAS on your desk is still noisy.
+
+---
+
+## Next steps
+
+Useful related guides:
+
+- [Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab](/guides/mini-pc-under-200/)
+- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
+- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
+- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
+- [Proxmox Snapshots vs Backups: What Beginners Get Wrong](/guides/proxmox-snapshots-vs-backups/)
+
+---
+
+## Recap
+
+Quiet storage is mostly about:
+
+- reducing vibration
+- keeping airflow sensible
+- placing noisy disks away from you
+- using SSDs for quiet always-on workloads
+- using hard drives where bulk storage makes sense
+- backing up anything important
+
+Start with the simplest setup that meets the need. Add storage only when the current setup actually needs it.
