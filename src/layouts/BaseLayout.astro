@@ -50,6 +50,67 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+
+    <style>
+      .page-with-ad-rails {
+        display: grid;
+        grid-template-columns: minmax(0, 980px);
+        justify-content: center;
+        gap: 1.25rem;
+        max-width: 1480px;
+        margin: 0 auto;
+      }
+
+      .ad-rail {
+        display: none;
+      }
+
+      .ad-rail-box {
+        position: sticky;
+        top: 92px;
+        min-height: 600px;
+        border: 1px dashed rgba(107, 115, 123, 0.35);
+        border-radius: 0.9rem;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.48)),
+          rgba(255, 255, 255, 0.64);
+        color: rgba(107, 115, 123, 0.72);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        writing-mode: vertical-rl;
+        box-shadow: 0 20px 45px -42px rgba(31, 36, 40, 0.45);
+      }
+
+      @media (min-width: 1280px) {
+        .page-with-ad-rails {
+          grid-template-columns: 160px minmax(0, 980px) 160px;
+          align-items: start;
+        }
+
+        .ad-rail {
+          display: block;
+        }
+      }
+
+      @media (min-width: 1500px) {
+        .page-with-ad-rails {
+          grid-template-columns: 200px minmax(0, 980px) 200px;
+          gap: 1.5rem;
+        }
+      }
+
+      @media print {
+        .ad-rail {
+          display: none !important;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -88,10 +149,20 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
       </header>
 
       <main class="page-shell">
-        <div class="page-inner">
-          <article class="article-card">
-            <slot />
-          </article>
+        <div class="page-with-ad-rails">
+          <aside class="ad-rail ad-rail-left" aria-label="Advertisement placeholder">
+            <div class="ad-rail-box">Advertisement</div>
+          </aside>
+
+          <div class="page-inner">
+            <article class="article-card">
+              <slot />
+            </article>
+          </div>
+
+          <aside class="ad-rail ad-rail-right" aria-label="Advertisement placeholder">
+            <div class="ad-rail-box">Advertisement</div>
+          </aside>
         </div>
       </main>
 
