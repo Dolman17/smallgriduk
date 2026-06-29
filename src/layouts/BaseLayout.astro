@@ -11,9 +11,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 
 // Base-path safe URLs (works on / and on subpaths like /smallgrid/)
 const base = import.meta.env.BASE_URL;
-const iconSvg = `${base}brand/smallgrid-icon.svg`;
-const iconMonoSvg = `${base}brand/smallgrid-icon-mono.svg`;
-const wordmarkDarkSvg = `${base}brand/smallgrid-wordmark-dark.svg`;
+const brandVersion = "2026-06-29-2";
+const iconSvg = `${base}brand/smallgrid-icon.svg?v=${brandVersion}`;
+const iconMonoSvg = `${base}brand/smallgrid-icon-mono.svg?v=${brandVersion}`;
+const wordmarkDarkSvg = `${base}brand/smallgrid-wordmark-dark.svg?v=${brandVersion}`;
 const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.replace(/^\//, "")}`;
 ---
 
