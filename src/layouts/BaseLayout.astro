@@ -94,6 +94,18 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
         box-shadow: 0 20px 45px -42px rgba(31, 36, 40, 0.45);
       }
 
+      .article-hero .cover-image,
+      .card > .cover-image {
+        width: 100%;
+        height: auto;
+        max-height: none;
+        object-fit: contain;
+      }
+
+      .article-hero {
+        background: #f7f9fa;
+      }
+
       @media (min-width: 1280px) {
         .page-with-ad-rails {
           grid-template-columns: 160px minmax(0, 980px) 160px;
