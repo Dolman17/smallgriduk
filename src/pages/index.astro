@@ -22,23 +22,23 @@ const latestJournal = journalSorted[0];
 ---
 
 <BaseLayout
-  title="Small, efficient homelabs"
-  description="Low-power Jellyfin servers, mini PC homelabs, simple networking, and backups that actually restore."
+  title="Small, efficient home labs"
+  description="Build a small efficient home lab with low-power mini PCs, Jellyfin, simple networking, quiet storage, and backups that actually restore."
   canonicalPath="/"
 >
   <section class="card">
     <div class="kicker">⚡ SmallGrid philosophy</div>
-    <h1>Homelabs that don’t become a second job.</h1>
+    <h1>Small, efficient home labs that don’t become a second job.</h1>
     <p>
-      Build quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, and backups you can actually restore. No enterprise cosplay. Just sane defaults.
+      Build a small efficient home lab around quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, private remote access, and backups you can actually restore. No enterprise cosplay. Just sane defaults.
     </p>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/start/">Start here</a>
+      <a class="btn" href="/recommended-gear/">Recommended gear</a>
       <a class="btn" href="/tutorials/">Tutorials</a>
       <a class="btn" href="/guides/">Browse guides</a>
       <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
-      <a class="btn" href="/guides/jellyfin-ubuntu-folder-permissions/">Fix Jellyfin permissions</a>
       <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage</a>
     </div>
   </section>
@@ -46,7 +46,7 @@ const latestJournal = journalSorted[0];
   <section class="grid" style="margin-top: 16px;">
     <article class="card hover">
       <div class="kicker">1 · Start</div>
-      <h2>Follow the beginner path</h2>
+      <h2>Follow the small efficient home lab path</h2>
       <p>
         The quickest route is one reliable mini PC, one useful service, backups, private remote access, and measured power usage.
       </p>
@@ -54,28 +54,57 @@ const latestJournal = journalSorted[0];
     </article>
 
     <article class="card hover">
-      <div class="kicker">2 · Tutorials</div>
+      <div class="kicker">2 · Equipment</div>
+      <h2>Choose budget-friendly home lab gear</h2>
+      <p>
+        Compare budget, mid range, and top spec equipment for a quiet home server, mini PC home lab, storage, networking, and power protection.
+      </p>
+      <a class="btn" href="/recommended-gear/">View recommended gear →</a>
+    </article>
+
+    <article class="card hover">
+      <div class="kicker">3 · Tutorials</div>
       <h2>Use the tutorial hub</h2>
       <p>
         Find guides grouped by practical job: Jellyfin, Proxmox, backups, quiet storage, power usage, and low-power hardware.
       </p>
       <a class="btn" href="/tutorials/">Browse tutorials →</a>
     </article>
+  </section>
 
+  <section class="grid" style="margin-top: 16px;">
     <article class="card hover">
-      <div class="kicker">3 · First project</div>
+      <div class="kicker">First project</div>
       <h2>Build a low-power Jellyfin server</h2>
       <p>
         Install Jellyfin on Ubuntu, give it access to your media folders, and avoid the usual permissions problems.
       </p>
       <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin →</a>
     </article>
+
+    <article class="card hover">
+      <div class="kicker">Hardware</div>
+      <h2>Pick a budget mini PC home lab box</h2>
+      <p>
+        Learn what to look for in a used mini PC under £200, including CPU generation, RAM, SSD storage, idle power, and noise.
+      </p>
+      <a class="btn" href="/guides/mini-pc-under-200/">Read the mini PC guide →</a>
+    </article>
+
+    <article class="card hover">
+      <div class="kicker">Power</div>
+      <h2>Measure low-power home lab usage</h2>
+      <p>
+        Check real wattage before upgrading hardware, then calculate monthly and yearly running costs properly.
+      </p>
+      <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage →</a>
+    </article>
   </section>
 
   {priorityGuides.length ? (
     <section style="margin-top: 16px;">
       <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
-        <h2>Start with these guides</h2>
+        <h2>Start with these small home server guides</h2>
         <a class="btn" href="/guides/">View all →</a>
       </div>
 
