@@ -16,6 +16,7 @@ const iconSvg = `${base}brand/smallgrid-icon.svg?v=${brandVersion}`;
 const iconMonoSvg = `${base}brand/smallgrid-icon-mono.svg?v=${brandVersion}`;
 const wordmarkDarkSvg = `${base}brand/smallgrid-wordmark-dark.svg?v=${brandVersion}`;
 const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.replace(/^\//, "")}`;
+const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
 ---
 
 <!doctype html>
@@ -130,6 +131,7 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
         }
       }
     </style>
+    <link rel="stylesheet" href={heroFixCss} />
   </head>
 
   <body>
