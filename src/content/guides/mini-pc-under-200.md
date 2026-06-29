@@ -1,6 +1,6 @@
 ---
-title: "Mini PCs Under £200: Picking a Tiny Box That Can Actually Homelab"
-description: "How to choose a used or budget mini PC for Jellyfin, Docker, Proxmox, backups, and a small low-power homelab."
+title: "Budget Mini PC Home Lab: Picking a Tiny Box That Can Actually Homelab"
+description: "How to choose a used or budget mini PC for a small efficient home lab, Jellyfin, Docker, Proxmox, backups, and low-power home server use."
 pubDate: 2026-01-21
 tags: ["hardware", "mini-pc", "low-power", "homelab"]
 cover: "/images/guides/mini-pc-hero.svg"
@@ -18,6 +18,8 @@ Pick a mini PC under about £200 that can:
 - avoid becoming another noisy desktop under the desk
 
 This is not a shopping list. It is a practical checklist so you can judge used mini PCs on eBay, CEX, Facebook Marketplace, or wherever you are looking.
+
+If you want a small efficient home lab, a used mini PC is usually the best first box: cheap to buy, cheap to run, quiet enough for a normal room, and powerful enough for the services most people actually use.
 
 ---
 
@@ -38,6 +40,8 @@ Power:    roughly 5W to 20W idle if well configured
 ```
 
 Spend money on RAM, SSD, and backups before chasing flashy hardware.
+
+For a broader equipment comparison, see [Recommended Home Lab Gear](/recommended-gear/).
 
 ---
 
@@ -217,79 +221,3 @@ If you want to run Proxmox from the start, read [Proxmox for Normal Humans: One-
 This can be fine if the price is low enough.
 
 Just price the missing parts before buying.
-
-### Tiny passive boxes
-
-Passive cooling sounds attractive, but very small passive systems can throttle or struggle under sustained load.
-
-They can be good for light services, but check CPU, RAM, and storage limits carefully.
-
-### Old office desktops
-
-They can work, but check idle power.
-
-A cheap old desktop that idles at 60W can cost more over time than a slightly more expensive mini PC.
-
-### Weak storage options
-
-Some tiny boxes have limited internal storage support.
-
-Check whether the machine supports NVMe, SATA, or both.
-
-### Missing power adapter
-
-Replacement power adapters can remove the saving from a cheap listing.
-
-Check total cost, not just the headline price.
-
----
-
-## What to buy first
-
-A sensible starter bundle is:
-
-```text
-Mini PC with 16GB RAM
-256GB or 512GB SSD
-Gigabit Ethernet
-External USB backup disk
-```
-
-That is enough to start useful projects without overbuilding.
-
-Good first projects:
-
-- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
-- [Remote Jellyfin with Tailscale: Private Access Setup](/guides/jellyfin-tailscale-remote-access/)
-- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
-
----
-
-## Next steps
-
-Useful related guides:
-
-- [Start Here: Build a Small, Useful Homelab](/start/)
-- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
-- [Jellyfin Direct Play vs Transcoding: What Actually Matters](/guides/jellyfin-direct-play-vs-transcoding/)
-- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
-- [Proxmox for Normal Humans: One-Node Starter Setup](/guides/proxmox-one-node-starter/)
-- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
-
----
-
-## Recap
-
-A good mini PC homelab box is not exciting. That is the point.
-
-Look for:
-
-- low idle power
-- enough CPU for your services
-- 16GB RAM if possible
-- SSD storage
-- Gigabit Ethernet
-- quiet cooling
-- easy upgrade options
-
-If it runs quietly, sips power, and gives you a reliable place for Jellyfin, backups, and a few services, it is doing the job.
