@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 1440 1080" fill="none" role="img" aria-label="SmallGrid.uk brand board">
+  <rect width="1440" height="1080" rx="18" fill="#F2F4F5" />
+  <rect x="32" y="32" width="1376" height="1016" rx="22" fill="#FFFFFF" stroke="#D8DEE3" />
+
+  <text x="64" y="118" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="70" font-weight="800" fill="#0E3D39" letter-spacing="-2">SmallGrid</text>
+  <text x="401" y="118" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="70" font-weight="800" fill="#0A66FF" letter-spacing="-2">.uk</text>
+  <text x="64" y="188" font-family="Inter, sans-serif" font-size="24" font-weight="500" fill="#34434A">Practical tools and clear guidance for building reliable, well-structured systems.</text>
+  <text x="650" y="92" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="26" font-weight="750" fill="#0E3D39">Small, useful systems.</text>
+  <text x="650" y="128" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="26" font-weight="750" fill="#0E3D39">Clear technical guidance.</text>
+
+  <line x1="64" y1="236" x2="1376" y2="236" stroke="#D8DEE3" />
+  <line x1="64" y1="512" x2="1376" y2="512" stroke="#D8DEE3" />
+  <line x1="64" y1="760" x2="1376" y2="760" stroke="#D8DEE3" />
+  <line x1="612" y1="276" x2="612" y2="492" stroke="#D8DEE3" />
+  <line x1="1020" y1="276" x2="1020" y2="492" stroke="#D8DEE3" />
+  <line x1="612" y1="552" x2="612" y2="724" stroke="#D8DEE3" />
+  <line x1="430" y1="798" x2="430" y2="944" stroke="#D8DEE3" />
+  <line x1="900" y1="798" x2="900" y2="944" stroke="#D8DEE3" />
+
+  <text x="64" y="292" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">PRIMARY LOGO — HORIZONTAL</text>
+  <image href="/brand/smallgrid-logo.svg" x="64" y="318" width="500" height="168" preserveAspectRatio="xMinYMid meet" />
+
+  <text x="660" y="292" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">STACKED LOGO</text>
+  <image href="/brand/smallgrid-logo-stacked.svg" x="645" y="305" width="300" height="190" preserveAspectRatio="xMidYMid meet" />
+
+  <text x="1070" y="292" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">ICON — MARK ONLY</text>
+  <image href="/brand/smallgrid-icon.svg" x="1110" y="330" width="150" height="150" />
+
+  <text x="64" y="568" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">DARK BACKGROUND PREVIEW</text>
+  <image href="/brand/smallgrid-logo-dark.svg" x="64" y="590" width="500" height="167" preserveAspectRatio="xMinYMid meet" />
+
+  <text x="660" y="568" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">COLOR PALETTE</text>
+  <g transform="translate(660 600)">
+    <rect x="0" y="0" width="120" height="86" rx="10" fill="#0E3D39" />
+    <text x="60" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#34434A">Deep Teal</text>
+    <text x="60" y="144" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">#0E3D39</text>
+    <rect x="160" y="0" width="120" height="86" rx="10" fill="#0A66FF" />
+    <text x="220" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#34434A">Grid Blue</text>
+    <text x="220" y="144" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">#0A66FF</text>
+    <rect x="320" y="0" width="120" height="86" rx="10" fill="#F2F4F5" stroke="#D8DEE3" />
+    <text x="380" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#34434A">Light Gray</text>
+    <text x="380" y="144" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">#F2F4F5</text>
+    <rect x="480" y="0" width="120" height="86" rx="10" fill="#6B737B" />
+    <text x="540" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#34434A">Steel Gray</text>
+    <text x="540" y="144" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">#6B737B</text>
+    <rect x="640" y="0" width="120" height="86" rx="10" fill="#1F2428" />
+    <text x="700" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#34434A">Charcoal</text>
+    <text x="700" y="144" text-anchor="middle" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">#1F2428</text>
+  </g>
+
+  <text x="64" y="816" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">TYPOGRAPHY</text>
+  <text x="64" y="900" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="72" font-weight="800" fill="#0E3D39">Aa</text>
+  <text x="175" y="868" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#34434A">Headings</text>
+  <text x="175" y="898" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#0E3D39">Plus Jakarta Sans</text>
+  <text x="175" y="926" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">Bold / Extra Bold</text>
+  <text x="330" y="868" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#34434A">Body</text>
+  <text x="330" y="898" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#0E3D39">Inter</text>
+  <text x="330" y="926" font-family="Inter, sans-serif" font-size="16" fill="#6B737B">Regular / Medium</text>
+
+  <text x="470" y="856" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="38" font-weight="800" fill="#0E3D39">Heading Example</text>
+  <text x="470" y="900" font-family="Inter, sans-serif" font-size="22" font-weight="700" fill="#0E3D39">This is a subheading example.</text>
+  <text x="470" y="934" font-family="Inter, sans-serif" font-size="18" fill="#6B737B">Readable body copy for tutorials, documentation, and long-form guidance.</text>
+
+  <text x="950" y="816" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="16" font-weight="800" fill="#0E3D39" letter-spacing="2">BRAND IN A LINE</text>
+  <circle cx="982" cy="878" r="32" fill="#0E3D39" />
+  <text x="982" y="890" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="48" font-weight="800" fill="#FFFFFF">“</text>
+  <text x="1040" y="864" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="28" font-weight="800" fill="#0E3D39">Small, useful systems.</text>
+  <text x="1040" y="904" font-family="Plus Jakarta Sans, Inter, sans-serif" font-size="28" font-weight="800" fill="#0E3D39">Clear technical guidance.</text>
+  <text x="1040" y="944" font-family="Inter, sans-serif" font-size="20" font-weight="500" fill="#34434A">Tiny tools. Solid systems.</text>
+</svg>
