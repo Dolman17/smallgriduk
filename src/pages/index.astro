@@ -26,12 +26,18 @@ const latestJournal = journalSorted[0];
   description="Build a small efficient home lab with low-power mini PCs, Jellyfin, simple networking, quiet storage, and backups that actually restore."
   canonicalPath="/"
 >
-  <section class="card">
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
     <div class="kicker">⚡ SmallGrid philosophy</div>
     <h1>Small, efficient home labs that don’t become a second job.</h1>
     <p>
       Build a small efficient home lab around quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, private remote access, and backups you can actually restore. No enterprise cosplay. Just sane defaults.
     </p>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 1rem 0;">
+      <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/mini-pc-under-200-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/quiet-storage-without-noise-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+    </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/start/">Start here</a>
@@ -44,7 +50,7 @@ const latestJournal = journalSorted[0];
   </section>
 
   <section class="grid" style="margin-top: 16px;">
-    <article class="card hover">
+    <article class="card hover" style="border-top:4px solid #0e3d39; background:linear-gradient(180deg,#ffffff,#f7fbfb);">
       <div class="kicker">1 · Start</div>
       <h2>Follow the small efficient home lab path</h2>
       <p>
@@ -53,7 +59,7 @@ const latestJournal = journalSorted[0];
       <a class="btn primary" href="/start/">Open Start Here →</a>
     </article>
 
-    <article class="card hover">
+    <article class="card hover" style="border-top:4px solid #0a66ff; background:linear-gradient(180deg,#ffffff,#f7faff);">
       <div class="kicker">2 · Equipment</div>
       <h2>Choose budget-friendly home lab gear</h2>
       <p>
@@ -62,7 +68,7 @@ const latestJournal = journalSorted[0];
       <a class="btn" href="/recommended-gear/">View recommended gear →</a>
     </article>
 
-    <article class="card hover">
+    <article class="card hover" style="border-top:4px solid #2fa4a9; background:linear-gradient(180deg,#ffffff,#f4fbfb);">
       <div class="kicker">3 · Tutorials</div>
       <h2>Use the tutorial hub</h2>
       <p>
@@ -73,31 +79,40 @@ const latestJournal = journalSorted[0];
   </section>
 
   <section class="grid" style="margin-top: 16px;">
-    <article class="card hover">
-      <div class="kicker">First project</div>
-      <h2>Build a low-power Jellyfin server</h2>
-      <p>
-        Install Jellyfin on Ubuntu, give it access to your media folders, and avoid the usual permissions problems.
-      </p>
-      <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin →</a>
+    <article class="card hover" style="padding:0; overflow:hidden;">
+      <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
+      <div style="padding:1.1rem 1.05rem 1rem;">
+        <div class="kicker">First project</div>
+        <h2>Build a low-power Jellyfin server</h2>
+        <p>
+          Install Jellyfin on Ubuntu, give it access to your media folders, and avoid the usual permissions problems.
+        </p>
+        <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin →</a>
+      </div>
     </article>
 
-    <article class="card hover">
-      <div class="kicker">Hardware</div>
-      <h2>Pick a budget mini PC home lab box</h2>
-      <p>
-        Learn what to look for in a used mini PC under £200, including CPU generation, RAM, SSD storage, idle power, and noise.
-      </p>
-      <a class="btn" href="/guides/mini-pc-under-200/">Read the mini PC guide →</a>
+    <article class="card hover" style="padding:0; overflow:hidden;">
+      <img src="/images/guides/mini-pc-under-200-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
+      <div style="padding:1.1rem 1.05rem 1rem;">
+        <div class="kicker">Hardware</div>
+        <h2>Pick a budget mini PC home lab box</h2>
+        <p>
+          Learn what to look for in a used mini PC under £200, including CPU generation, RAM, SSD storage, idle power, and noise.
+        </p>
+        <a class="btn" href="/guides/mini-pc-under-200/">Read the mini PC guide →</a>
+      </div>
     </article>
 
-    <article class="card hover">
-      <div class="kicker">Power</div>
-      <h2>Measure low-power home lab usage</h2>
-      <p>
-        Check real wattage before upgrading hardware, then calculate monthly and yearly running costs properly.
-      </p>
-      <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage →</a>
+    <article class="card hover" style="padding:0; overflow:hidden;">
+      <img src="/images/guides/measure-power-usage-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
+      <div style="padding:1.1rem 1.05rem 1rem;">
+        <div class="kicker">Power</div>
+        <h2>Measure low-power home lab usage</h2>
+        <p>
+          Check real wattage before upgrading hardware, then calculate monthly and yearly running costs properly.
+        </p>
+        <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage →</a>
+      </div>
     </article>
   </section>
 
@@ -133,7 +148,7 @@ const latestJournal = journalSorted[0];
         <a class="btn" href="/journal/">View all →</a>
       </div>
 
-      <article class="card hover" style="margin-top: 10px;">
+      <article class="card hover" style="margin-top: 10px; border-left:5px solid #2fa4a9;">
         <h3 style="margin-top: 0;">
           <a href={`/journal/${latestJournal.slug}/`}>{latestJournal.data.title}</a>
         </h3>
@@ -174,17 +189,17 @@ const latestJournal = journalSorted[0];
   </section>
 
   <section class="grid" style="margin-top: 16px;">
-    <div class="card">
+    <div class="card" style="background:linear-gradient(180deg,#ffffff,#f3fbf9);">
       <div class="kicker">🔌 Low power</div>
       <h2>Efficiency first</h2>
       <p>Mini PCs, iGPU transcoding, and good-enough choices that keep wattage and noise down.</p>
     </div>
-    <div class="card">
+    <div class="card" style="background:linear-gradient(180deg,#ffffff,#f7faff);">
       <div class="kicker">🧰 Low drama</div>
       <h2>Maintainable</h2>
       <p>Setups you can support when you’re busy, tired, or both. Fewer moving parts, fewer surprises.</p>
     </div>
-    <div class="card">
+    <div class="card" style="background:linear-gradient(180deg,#ffffff,#f8fbfb);">
       <div class="kicker">🛡️ Secure default</div>
       <h2>Private remote access</h2>
       <p>Prefer private networking for remote access unless there is a clear reason to publish a service.</p>
