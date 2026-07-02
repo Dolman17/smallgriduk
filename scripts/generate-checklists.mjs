@@ -206,6 +206,10 @@ function addCheckbox(commands, x, y) {
   commands.push(`${x} ${y - 2} 9 9 re S`);
 }
 
+function addRule(commands, y) {
+  commands.push(`48 ${y} m 548 ${y} l S`);
+}
+
 function buildPages(checklist) {
   const pages = [];
   let commands = [];
@@ -230,7 +234,7 @@ function buildPages(checklist) {
     y -= 14;
   }
   y -= 12;
-  commands.push(`48 ${y} 500 0 l S`);
+  addRule(commands, y);
   y -= 30;
 
   for (const section of checklist.sections) {
@@ -254,7 +258,7 @@ function buildPages(checklist) {
   }
 
   ensureSpace(80);
-  commands.push(`48 ${y} 500 0 l S`);
+  addRule(commands, y);
   y -= 22;
   addText(commands, "Related guides", 48, y, 12, "F2");
   y -= 18;
