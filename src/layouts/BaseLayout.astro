@@ -95,6 +95,52 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
         box-shadow: 0 20px 45px -42px rgba(31, 36, 40, 0.45);
       }
 
+      .site-search-bar {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(90deg, #0b4f49, #0e3d39);
+      }
+
+      .site-search-inner {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0.65rem 1.25rem;
+      }
+
+      .site-search-form {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+      }
+
+      .site-search-input {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 999px;
+        padding: 0.62rem 0.95rem;
+        background: rgba(255, 255, 255, 0.96);
+        color: #1f2428;
+        font: inherit;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+      }
+
+      .site-search-input:focus {
+        outline: 3px solid rgba(10, 102, 255, 0.24);
+        border-color: rgba(10, 102, 255, 0.55);
+      }
+
+      .site-search-button {
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 999px;
+        padding: 0.62rem 0.95rem;
+        background: #ffffff;
+        color: #0e3d39;
+        font-weight: 750;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
       .article-hero .cover-image,
       .card > .cover-image {
         width: 100% !important;
@@ -125,8 +171,20 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
         }
       }
 
+      @media (max-width: 520px) {
+        .site-search-form {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .site-search-button {
+          width: 100%;
+        }
+      }
+
       @media print {
-        .ad-rail {
+        .ad-rail,
+        .site-search-bar {
           display: none !important;
         }
       }
@@ -168,6 +226,23 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
             <a class="site-nav-link" href={`${base}recommended-gear/`}>Recommended Gear</a>
             <a class="site-nav-link" href={`${base}about/`}>About</a>
           </nav>
+        </div>
+
+        <div class="site-search-bar" role="search">
+          <div class="site-search-inner">
+            <form class="site-search-form" action={`${base}search/`} method="get">
+              <label class="sr-only" for="site-search-input">Search SmallGrid</label>
+              <input
+                id="site-search-input"
+                class="site-search-input"
+                type="search"
+                name="q"
+                placeholder="Search guides, tutorials, journal entries…"
+                autocomplete="off"
+              />
+              <button class="site-search-button" type="submit">Search</button>
+            </form>
+          </div>
         </div>
       </header>
 
