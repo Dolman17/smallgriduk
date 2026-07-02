@@ -80,6 +80,7 @@ const jellyfinClusterSlugs = [
   "jellyfin-docker-permissions-media-folder",
   "jellyfin-direct-play-vs-transcoding",
   "best-file-formats-for-jellyfin-direct-play",
+  "best-mini-pc-specs-for-jellyfin",
   "jellyfin-hardware-transcoding-ubuntu",
   "jellyfin-tailscale-remote-access",
   "jellyfin-remote-access-safely",
@@ -110,17 +111,22 @@ const nextGuideMap: Record<string, string[]> = {
   "jellyfin-direct-play-vs-transcoding": [
     "best-file-formats-for-jellyfin-direct-play",
     "jellyfin-hardware-transcoding-ubuntu",
-    "jellyfin-mini-pc-home-server",
+    "best-mini-pc-specs-for-jellyfin",
   ],
   "best-file-formats-for-jellyfin-direct-play": [
     "jellyfin-direct-play-vs-transcoding",
     "jellyfin-hardware-transcoding-ubuntu",
+    "best-mini-pc-specs-for-jellyfin",
+  ],
+  "best-mini-pc-specs-for-jellyfin": [
+    "mini-pc-under-200",
     "jellyfin-mini-pc-home-server",
+    "jellyfin-direct-play-vs-transcoding",
   ],
   "jellyfin-hardware-transcoding-ubuntu": [
     "jellyfin-direct-play-vs-transcoding",
     "best-file-formats-for-jellyfin-direct-play",
-    "jellyfin-mini-pc-home-server",
+    "best-mini-pc-specs-for-jellyfin",
   ],
   "jellyfin-tailscale-remote-access": [
     "jellyfin-remote-access-safely",
@@ -133,8 +139,8 @@ const nextGuideMap: Record<string, string[]> = {
     "backups-3-2-1-home-server",
   ],
   "jellyfin-mini-pc-home-server": [
+    "best-mini-pc-specs-for-jellyfin",
     "mini-pc-under-200",
-    "jellyfin-direct-play-vs-transcoding",
     "measure-power-usage-homelab",
   ],
 };
