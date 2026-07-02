@@ -1,0 +1,77 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const checklists = [
+  {
+    title: "Jellyfin Media Not Showing Checklist",
+    description: "A quick diagnostic checklist for empty libraries, missing files, bad paths, failed scans, mounts, and folder permissions.",
+    href: "/downloads/checklists/jellyfin-media-not-showing-checklist.pdf",
+    tag: "Troubleshooting",
+  },
+  {
+    title: "Jellyfin Folder Permissions Checklist",
+    description: "A safer Ubuntu permissions checklist for testing Jellyfin folder access and applying ACLs without opening everything up.",
+    href: "/downloads/checklists/jellyfin-folder-permissions-checklist.pdf",
+    tag: "Permissions",
+  },
+  {
+    title: "Jellyfin Docker Permissions Checklist",
+    description: "A Docker-specific checklist for host paths, container paths, bind mounts, user IDs, and read-only media volumes.",
+    href: "/downloads/checklists/jellyfin-docker-permissions-checklist.pdf",
+    tag: "Docker",
+  },
+  {
+    title: "Jellyfin Direct Play Checklist",
+    description: "A practical checklist for reducing unnecessary transcoding by checking codecs, audio, subtitles, clients, and 4K playback.",
+    href: "/downloads/checklists/jellyfin-direct-play-checklist.pdf",
+    tag: "Direct play",
+  },
+  {
+    title: "Jellyfin Mini PC Buying Checklist",
+    description: "A buying checklist for choosing a quiet low-power mini PC with the right CPU, Quick Sync support, RAM, storage, and networking.",
+    href: "/downloads/checklists/jellyfin-mini-pc-buying-checklist.pdf",
+    tag: "Hardware",
+  },
+];
+---
+
+<BaseLayout
+  title="SmallGrid Checklists"
+  description="Download practical SmallGrid checklists for Jellyfin, home servers, mini PCs, and low-power homelab setup tasks."
+  canonicalPath="/checklists/"
+>
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
+    <p class="kicker">Checklists · SmallGrid</p>
+    <h1 style="margin:0 0 8px;">Downloadable home lab checklists</h1>
+    <p class="muted" style="margin:0; font-size:1.05rem; max-width:780px;">
+      Practical PDF checklists for common SmallGrid jobs: fixing Jellyfin, checking permissions, choosing mini PC hardware, and avoiding unnecessary transcoding.
+    </p>
+  </section>
+
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <div class="kicker" style="color:rgba(255,255,255,0.78);">Current collection</div>
+    <h2 style="color:#ffffff; margin-top:0;">Jellyfin checklists</h2>
+    <p style="color:rgba(255,255,255,0.88); margin-bottom:0;">
+      These are designed to be printed, saved, or kept open while working through a Jellyfin issue.
+    </p>
+  </section>
+
+  <section class="grid" style="margin-top:16px;">
+    {checklists.map((item) => (
+      <article class="card hover">
+        <div class="kicker">{item.tag}</div>
+        <h2 style="margin-top:0; font-size:1.2rem;">{item.title}</h2>
+        <p class="muted">{item.description}</p>
+        <a class="btn primary" href={item.href} download>Download PDF</a>
+      </article>
+    ))}
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <p class="kicker">Coming later</p>
+    <h2 style="margin-top:0;">More checklist sections can be added here</h2>
+    <p class="muted" style="margin-bottom:0;">
+      This section can grow into separate groups for Proxmox, backups, power usage, buying guides, storage, and safe remote access.
+    </p>
+  </section>
+</BaseLayout>
