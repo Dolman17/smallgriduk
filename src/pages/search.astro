@@ -1,0 +1,178 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
+const guides = guidesAll
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((guide) => ({
+    title: guide.data.title,
+    description: guide.data.description,
+    url: `/guides/${guide.slug}/`,
+    type: "Guide",
+    tags: guide.data.tags || [],
+    date: guide.data.pubDate,
+  }));
+
+const journalAll = await getCollection("journal", ({ data }) => !data.draft);
+const journal = journalAll
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    url: `/journal/${entry.slug}/`,
+    type: "Journal",
+    tags: entry.data.tags || [],
+    date: entry.data.pubDate,
+  }));
+
+const sitePages = [
+  {
+    title: "Tutorials",
+    description: "A practical tutorial hub for Jellyfin, Proxmox, backups, power usage, storage, mini PCs, and safe remote access.",
+    url: "/tutorials/",
+    type: "Tutorial hub",
+    tags: ["tutorials", "jellyfin", "proxmox", "backups", "homelab"],
+    date: null,
+  },
+  {
+    title: "Start Here: Build a Small Efficient Home Lab",
+    description: "A practical starter path for building a small efficient home lab with a mini PC, Jellyfin, backups, private access, and measured power usage.",
+    url: "/start/",
+    type: "Start here",
+    tags: ["start", "beginner", "homelab", "mini-pc", "jellyfin"],
+    date: null,
+  },
+  {
+    title: "Recommended Gear",
+    description: "Budget, mid-range, and higher-spec equipment ideas for a quiet small home lab.",
+    url: "/recommended-gear/",
+    type: "Gear",
+    tags: ["hardware", "mini-pc", "storage", "networking", "ups"],
+    date: null,
+  },
+  {
+    title: "About SmallGrid",
+    description: "What SmallGrid is, who it is for, and why it focuses on small, quiet, low-power home labs.",
+    url: "/about/",
+    type: "Page",
+    tags: ["about", "smallgrid", "homelab"],
+    date: null,
+  },
+];
+
+const searchItems = [...sitePages, ...guides, ...journal];
+---
+
+<BaseLayout
+  title="Search SmallGrid"
+  description="Search SmallGrid guides, tutorials, journal entries, and key site pages."
+  canonicalPath="/search/"
+>
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
+    <p class="kicker">Search SmallGrid</p>
+    <h1 style="margin:0 0 8px;">Search guides, tutorials, and journal entries</h1>
+    <p class="muted" style="margin:0; font-size:1.05rem; max-width:760px;">
+      Search by topic, problem, service, or keyword. Try terms like Jellyfin, permissions, backups, Proxmox, mini PC, power usage, Docker, or remote access.
+    </p>
+
+    <form id="search-page-form" style="display:flex; gap:0.55rem; flex-wrap:wrap; margin-top:1rem;" role="search">
+      <label class="sr-only" for="search-page-input">Search SmallGrid</label>
+      <input
+        id="search-page-input"
+        type="search"
+        name="q"
+        placeholder="Search SmallGrid…"
+        autocomplete="off"
+        style="flex:1; min-width:220px; border:1px solid rgba(107,115,123,0.35); border-radius:999px; padding:0.7rem 0.95rem; font:inherit;"
+      />
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+  </section>
+
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <div class="kicker" style="color:rgba(255,255,255,0.78);">Results</div>
+    <h2 id="search-summary" style="color:#ffffff; margin-top:0;">Enter a search term to filter the site.</h2>
+    <p style="color:rgba(255,255,255,0.88); margin-bottom:0;">
+      Results include guide pages, the tutorials hub, the Homelab Journal, and useful site pages.
+    </p>
+  </section>
+
+  <section id="search-results" class="grid" style="margin-top:16px;">
+    {searchItems.map((item) => (
+      <article
+        class="card hover search-result-card"
+        data-search={`${item.title} ${item.description} ${item.type} ${(item.tags || []).join(" ")}`.toLowerCase()}
+      >
+        <div class="kicker">{item.type}</div>
+        <h2 style="margin-top:0; font-size:1.1rem;">
+          <a href={item.url}>{item.title}</a>
+        </h2>
+        {item.date ? (
+          <div class="muted" style="font-size:13px; margin-bottom:8px;">
+            {item.date.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
+          </div>
+        ) : null}
+        <p class="muted">{item.description}</p>
+        <div>
+          {(item.tags || []).slice(0, 6).map((tag) => (
+            <span class="pill">#{tag}</span>
+          ))}
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <section id="no-search-results" class="card" style="display:none; margin-top:16px;">
+    <h2 style="margin-top:0;">No matching results</h2>
+    <p class="muted" style="margin-bottom:0;">
+      Try a broader term such as Jellyfin, backups, storage, Proxmox, mini PC, power, remote access, or permissions.
+    </p>
+  </section>
+
+  <script>
+    const input = document.getElementById("search-page-input");
+    const form = document.getElementById("search-page-form");
+    const cards = Array.from(document.querySelectorAll(".search-result-card"));
+    const summary = document.getElementById("search-summary");
+    const empty = document.getElementById("no-search-results");
+
+    const normalise = (value) => value.toLowerCase().trim();
+
+    const runSearch = () => {
+      const query = normalise(input.value || "");
+      const words = query.split(/\s+/).filter(Boolean);
+      let visible = 0;
+
+      cards.forEach((card) => {
+        const haystack = card.dataset.search || "";
+        const match = words.length === 0 || words.every((word) => haystack.includes(word));
+        card.style.display = match ? "" : "none";
+        if (match) visible += 1;
+      });
+
+      if (!query) {
+        summary.textContent = "Enter a search term to filter the site.";
+      } else {
+        summary.textContent = `${visible} result${visible === 1 ? "" : "s"} for “${query}”.`;
+      }
+
+      empty.style.display = query && visible === 0 ? "" : "none";
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const initial = params.get("q") || "";
+    input.value = initial;
+    runSearch();
+
+    input.addEventListener("input", runSearch);
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = input.value.trim();
+      const url = query ? `/search/?q=${encodeURIComponent(query)}` : "/search/";
+      history.replaceState(null, "", url);
+      runSearch();
+    });
+  </script>
+</BaseLayout>
