@@ -88,6 +88,10 @@ const searchItems = [...sitePages, ...guides, ...journal];
       />
       <button class="btn primary" type="submit">Search</button>
     </form>
+
+    <p class="muted" style="margin:0.75rem 0 0; font-size:0.9rem;">
+      Search terms may be logged anonymously to help decide which guides to write next. No names, email addresses, IP addresses, or personal identifiers are intentionally stored.
+    </p>
   </section>
 
   <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
@@ -136,8 +140,37 @@ const searchItems = [...sitePages, ...guides, ...journal];
     const cards = Array.from(document.querySelectorAll(".search-result-card"));
     const summary = document.getElementById("search-summary");
     const empty = document.getElementById("no-search-results");
+    let lastLoggedQuery = "";
 
     const normalise = (value) => value.toLowerCase().trim();
+
+    const logSearch = (query) => {
+      const cleanQuery = query.trim().replace(/\s+/g, " ");
+
+      if (!cleanQuery || cleanQuery.length < 2 || cleanQuery === lastLoggedQuery) {
+        return;
+      }
+
+      lastLoggedQuery = cleanQuery;
+
+      const payload = JSON.stringify({
+        query: cleanQuery,
+        path: window.location.pathname,
+      });
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: "application/json" });
+        navigator.sendBeacon("/api/search-log", blob);
+        return;
+      }
+
+      fetch("/api/search-log", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    };
 
     const runSearch = () => {
       const query = normalise(input.value || "");
@@ -165,6 +198,10 @@ const searchItems = [...sitePages, ...guides, ...journal];
     input.value = initial;
     runSearch();
 
+    if (initial.trim().length >= 2) {
+      logSearch(initial);
+    }
+
     input.addEventListener("input", runSearch);
 
     form.addEventListener("submit", (event) => {
@@ -173,6 +210,7 @@ const searchItems = [...sitePages, ...guides, ...journal];
       const url = query ? `/search/?q=${encodeURIComponent(query)}` : "/search/";
       history.replaceState(null, "", url);
       runSearch();
+      logSearch(query);
     });
   </script>
 </BaseLayout>
