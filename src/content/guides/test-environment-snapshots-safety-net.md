@@ -3,7 +3,7 @@ title: "Safe Experiments: Snapshots and Test Environments for Your Homelab"
 description: "Use snapshots, test VMs, and simple clones so you can tinker without breaking your working homelab."
 pubDate: 2026-01-21
 tags: ["testing", "snapshots", "proxmox", "homelab"]
-cover: "/images/guides/snapshots-hero.svg"
+cover: "/images/guides/test-environment-snapshots-safety-net-hero.webp"
 ---
 
 ## Goal
