@@ -145,6 +145,71 @@ const nextGuideMap: Record<string, string[]> = {
   ],
 };
 
+const checklistMap: Record<string, { title: string; description: string; href: string }[]> = {
+  "jellyfin-media-library-not-showing-files": [
+    {
+      title: "Jellyfin Media Not Showing Checklist",
+      description: "Work through paths, mounts, scans, logs, and folder access in the right order.",
+      href: "/downloads/checklists/jellyfin-media-not-showing-checklist.pdf",
+    },
+    {
+      title: "Jellyfin Folder Permissions Checklist",
+      description: "Test folder access as the jellyfin user and apply safer ACL permissions.",
+      href: "/downloads/checklists/jellyfin-folder-permissions-checklist.pdf",
+    },
+  ],
+  "jellyfin-ubuntu-folder-permissions": [
+    {
+      title: "Jellyfin Folder Permissions Checklist",
+      description: "A printable Ubuntu checklist for testing and fixing Jellyfin media folder access.",
+      href: "/downloads/checklists/jellyfin-folder-permissions-checklist.pdf",
+    },
+  ],
+  "jellyfin-docker-permissions-media-folder": [
+    {
+      title: "Jellyfin Docker Permissions Checklist",
+      description: "Check host paths, container paths, bind mounts, users, and read-only volumes.",
+      href: "/downloads/checklists/jellyfin-docker-permissions-checklist.pdf",
+    },
+  ],
+  "jellyfin-direct-play-vs-transcoding": [
+    {
+      title: "Jellyfin Direct Play Checklist",
+      description: "Check codecs, audio, subtitles, clients, and 4K playback before changing hardware.",
+      href: "/downloads/checklists/jellyfin-direct-play-checklist.pdf",
+    },
+  ],
+  "best-file-formats-for-jellyfin-direct-play": [
+    {
+      title: "Jellyfin Direct Play Checklist",
+      description: "A quick format and playback checklist to reduce unnecessary transcoding.",
+      href: "/downloads/checklists/jellyfin-direct-play-checklist.pdf",
+    },
+  ],
+  "best-mini-pc-specs-for-jellyfin": [
+    {
+      title: "Jellyfin Mini PC Buying Checklist",
+      description: "Check CPU, Quick Sync, RAM, SSD, networking, storage, and power use before buying.",
+      href: "/downloads/checklists/jellyfin-mini-pc-buying-checklist.pdf",
+    },
+  ],
+  "jellyfin-mini-pc-home-server": [
+    {
+      title: "Jellyfin Mini PC Buying Checklist",
+      description: "A practical checklist for choosing a quiet low-power Jellyfin mini PC.",
+      href: "/downloads/checklists/jellyfin-mini-pc-buying-checklist.pdf",
+    },
+  ],
+  "mini-pc-under-200": [
+    {
+      title: "Jellyfin Mini PC Buying Checklist",
+      description: "Use this when comparing used mini PCs for a small Jellyfin server.",
+      href: "/downloads/checklists/jellyfin-mini-pc-buying-checklist.pdf",
+    },
+  ],
+};
+
+const checklistDownloads = checklistMap[guide.slug] ?? [];
 const nextGuides = getGuideCards(nextGuideMap[guide.slug] ?? []);
 const jellyfinCluster = tags.includes("jellyfin") ? getGuideCards(jellyfinClusterSlugs).slice(0, 6) : [];
 ---
@@ -245,6 +310,28 @@ const jellyfinCluster = tags.includes("jellyfin") ? getGuideCards(jellyfinCluste
   <div class="article-grid">
     <article class="article-body">
       <Content />
+
+      {checklistDownloads.length ? (
+        <section class="card" style="margin-top:2rem; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff; border:0;">
+          <p class="kicker" style="color:rgba(255,255,255,0.78);">Downloadable checklist</p>
+          <h2 style="margin-top:0; color:#ffffff;">Save the matching PDF checklist</h2>
+          <p style="color:rgba(255,255,255,0.88);">
+            Use these while working through the guide, or keep a copy for the next time the same problem appears.
+          </p>
+          <div class="grid" style="margin-top:1rem;">
+            {checklistDownloads.map((item) => (
+              <article class="card" style="padding:1rem; background:#ffffff; color:#1f2428;">
+                <h3 style="margin-top:0; font-size:1rem;"><a href={item.href} download>{item.title}</a></h3>
+                <p class="muted">{item.description}</p>
+                <a class="btn primary" href={item.href} download>Download PDF</a>
+              </article>
+            ))}
+          </div>
+          <p style="color:rgba(255,255,255,0.82); margin-bottom:0; margin-top:1rem; font-size:0.95rem;">
+            More downloads are available in the <a href="/checklists/" style="color:#ffffff; text-decoration:underline;">SmallGrid checklists section</a>.
+          </p>
+        </section>
+      ) : null}
 
       {nextGuides.length ? (
         <section class="card" style="margin-top:2rem; background:linear-gradient(135deg,#f4fbfb,#ffffff); border:1px solid rgba(14,61,57,0.14);">
