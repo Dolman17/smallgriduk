@@ -1,5 +1,4 @@
-/* Final override for guide and article hero images.
-   This file is loaded after the bundled Astro stylesheet so image heroes display in full. */
+/* Image display overrides loaded after the bundled Astro stylesheet. */
 
 .article-hero,
 .article-card .article-hero {
@@ -21,4 +20,25 @@
   aspect-ratio: auto !important;
   object-fit: contain !important;
   object-position: center center !important;
+}
+
+.guide-card {
+  overflow: hidden;
+}
+
+.guide-card-cover-link {
+  display: block !important;
+  margin: -1.1rem -1.05rem 0.9rem !important;
+  background: #f7f9fa !important;
+  border-bottom: 1px solid rgba(107, 115, 123, 0.16) !important;
+  text-decoration: none !important;
+}
+
+.guide-card-cover {
+  display: block !important;
+  width: 100% !important;
+  height: 160px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: #f7f9fa !important;
 }
