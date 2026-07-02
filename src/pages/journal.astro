@@ -4,6 +4,7 @@ import { getCollection } from "astro:content";
 
 const entriesAll = await getCollection("journal", ({ data }) => !data.draft);
 const entries = entriesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const latestEntries = entries.slice(0, 3);
 
 const allTags = Array.from(
   new Set(entries.flatMap((e) => e.data.tags || []))
@@ -15,26 +16,64 @@ const allTags = Array.from(
   description="A weekly log of building my SmallGrid homelab — what worked, what broke, and what I kept boring on purpose."
   canonicalPath="/journal/"
 >
-  <section class="card">
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
+    <p class="kicker">Homelab Journal</p>
     <h1 style="margin:0 0 8px;">Homelab Journal</h1>
-    <p class="muted" style="margin:0;">
-      Weekly progress notes from building a small, efficient homelab at home. Less theory. More “did this actually work?”.
+    <p class="muted" style="margin:0; font-size:1.05rem; max-width:760px;">
+      Weekly progress notes from building a small, efficient homelab at home. Less theory. More “did this actually work?”. Includes mistakes, fixes, overthinking, and the occasional refusal to buy more hardware for no good reason.
     </p>
 
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
+      <img src="/images/guides/starter-self-hosted-services-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/updates-without-drama-homelab-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/test-environment-snapshots-safety-net-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+    </div>
+
     {allTags.length > 0 && (
-      <div style="margin-top: 12px;">
-        <div class="muted" style="font-size: 13px;">Popular tags</div>
-        <div>
+      <div style="margin-top: 1rem;">
+        <div class="muted" style="font-size: 13px; margin-bottom: 0.35rem;">Popular tags</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
           {allTags.map((t) => <span class="pill">#{t}</span>)}
         </div>
       </div>
     )}
   </section>
 
+  {latestEntries.length ? (
+    <section class="grid" style="margin-top:16px;">
+      {latestEntries.map((entry, index) => (
+        <article class="card hover" style={`border-top:4px solid ${index === 0 ? "#0e3d39" : index === 1 ? "#0a66ff" : "#2fa4a9"}; background:linear-gradient(180deg,#ffffff,#f7fbfb);`}>
+          <div class="kicker">Latest entry</div>
+          <h2 style="margin-top:0; font-size: 1.1rem;">
+            <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
+          </h2>
+          <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
+            {entry.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
+          </div>
+          <p class="muted">{entry.data.description}</p>
+          <a class="btn" href={`/journal/${entry.slug}/`}>Read entry →</a>
+        </article>
+      ))}
+    </section>
+  ) : null}
+
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <div class="kicker" style="color:rgba(255,255,255,0.78);">Retrospective build log</div>
+    <h2 style="color:#ffffff; margin-top:0;">Realistic progress, not perfect progress.</h2>
+    <p style="color:rgba(255,255,255,0.88); margin-bottom:0;">
+      The journal follows a beginner-friendly home lab build over time: choosing hardware, installing Jellyfin, fixing permissions, measuring power, testing backups, and slowly making the setup less ridiculous to explain.
+    </p>
+  </section>
+
   <section style="margin-top: 16px;">
-    <div class="grid">
+    <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+      <h2>All journal entries</h2>
+      <a class="btn" href="/guides/">Browse guides →</a>
+    </div>
+
+    <div class="grid" style="margin-top: 10px;">
       {entries.map((entry) => (
-        <article class="card">
+        <article class="card hover" style="background:linear-gradient(180deg,#ffffff,#f8fbfb);">
           <h2 style="margin: 0 0 8px; font-size: 18px;">
             <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
           </h2>
