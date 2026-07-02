@@ -3,7 +3,7 @@ title: "Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions"
 description: "Install Jellyfin on Ubuntu, give it access to your media folders, and avoid the usual Linux permissions problems."
 pubDate: 2026-01-20
 tags: ["jellyfin", "ubuntu", "low-power", "media"]
-cover: "/images/guides/jellyfin-hero.svg"
+cover: "/images/guides/jellyfin-ubuntu-low-power-hero.webp"
 ---
 
 ## Goal

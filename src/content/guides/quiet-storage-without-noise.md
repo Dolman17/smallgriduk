@@ -3,7 +3,7 @@ title: "Quiet Storage: Add Disks Without Turning Your Home Into a Datacentre"
 description: "Add storage to a home server quietly with better drive placement, airflow, vibration control, sensible enclosures, and realistic power choices."
 pubDate: 2026-01-20
 tags: ["storage", "nas", "quiet", "low-power"]
-cover: "/images/guides/quiet-storage-hero.svg"
+cover: "/images/guides/quiet-storage-without-noise-hero.webp"
 ---
 
 ## Goal
