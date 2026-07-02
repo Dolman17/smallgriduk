@@ -42,6 +42,18 @@ const formatDate = (d: Date) =>
   <section class="guide-grid" aria-label="All guides">
     {guides.map((post) => (
       <article class="guide-card">
+        {post.data.cover ? (
+          <a class="guide-card-cover-link" href={`/guides/${post.slug}/`} aria-label={`Read ${post.data.title}`}>
+            <img
+              class="guide-card-cover"
+              src={post.data.cover}
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+        ) : null}
+
         <h2 class="guide-card-title">
           <a class="guide-card-link" href={`/guides/${post.slug}/`}>
             {post.data.title}
