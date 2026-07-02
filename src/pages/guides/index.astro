@@ -4,6 +4,7 @@ import { getCollection } from "astro:content";
 
 const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
 const guides = guidesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const featuredCovers = guides.filter((g) => g.data.cover).slice(0, 3);
 
 const allTags = Array.from(new Set(guides.flatMap((g) => g.data.tags || []))).sort((a, b) =>
   a.localeCompare(b)
@@ -18,28 +19,44 @@ const formatDate = (d: Date) =>
   description="Practical tutorials for quiet, low-power homelabs: Jellyfin, mini PCs, simple networking, and backups."
   canonicalPath="/guides/"
 >
-  <header class="article-header">
-    <p class="article-kicker">Guides · SmallGrid</p>
-    <h1 class="article-title">Guides</h1>
-    <p class="article-lede">
-      Practical and opinionated setups for small, efficient homelabs. No port-forwarding heroics. No rack cosplay.
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
+    <p class="kicker">Guides · SmallGrid</p>
+    <h1 style="margin:0 0 0.75rem;">Guides</h1>
+    <p class="muted" style="margin:0; font-size:1.05rem; max-width:760px;">
+      Practical and opinionated setups for small, efficient homelabs. No port-forwarding heroics. No rack cosplay. Just clear fixes, sensible defaults, and systems you can actually maintain.
     </p>
 
+    {featuredCovers.length ? (
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
+        {featuredCovers.map((post) => (
+          <a href={`/guides/${post.slug}/`} aria-label={`Read ${post.data.title}`} style="display:block; text-decoration:none;">
+            <img src={post.data.cover} alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+          </a>
+        ))}
+      </div>
+    ) : null}
+
     {allTags.length > 0 && (
-      <div class="article-meta" style="margin-top: 0.6rem;">
-        <span class="article-meta-item">Popular tags</span>
-        <ul class="article-tags">
+      <div style="margin-top: 1rem;">
+        <div class="muted" style="font-size: 13px; margin-bottom: 0.35rem;">Popular tags</div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.35rem;">
           {allTags.map((tag) => (
-            <li class="tag-pill">#{tag}</li>
+            <span class="pill">#{tag}</span>
           ))}
-        </ul>
+        </div>
       </div>
     )}
-  </header>
+  </section>
 
-  <hr class="article-divider" />
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <div class="kicker" style="color:rgba(255,255,255,0.78);">Guide library</div>
+    <h2 style="color:#ffffff; margin-top:0;">Pick the problem you are solving now.</h2>
+    <p style="color:rgba(255,255,255,0.88); margin-bottom:0;">
+      Start with the guide that matches the thing currently blocking progress: Jellyfin permissions, power usage, backups, safe updates, storage, remote access, or hardware choices.
+    </p>
+  </section>
 
-  <section class="guide-grid" aria-label="All guides">
+  <section class="guide-grid" aria-label="All guides" style="margin-top:16px;">
     {guides.map((post) => (
       <article class="guide-card">
         {post.data.cover ? (
