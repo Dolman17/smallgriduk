@@ -52,6 +52,95 @@ const shareLinks = {
   )}`,
   email: `mailto:?subject=${enc(shareTitle)}&body=${enc(`${shareTitle}\n\n${shareUrl}`)}`,
 };
+
+const allGuides = await getCollection("guides", ({ data }) => !data.draft);
+const guideBySlug = new Map(
+  allGuides.map((item) => [
+    item.slug,
+    {
+      title: item.data.title,
+      description: item.data.description,
+      url: `/guides/${item.slug}/`,
+      cover: item.data.cover,
+      tags: Array.isArray(item.data.tags) ? item.data.tags : [],
+    },
+  ])
+);
+
+const getGuideCards = (slugs: string[]) =>
+  slugs
+    .filter((slug) => slug !== guide.slug)
+    .map((slug) => guideBySlug.get(slug))
+    .filter(Boolean);
+
+const jellyfinClusterSlugs = [
+  "jellyfin-ubuntu-low-power",
+  "jellyfin-ubuntu-folder-permissions",
+  "jellyfin-media-library-not-showing-files",
+  "jellyfin-docker-permissions-media-folder",
+  "jellyfin-direct-play-vs-transcoding",
+  "best-file-formats-for-jellyfin-direct-play",
+  "jellyfin-hardware-transcoding-ubuntu",
+  "jellyfin-tailscale-remote-access",
+  "jellyfin-remote-access-safely",
+  "jellyfin-mini-pc-home-server",
+];
+
+const nextGuideMap: Record<string, string[]> = {
+  "jellyfin-ubuntu-low-power": [
+    "jellyfin-ubuntu-folder-permissions",
+    "jellyfin-direct-play-vs-transcoding",
+    "jellyfin-tailscale-remote-access",
+  ],
+  "jellyfin-ubuntu-folder-permissions": [
+    "jellyfin-media-library-not-showing-files",
+    "jellyfin-docker-permissions-media-folder",
+    "jellyfin-ubuntu-low-power",
+  ],
+  "jellyfin-media-library-not-showing-files": [
+    "jellyfin-ubuntu-folder-permissions",
+    "jellyfin-docker-permissions-media-folder",
+    "jellyfin-direct-play-vs-transcoding",
+  ],
+  "jellyfin-docker-permissions-media-folder": [
+    "jellyfin-media-library-not-showing-files",
+    "jellyfin-ubuntu-folder-permissions",
+    "jellyfin-direct-play-vs-transcoding",
+  ],
+  "jellyfin-direct-play-vs-transcoding": [
+    "best-file-formats-for-jellyfin-direct-play",
+    "jellyfin-hardware-transcoding-ubuntu",
+    "jellyfin-mini-pc-home-server",
+  ],
+  "best-file-formats-for-jellyfin-direct-play": [
+    "jellyfin-direct-play-vs-transcoding",
+    "jellyfin-hardware-transcoding-ubuntu",
+    "jellyfin-mini-pc-home-server",
+  ],
+  "jellyfin-hardware-transcoding-ubuntu": [
+    "jellyfin-direct-play-vs-transcoding",
+    "best-file-formats-for-jellyfin-direct-play",
+    "jellyfin-mini-pc-home-server",
+  ],
+  "jellyfin-tailscale-remote-access": [
+    "jellyfin-remote-access-safely",
+    "jellyfin-ubuntu-low-power",
+    "backups-3-2-1-home-server",
+  ],
+  "jellyfin-remote-access-safely": [
+    "jellyfin-tailscale-remote-access",
+    "jellyfin-ubuntu-low-power",
+    "backups-3-2-1-home-server",
+  ],
+  "jellyfin-mini-pc-home-server": [
+    "mini-pc-under-200",
+    "jellyfin-direct-play-vs-transcoding",
+    "measure-power-usage-homelab",
+  ],
+};
+
+const nextGuides = getGuideCards(nextGuideMap[guide.slug] ?? []);
+const jellyfinCluster = tags.includes("jellyfin") ? getGuideCards(jellyfinClusterSlugs).slice(0, 6) : [];
 ---
 
 <BaseLayout title={data.title} description={data.description} canonicalPath={`/guides/${guide.slug}/`}>
@@ -150,6 +239,42 @@ const shareLinks = {
   <div class="article-grid">
     <article class="article-body">
       <Content />
+
+      {nextGuides.length ? (
+        <section class="card" style="margin-top:2rem; background:linear-gradient(135deg,#f4fbfb,#ffffff); border:1px solid rgba(14,61,57,0.14);">
+          <p class="kicker">Next guide</p>
+          <h2 style="margin-top:0;">What to read next</h2>
+          <p class="muted">
+            Continue the setup path with these closely related guides.
+          </p>
+          <div class="grid" style="margin-top:1rem;">
+            {nextGuides.map((item: any) => (
+              <article class="card hover" style="padding:1rem;">
+                <h3 style="margin-top:0; font-size:1rem;"><a href={item.url}>{item.title}</a></h3>
+                <p class="muted" style="margin-bottom:0;">{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {jellyfinCluster.length ? (
+        <section class="card" style="margin-top:1rem; background:#ffffff; border:1px solid rgba(10,102,255,0.14);">
+          <p class="kicker">Jellyfin guide cluster</p>
+          <h2 style="margin-top:0;">More Jellyfin fixes and setup guides</h2>
+          <p class="muted">
+            These guides link the main Jellyfin setup, permissions, remote access, direct play, and hardware topics together.
+          </p>
+          <div class="grid" style="margin-top:1rem;">
+            {jellyfinCluster.map((item: any) => (
+              <article class="card hover" style="padding:1rem;">
+                <h3 style="margin-top:0; font-size:1rem;"><a href={item.url}>{item.title}</a></h3>
+                <p class="muted" style="margin-bottom:0;">{item.description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </article>
 
     <aside class="toc" aria-label="Contents">
