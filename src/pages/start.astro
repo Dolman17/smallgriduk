@@ -15,6 +15,7 @@ const pathSteps = [
     body: "Start with one small, efficient machine instead of building a cluster you do not need yet. Low idle power, enough RAM, and boring reliability matter more than raw benchmark numbers.",
     guide: findGuide("mini-pc-under-200"),
     linkText: "Choose a mini PC under £200 →",
+    accent: "#0e3d39",
   },
   {
     label: "Step 2",
@@ -22,6 +23,7 @@ const pathSteps = [
     body: "Pick a first service that gives you an immediate result. For most people, Jellyfin is a good starting point because it is useful, visible, and easy to understand.",
     guide: findGuide("jellyfin-ubuntu-low-power"),
     linkText: "Install Jellyfin on Ubuntu →",
+    accent: "#0a66ff",
   },
   {
     label: "Step 3",
@@ -29,6 +31,7 @@ const pathSteps = [
     body: "A lot of home server problems are not application problems. They are folder, user, group, and mount problems. Get the basics right before adding more services.",
     guide: findGuide("jellyfin-ubuntu-folder-permissions"),
     linkText: "Fix Jellyfin folder permissions →",
+    accent: "#2fa4a9",
   },
   {
     label: "Step 4",
@@ -36,6 +39,7 @@ const pathSteps = [
     body: "Snapshots are useful, but they are not backups. Make sure your important files and service configs can survive a dead disk, failed upgrade, or accidental deletion.",
     guide: findGuide("backups-3-2-1-home-server"),
     linkText: "Set up 3-2-1 backups →",
+    accent: "#0e3d39",
   },
   {
     label: "Step 5",
@@ -43,6 +47,7 @@ const pathSteps = [
     body: "Do not expose services to the internet just because a guide says it is possible. For most home labs, Tailscale-style private access is the better default.",
     guide: findGuide("jellyfin-tailscale-remote-access"),
     linkText: "Use Tailscale with Jellyfin →",
+    accent: "#0a66ff",
   },
   {
     label: "Step 6",
@@ -50,6 +55,7 @@ const pathSteps = [
     body: "Low power is not guesswork. Measure idle and normal-use watts, then decide whether hardware changes are worth it.",
     guide: findGuide("measure-power-usage-homelab"),
     linkText: "Measure homelab power usage →",
+    accent: "#2fa4a9",
   },
 ];
 
@@ -66,12 +72,18 @@ const usefulNext = [
   description="A practical starter guide for building a small efficient home lab with a low-power mini PC, Jellyfin, backups, private remote access, and sensible hardware."
   canonicalPath="/start/"
 >
-  <section class="card">
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
     <div class="kicker">🧭 Start here</div>
     <h1>Build a small efficient home lab without making it a second job.</h1>
-    <p>
+    <p style="font-size:1.05rem; max-width:760px;">
       SmallGrid is for practical home servers: quiet hardware, useful services, safe remote access, and backups that actually restore. Start with a small efficient home lab, make it reliable, then expand only when the next thing earns its place.
     </p>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 1rem 0;">
+      <img src="/images/guides/mini-pc-under-200-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/backups-3-2-1-diagram.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+    </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/tutorials/">Browse tutorials</a>
@@ -81,20 +93,23 @@ const usefulNext = [
     </div>
   </section>
 
-  <section class="card" style="margin-top: 16px;">
-    <div class="kicker">Default recommendation</div>
-    <h2>The SmallGrid small home server starter setup</h2>
-    <p>
+  <section class="card" style="margin-top: 16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <div class="kicker" style="color:rgba(255,255,255,0.78);">Default recommendation</div>
+    <h2 style="color:#ffffff; margin-top:0;">The SmallGrid small home server starter setup</h2>
+    <p style="color:rgba(255,255,255,0.88);">
       Start with one used mini PC, one SSD, one useful service, a basic backup routine, and private remote access. Do not build a cluster, buy a rack, expose ports, or add ten dashboards before the first service is working.
     </p>
-    <p>
+    <p style="color:rgba(255,255,255,0.88);">
       The boring version is usually the best version: one reliable box, clear folders, measured power use, simple recovery, and no clever complexity unless it solves a real problem.
     </p>
   </section>
 
   <section class="grid" style="margin-top: 16px;">
     {pathSteps.map((step) => (
-      <article class="card hover">
+      <article class="card hover" style={`border-top:4px solid ${step.accent}; background:linear-gradient(180deg,#ffffff,#f7fbfb);`}>
+        {step.guide?.data.cover ? (
+          <img src={step.guide.data.cover} alt="" loading="lazy" decoding="async" style="width:100%; height:130px; object-fit:contain; background:#f7f9fa; border-radius:0.7rem; border:1px solid rgba(107,115,123,0.14); margin-bottom:0.85rem;" />
+        ) : null}
         <div class="kicker">{step.label}</div>
         <h2>{step.title}</h2>
         <p>{step.body}</p>
@@ -107,7 +122,7 @@ const usefulNext = [
     ))}
   </section>
 
-  <section class="card" style="margin-top: 16px;">
+  <section class="card" style="margin-top: 16px; background:linear-gradient(180deg,#ffffff,#f7faff); border-left:5px solid #0a66ff;">
     <div class="kicker">What not to do first</div>
     <h2>Avoid the usual homelab trap</h2>
     <p>
@@ -127,15 +142,20 @@ const usefulNext = [
 
       <div class="grid" style="margin-top: 10px;">
         {usefulNext.map((guide) => (
-          <article class="card hover">
-            <h3 style="margin-top: 0;">
-              <a href={`/guides/${guide.slug}/`}>{guide.data.title}</a>
-            </h3>
-            <p>{guide.data.description}</p>
-            <div>
-              {(guide.data.tags ?? []).slice(0, 4).map((tag) => (
-                <span class="pill">#{tag}</span>
-              ))}
+          <article class="card hover" style="padding:0; overflow:hidden;">
+            {guide.data.cover ? (
+              <img src={guide.data.cover} alt="" loading="lazy" decoding="async" style="width:100%; height:140px; object-fit:contain; background:#f7f9fa;" />
+            ) : null}
+            <div style="padding:1.05rem;">
+              <h3 style="margin-top: 0;">
+                <a href={`/guides/${guide.slug}/`}>{guide.data.title}</a>
+              </h3>
+              <p>{guide.data.description}</p>
+              <div>
+                {(guide.data.tags ?? []).slice(0, 4).map((tag) => (
+                  <span class="pill">#{tag}</span>
+                ))}
+              </div>
             </div>
           </article>
         ))}
@@ -143,7 +163,7 @@ const usefulNext = [
     </section>
   ) : null}
 
-  <section class="card" style="margin-top: 16px;">
+  <section class="card" style="margin-top: 16px; background:linear-gradient(180deg,#ffffff,#f4fbfb);">
     <h2>Where to go next</h2>
     <p>
       Use the tutorials page as the main map through the site. It groups the guides by practical job: Jellyfin, Proxmox, backups, power usage, storage, and hardware.
