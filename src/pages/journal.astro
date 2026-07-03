@@ -5,6 +5,14 @@ import { getCollection } from "astro:content";
 const entriesAll = await getCollection("journal", ({ data }) => !data.draft);
 const entries = entriesAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const latestEntries = entries.slice(0, 3);
+const defaultJournalHero = "/images/journal/journal-homelab-working-hero.webp";
+const journalHeroImages = latestEntries.length
+  ? latestEntries.map((entry) => entry.data.cover ?? defaultJournalHero)
+  : [
+      "/images/guides/starter-self-hosted-services-hero.webp",
+      "/images/guides/updates-without-drama-homelab-hero.webp",
+      "/images/guides/test-environment-snapshots-safety-net-hero.webp",
+    ];
 
 const allTags = Array.from(
   new Set(entries.flatMap((e) => e.data.tags || []))
@@ -24,9 +32,9 @@ const allTags = Array.from(
     </p>
 
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
-      <img src="/images/guides/starter-self-hosted-services-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
-      <img src="/images/guides/updates-without-drama-homelab-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
-      <img src="/images/guides/test-environment-snapshots-safety-net-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      {journalHeroImages.map((image) => (
+        <img src={image} alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      ))}
     </div>
 
     {allTags.length > 0 && (
@@ -41,19 +49,30 @@ const allTags = Array.from(
 
   {latestEntries.length ? (
     <section class="grid" style="margin-top:16px;">
-      {latestEntries.map((entry, index) => (
-        <article class="card hover" style={`border-top:4px solid ${index === 0 ? "#0e3d39" : index === 1 ? "#0a66ff" : "#2fa4a9"}; background:linear-gradient(180deg,#ffffff,#f7fbfb);`}>
-          <div class="kicker">Latest entry</div>
-          <h2 style="margin-top:0; font-size: 1.1rem;">
-            <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
-          </h2>
-          <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
-            {entry.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
-          </div>
-          <p class="muted">{entry.data.description}</p>
-          <a class="btn" href={`/journal/${entry.slug}/`}>Read entry →</a>
-        </article>
-      ))}
+      {latestEntries.map((entry, index) => {
+        const entryCover = entry.data.cover ?? defaultJournalHero;
+
+        return (
+          <article class="card hover" style={`border-top:4px solid ${index === 0 ? "#0e3d39" : index === 1 ? "#0a66ff" : "#2fa4a9"}; background:linear-gradient(180deg,#ffffff,#f7fbfb);`}>
+            <img
+              src={entryCover}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style="width:100%; height:150px; object-fit:cover; object-position:center; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16); margin-bottom:0.85rem; background:#f7f9fa;"
+            />
+            <div class="kicker">Latest entry</div>
+            <h2 style="margin-top:0; font-size: 1.1rem;">
+              <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
+            </h2>
+            <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
+              {entry.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
+            </div>
+            <p class="muted">{entry.data.description}</p>
+            <a class="btn" href={`/journal/${entry.slug}/`}>Read entry →</a>
+          </article>
+        );
+      })}
     </section>
   ) : null}
 
@@ -72,23 +91,34 @@ const allTags = Array.from(
     </div>
 
     <div class="grid" style="margin-top: 10px;">
-      {entries.map((entry) => (
-        <article class="card hover" style="background:linear-gradient(180deg,#ffffff,#f8fbfb);">
-          <h2 style="margin: 0 0 8px; font-size: 18px;">
-            <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
-          </h2>
-          <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
-            {entry.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
-            {entry.data.updatedDate ? ` · Updated ${entry.data.updatedDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}` : ""}
-          </div>
-          <p class="muted" style="margin:0 0 10px;">{entry.data.description}</p>
-          <div>
-            {(entry.data.tags || []).slice(0, 6).map((t) => (
-              <span class="pill">#{t}</span>
-            ))}
-          </div>
-        </article>
-      ))}
+      {entries.map((entry) => {
+        const entryCover = entry.data.cover ?? defaultJournalHero;
+
+        return (
+          <article class="card hover" style="background:linear-gradient(180deg,#ffffff,#f8fbfb);">
+            <img
+              src={entryCover}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style="width:100%; height:130px; object-fit:cover; object-position:center; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16); margin-bottom:0.85rem; background:#f7f9fa;"
+            />
+            <h2 style="margin: 0 0 8px; font-size: 18px;">
+              <a href={`/journal/${entry.slug}/`}>{entry.data.title}</a>
+            </h2>
+            <div class="muted" style="font-size: 13px; margin-bottom: 8px;">
+              {entry.data.pubDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
+              {entry.data.updatedDate ? ` · Updated ${entry.data.updatedDate.toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}` : ""}
+            </div>
+            <p class="muted" style="margin:0 0 10px;">{entry.data.description}</p>
+            <div>
+              {(entry.data.tags || []).slice(0, 6).map((t) => (
+                <span class="pill">#{t}</span>
+              ))}
+            </div>
+          </article>
+        );
+      })}
     </div>
   </section>
 </BaseLayout>
