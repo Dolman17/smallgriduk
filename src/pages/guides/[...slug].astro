@@ -212,6 +212,15 @@ const checklistMap: Record<string, { title: string; description: string; href: s
 const checklistDownloads = checklistMap[guide.slug] ?? [];
 const nextGuides = getGuideCards(nextGuideMap[guide.slug] ?? []);
 const jellyfinCluster = tags.includes("jellyfin") ? getGuideCards(jellyfinClusterSlugs).slice(0, 6) : [];
+const isJellyfinGuide = tags.includes("jellyfin") || guide.slug.includes("jellyfin");
+const isProxmoxGuide = tags.includes("proxmox") || guide.slug.includes("proxmox");
+const guideDifficulty = isProxmoxGuide ? "Beginner to intermediate" : "Beginner-friendly";
+const guideFocus = isJellyfinGuide
+  ? "Jellyfin setup and troubleshooting"
+  : isProxmoxGuide
+    ? "Small home lab virtualisation"
+    : "Small home server setup";
+const quickAnswer = data.description;
 ---
 
 <BaseLayout title={data.title} description={data.description} canonicalPath={`/guides/${guide.slug}/`}>
@@ -309,6 +318,42 @@ const jellyfinCluster = tags.includes("jellyfin") ? getGuideCards(jellyfinCluste
 
   <div class="article-grid">
     <article class="article-body">
+      <section class="card" style="margin-bottom:1.25rem; background:linear-gradient(135deg,#f4fbfb,#ffffff); border:1px solid rgba(14,61,57,0.14);">
+        <p class="kicker">Quick answer</p>
+        <h2 style="margin-top:0;">What this guide helps you do</h2>
+        <p style="font-size:1.03rem; margin-bottom:0;">{quickAnswer}</p>
+      </section>
+
+      <section class="grid" style="margin-bottom:1.25rem;">
+        <article class="card" style="padding:1rem; border-left:4px solid #0e3d39;">
+          <p class="kicker">Difficulty</p>
+          <h3 style="margin:0; font-size:1rem;">{guideDifficulty}</h3>
+        </article>
+        <article class="card" style="padding:1rem; border-left:4px solid #0a66ff;">
+          <p class="kicker">Focus</p>
+          <h3 style="margin:0; font-size:1rem;">{guideFocus}</h3>
+        </article>
+        <article class="card" style="padding:1rem; border-left:4px solid #2fa4a9;">
+          <p class="kicker">Best used for</p>
+          <h3 style="margin:0; font-size:1rem;">Practical setup, fixes, and checks</h3>
+        </article>
+      </section>
+
+      {checklistDownloads.length ? (
+        <section class="card" style="margin-bottom:1.25rem; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff; border:0;">
+          <p class="kicker" style="color:rgba(255,255,255,0.78);">Printable helper</p>
+          <h2 style="margin-top:0; color:#ffffff;">Prefer to work through this step by step?</h2>
+          <p style="color:rgba(255,255,255,0.88);">
+            Download the matching checklist and tick off the common causes while you work through the guide.
+          </p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1rem;">
+            {checklistDownloads.map((item) => (
+              <a class="btn" href={item.href} download style="background:#ffffff;">{item.title}</a>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <Content />
 
       {checklistDownloads.length ? (
