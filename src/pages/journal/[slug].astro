@@ -25,7 +25,8 @@ const updated = entry.data.updatedDate
   : null;
 
 const tags = entry.data.tags || [];
-const journalHero = "/images/journal/journal-homelab-working-hero.webp";
+const defaultJournalHero = "/images/journal/journal-homelab-working-hero.webp";
+const journalHero = entry.data.cover ?? defaultJournalHero;
 ---
 
 <BaseLayout
