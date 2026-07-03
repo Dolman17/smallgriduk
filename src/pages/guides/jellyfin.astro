@@ -1,0 +1,180 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
+const guideBySlug = new Map(guidesAll.map((guide) => [guide.slug, guide]));
+
+const findGuide = (slug: string) => guideBySlug.get(slug);
+
+const sections = [
+  {
+    kicker: "Start here",
+    title: "Build the basic Jellyfin server",
+    description: "Start with the clean, low-power setup path before trying remote access, transcoding, or advanced storage.",
+    accent: "#0e3d39",
+    guides: [
+      findGuide("jellyfin-ubuntu-low-power"),
+      findGuide("jellyfin-ubuntu-folder-permissions"),
+      findGuide("jellyfin-mini-pc-home-server"),
+    ].filter(Boolean),
+  },
+  {
+    kicker: "Fix common problems",
+    title: "Solve empty libraries and folder access issues",
+    description: "Most beginner Jellyfin problems are path, mount, folder permission, or Docker volume mapping problems.",
+    accent: "#0a66ff",
+    guides: [
+      findGuide("jellyfin-media-library-not-showing-files"),
+      findGuide("jellyfin-docker-permissions-media-folder"),
+      findGuide("jellyfin-ubuntu-folder-permissions"),
+    ].filter(Boolean),
+  },
+  {
+    kicker: "Playback",
+    title: "Reduce transcoding and improve direct play",
+    description: "Understand why Jellyfin transcodes, which formats work best, and what hardware actually matters.",
+    accent: "#2fa4a9",
+    guides: [
+      findGuide("jellyfin-direct-play-vs-transcoding"),
+      findGuide("best-file-formats-for-jellyfin-direct-play"),
+      findGuide("jellyfin-hardware-transcoding-ubuntu"),
+      findGuide("best-mini-pc-specs-for-jellyfin"),
+    ].filter(Boolean),
+  },
+  {
+    kicker: "Remote access",
+    title: "Access Jellyfin safely from outside home",
+    description: "Use private remote access first. Avoid opening ports until you understand the security trade-offs.",
+    accent: "#0e3d39",
+    guides: [
+      findGuide("jellyfin-tailscale-remote-access"),
+      findGuide("jellyfin-remote-access-safely"),
+      findGuide("backups-3-2-1-home-server"),
+    ].filter(Boolean),
+  },
+];
+
+const featuredChecklistLinks = [
+  {
+    title: "Jellyfin Media Not Showing Checklist",
+    href: "/downloads/checklists/jellyfin-media-not-showing-checklist.pdf",
+    description: "Work through paths, mounts, scans, logs, and permissions in the right order.",
+  },
+  {
+    title: "Jellyfin Docker Permissions Checklist",
+    href: "/downloads/checklists/jellyfin-docker-permissions-checklist.pdf",
+    description: "Check host paths, container paths, bind mounts, users, and read-only volumes.",
+  },
+  {
+    title: "Jellyfin Direct Play Checklist",
+    href: "/downloads/checklists/jellyfin-direct-play-checklist.pdf",
+    description: "Check codecs, clients, subtitles, audio, and hardware before upgrading.",
+  },
+];
+---
+
+<BaseLayout
+  title="Jellyfin Beginner Guides"
+  description="Beginner-friendly Jellyfin guides for Ubuntu, Docker permissions, empty libraries, direct play, transcoding, mini PCs, and safe remote access."
+  canonicalPath="/guides/jellyfin/"
+>
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
+    <p class="kicker">Jellyfin hub</p>
+    <h1 style="margin:0 0 8px;">Jellyfin beginner guides that fix the real problems.</h1>
+    <p class="muted" style="margin:0; font-size:1.05rem; max-width:800px;">
+      Start with a simple Jellyfin server, then work through media folders, permissions, Docker paths, direct play, transcoding, mini PC hardware, and safe remote access.
+    </p>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 1rem 0;">
+      <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/jellyfin-media-library-not-showing-files-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/best-mini-pc-specs-for-jellyfin-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+      <a class="btn primary" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin on Ubuntu</a>
+      <a class="btn" href="/guides/jellyfin-media-library-not-showing-files/">Fix an empty library</a>
+      <a class="btn" href="/checklists/">Download checklists</a>
+    </div>
+  </section>
+
+  <section class="grid" style="margin-top:16px;">
+    <article class="card hover" style="border-top:4px solid #0e3d39; background:linear-gradient(180deg,#ffffff,#f7fbfb);">
+      <div class="kicker">If you are new</div>
+      <h2>Follow this order</h2>
+      <ol style="margin-bottom:0; padding-left:1.2rem;">
+        <li>Install Jellyfin on a simple low-power server.</li>
+        <li>Put your media in clear folders.</li>
+        <li>Fix Linux or Docker permissions properly.</li>
+        <li>Check direct play before buying new hardware.</li>
+        <li>Use private remote access before exposing anything publicly.</li>
+      </ol>
+    </article>
+
+    <article class="card hover" style="border-top:4px solid #0a66ff; background:linear-gradient(180deg,#ffffff,#f7faff);">
+      <div class="kicker">Quick fix path</div>
+      <h2>Library empty?</h2>
+      <p>
+        Do not reinstall Jellyfin first. Check the path, mount, folder access, Docker volume mapping, and library scan order.
+      </p>
+      <a class="btn" href="/guides/jellyfin-media-library-not-showing-files/">Open the troubleshooting guide →</a>
+    </article>
+
+    <article class="card hover" style="border-top:4px solid #2fa4a9; background:linear-gradient(180deg,#ffffff,#f4fbfb);">
+      <div class="kicker">Hardware path</div>
+      <h2>Choosing a mini PC?</h2>
+      <p>
+        Focus on idle power, Intel Quick Sync, enough RAM, SSD storage, and reliable networking before chasing headline CPU scores.
+      </p>
+      <a class="btn" href="/guides/best-mini-pc-specs-for-jellyfin/">Read the mini PC specs guide →</a>
+    </article>
+  </section>
+
+  {sections.map((section) => (
+    <section style="margin-top:16px;">
+      <div style={`display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap; border-left:5px solid ${section.accent}; padding-left:0.9rem;`}>
+        <div>
+          <p class="kicker" style="margin-bottom:0.3rem;">{section.kicker}</p>
+          <h2 style="margin:0;">{section.title}</h2>
+          <p class="muted" style="margin:0.45rem 0 0; max-width:760px;">{section.description}</p>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:10px;">
+        {section.guides.map((guide) => (
+          <article class="card hover" style="padding:0; overflow:hidden; background:linear-gradient(180deg,#ffffff,#f8fbfb);">
+            {guide.data.cover ? (
+              <img src={guide.data.cover} alt="" loading="lazy" decoding="async" style="width:100%; height:140px; object-fit:contain; background:#f7f9fa;" />
+            ) : null}
+            <div style="padding:1.05rem;">
+              <h3 style="margin-top:0; font-size:1rem;"><a href={`/guides/${guide.slug}/`}>{guide.data.title}</a></h3>
+              <p class="muted">{guide.data.description}</p>
+              <a class="btn" href={`/guides/${guide.slug}/`}>Read guide →</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <p class="kicker" style="color:rgba(255,255,255,0.78);">Printable help</p>
+    <h2 style="color:#ffffff; margin-top:0;">Download the Jellyfin checklists</h2>
+    <p style="color:rgba(255,255,255,0.88);">
+      Use these when you want to work through the problem step by step without bouncing between browser tabs.
+    </p>
+    <div class="grid" style="margin-top:1rem;">
+      {featuredChecklistLinks.map((item) => (
+        <article class="card" style="background:#ffffff; color:#1f2428; padding:1rem;">
+          <h3 style="margin-top:0; font-size:1rem;"><a href={item.href} download>{item.title}</a></h3>
+          <p class="muted">{item.description}</p>
+          <a class="btn primary" href={item.href} download>Download PDF</a>
+        </article>
+      ))}
+    </div>
+    <p style="color:rgba(255,255,255,0.82); margin-bottom:0; margin-top:1rem; font-size:0.95rem;">
+      More downloads are available in the <a href="/checklists/" style="color:#ffffff; text-decoration:underline;">SmallGrid checklists section</a>.
+    </p>
+  </section>
+</BaseLayout>
