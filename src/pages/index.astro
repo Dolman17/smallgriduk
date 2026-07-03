@@ -10,11 +10,46 @@ const guideBySlug = new Map(guides.map((guide) => [guide.slug, guide]));
 const findGuide = (slug: string) => guideBySlug.get(slug);
 
 const priorityGuides = [
-  findGuide("jellyfin-ubuntu-low-power"),
-  findGuide("jellyfin-ubuntu-folder-permissions"),
-  findGuide("measure-power-usage-homelab"),
-  findGuide("backups-3-2-1-home-server"),
+  findGuide("jellyfin-media-library-not-showing-files"),
+  findGuide("jellyfin-docker-permissions-media-folder"),
+  findGuide("best-file-formats-for-jellyfin-direct-play"),
+  findGuide("best-mini-pc-specs-for-jellyfin"),
 ].filter(Boolean);
+
+const beginnerPaths = [
+  {
+    kicker: "Fix Jellyfin",
+    title: "My Jellyfin library is empty",
+    body: "Check paths, mounted drives, folder permissions, Docker volume mappings, and library scans before reinstalling anything.",
+    href: "/guides/jellyfin-media-library-not-showing-files/",
+    linkText: "Fix Jellyfin files →",
+    accent: "#0e3d39",
+  },
+  {
+    kicker: "Build",
+    title: "I want a small home server",
+    body: "Start with one low-power mini PC, one useful service, a clean folder structure, and a backup plan you can actually test.",
+    href: "/start/",
+    linkText: "Follow the starter path →",
+    accent: "#0a66ff",
+  },
+  {
+    kicker: "Buy smarter",
+    title: "I need a Jellyfin mini PC",
+    body: "Focus on idle power, Intel Quick Sync, enough RAM, SSD storage, and reliable networking instead of headline CPU scores.",
+    href: "/guides/best-mini-pc-specs-for-jellyfin/",
+    linkText: "Choose Jellyfin specs →",
+    accent: "#2fa4a9",
+  },
+  {
+    kicker: "Protect it",
+    title: "I need backups that restore",
+    body: "Use boring, testable backups before adding more services. Snapshots are useful, but they are not a full backup plan.",
+    href: "/guides/backups-3-2-1-home-server/",
+    linkText: "Set up backups →",
+    accent: "#0e3d39",
+  },
+];
 
 const journalAll = await getCollection("journal", ({ data }) => !data.draft);
 const journalSorted = journalAll.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -27,55 +62,49 @@ const latestJournal = journalSorted[0];
   canonicalPath="/"
 >
   <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
-    <div class="kicker">⚡ SmallGrid philosophy</div>
-    <h1>Small, efficient home labs that don’t become a second job.</h1>
-    <p>
-      Build a small efficient home lab around quiet, low-power home servers that work reliably — Jellyfin, mini PCs, simple networking, private remote access, and backups you can actually restore. No enterprise cosplay. Just sane defaults.
+    <div class="kicker">Tiny tools. Solid systems.</div>
+    <h1>Beginner-friendly home lab guides that fix real problems.</h1>
+    <p style="font-size:1.08rem; max-width:820px;">
+      SmallGrid helps you build a quiet, low-power home server around Jellyfin, mini PCs, safe remote access, practical backups, and troubleshooting steps that do not assume you already know everything.
     </p>
 
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 1rem 0;">
       <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
       <img src="/images/guides/mini-pc-under-200-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
-      <img src="/images/guides/quiet-storage-without-noise-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <img src="/images/guides/jellyfin-media-library-not-showing-files-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
     </div>
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/start/">Start here</a>
+      <a class="btn" href="/guides/jellyfin/">Jellyfin guides</a>
+      <a class="btn" href="/checklists/">Download checklists</a>
       <a class="btn" href="/recommended-gear/">Recommended gear</a>
-      <a class="btn" href="/tutorials/">Tutorials</a>
-      <a class="btn" href="/guides/">Browse guides</a>
-      <a class="btn" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin</a>
-      <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage</a>
+      <a class="btn" href="/guides/">Browse all guides</a>
     </div>
   </section>
 
   <section class="grid" style="margin-top: 16px;">
-    <article class="card hover" style="border-top:4px solid #0e3d39; background:linear-gradient(180deg,#ffffff,#f7fbfb);">
-      <div class="kicker">1 · Start</div>
-      <h2>Follow the small efficient home lab path</h2>
-      <p>
-        The quickest route is one reliable mini PC, one useful service, backups, private remote access, and measured power usage.
-      </p>
-      <a class="btn primary" href="/start/">Open Start Here →</a>
-    </article>
+    {beginnerPaths.map((path) => (
+      <article class="card hover" style={`border-top:4px solid ${path.accent}; background:linear-gradient(180deg,#ffffff,#f7fbfb);`}>
+        <div class="kicker">{path.kicker}</div>
+        <h2>{path.title}</h2>
+        <p>{path.body}</p>
+        <a class="btn" href={path.href}>{path.linkText}</a>
+      </article>
+    ))}
+  </section>
 
-    <article class="card hover" style="border-top:4px solid #0a66ff; background:linear-gradient(180deg,#ffffff,#f7faff);">
-      <div class="kicker">2 · Equipment</div>
-      <h2>Choose budget-friendly home lab gear</h2>
-      <p>
-        Compare budget, mid range, and top spec equipment for a quiet home server, mini PC home lab, storage, networking, and power protection.
-      </p>
-      <a class="btn" href="/recommended-gear/">View recommended gear →</a>
-    </article>
-
-    <article class="card hover" style="border-top:4px solid #2fa4a9; background:linear-gradient(180deg,#ffffff,#f4fbfb);">
-      <div class="kicker">3 · Tutorials</div>
-      <h2>Use the tutorial hub</h2>
-      <p>
-        Find guides grouped by practical job: Jellyfin, Proxmox, backups, quiet storage, power usage, and low-power hardware.
-      </p>
-      <a class="btn" href="/tutorials/">Browse tutorials →</a>
-    </article>
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <div class="kicker" style="color:rgba(255,255,255,0.78);">Most useful first</div>
+    <h2 style="color:#ffffff; margin-top:0;">Trying to fix Jellyfin?</h2>
+    <p style="color:rgba(255,255,255,0.88); max-width:820px;">
+      The fastest wins are usually not hardware upgrades. They are path checks, mounted drives, Linux permissions, Docker volume mappings, direct play settings, and a clear folder structure.
+    </p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1rem;">
+      <a class="btn primary" href="/guides/jellyfin/">Open the Jellyfin hub →</a>
+      <a class="btn" href="/guides/jellyfin-media-library-not-showing-files/" style="background:#ffffff;">Fix an empty library</a>
+      <a class="btn" href="/downloads/checklists/jellyfin-media-not-showing-checklist.pdf" download style="background:#ffffff;">Download checklist</a>
+    </div>
   </section>
 
   <section class="grid" style="margin-top: 16px;">
@@ -92,26 +121,26 @@ const latestJournal = journalSorted[0];
     </article>
 
     <article class="card hover" style="padding:0; overflow:hidden;">
-      <img src="/images/guides/mini-pc-under-200-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
+      <img src="/images/guides/best-mini-pc-specs-for-jellyfin-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
       <div style="padding:1.1rem 1.05rem 1rem;">
         <div class="kicker">Hardware</div>
-        <h2>Pick a budget mini PC home lab box</h2>
+        <h2>Pick a Jellyfin-ready mini PC</h2>
         <p>
-          Learn what to look for in a used mini PC under £200, including CPU generation, RAM, SSD storage, idle power, and noise.
+          Choose CPU, RAM, storage, networking, and hardware transcoding support before buying a used mini PC.
         </p>
-        <a class="btn" href="/guides/mini-pc-under-200/">Read the mini PC guide →</a>
+        <a class="btn" href="/guides/best-mini-pc-specs-for-jellyfin/">Read the specs guide →</a>
       </div>
     </article>
 
     <article class="card hover" style="padding:0; overflow:hidden;">
-      <img src="/images/guides/measure-power-usage-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
+      <img src="/images/guides/backups-3-2-1-diagram.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:150px; object-fit:contain; background:#f7f9fa;" />
       <div style="padding:1.1rem 1.05rem 1rem;">
-        <div class="kicker">Power</div>
-        <h2>Measure low-power home lab usage</h2>
+        <div class="kicker">Backups</div>
+        <h2>Make recovery boring</h2>
         <p>
-          Check real wattage before upgrading hardware, then calculate monthly and yearly running costs properly.
+          Set up a simple 3-2-1 backup approach before your home server becomes something you rely on.
         </p>
-        <a class="btn" href="/guides/measure-power-usage-homelab/">Measure power usage →</a>
+        <a class="btn" href="/guides/backups-3-2-1-home-server/">Build the backup habit →</a>
       </div>
     </article>
   </section>
@@ -119,8 +148,8 @@ const latestJournal = journalSorted[0];
   {priorityGuides.length ? (
     <section style="margin-top: 16px;">
       <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
-        <h2>Start with these small home server guides</h2>
-        <a class="btn" href="/guides/">View all →</a>
+        <h2>High-value Jellyfin fixes</h2>
+        <a class="btn" href="/guides/jellyfin/">View Jellyfin hub →</a>
       </div>
 
       <div class="grid" style="margin-top: 10px;">
