@@ -87,6 +87,14 @@ const jellyfinClusterSlugs = [
   "jellyfin-mini-pc-home-server",
 ];
 
+const jellyfinPathSlugs = [
+  "jellyfin-ubuntu-low-power",
+  "jellyfin-ubuntu-folder-permissions",
+  "jellyfin-media-library-not-showing-files",
+  "jellyfin-direct-play-vs-transcoding",
+  "best-mini-pc-specs-for-jellyfin",
+];
+
 const nextGuideMap: Record<string, string[]> = {
   "jellyfin-ubuntu-low-power": [
     "jellyfin-ubuntu-folder-permissions",
@@ -211,8 +219,9 @@ const checklistMap: Record<string, { title: string; description: string; href: s
 
 const checklistDownloads = checklistMap[guide.slug] ?? [];
 const nextGuides = getGuideCards(nextGuideMap[guide.slug] ?? []);
-const jellyfinCluster = tags.includes("jellyfin") ? getGuideCards(jellyfinClusterSlugs).slice(0, 6) : [];
 const isJellyfinGuide = tags.includes("jellyfin") || guide.slug.includes("jellyfin");
+const jellyfinCluster = isJellyfinGuide ? getGuideCards(jellyfinClusterSlugs).slice(0, 6) : [];
+const jellyfinPathGuides = isJellyfinGuide ? getGuideCards(jellyfinPathSlugs) : [];
 const isProxmoxGuide = tags.includes("proxmox") || guide.slug.includes("proxmox");
 const guideDifficulty = isProxmoxGuide ? "Beginner to intermediate" : "Beginner-friendly";
 const guideFocus = isJellyfinGuide
@@ -323,6 +332,27 @@ const quickAnswer = data.description;
         <h2 style="margin-top:0;">What this guide helps you do</h2>
         <p style="font-size:1.03rem; margin-bottom:0;">{quickAnswer}</p>
       </section>
+
+      {jellyfinPathGuides.length ? (
+        <section class="card" style="margin-bottom:1.25rem; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff; border:0;">
+          <p class="kicker" style="color:rgba(255,255,255,0.78);">Jellyfin beginner path</p>
+          <h2 style="margin-top:0; color:#ffffff;">New to Jellyfin? Follow this order.</h2>
+          <p style="color:rgba(255,255,255,0.88);">
+            These guides form the SmallGrid Jellyfin path: install it, fix folder access, solve empty libraries, reduce unnecessary transcoding, then choose the right mini PC.
+          </p>
+          <ol style="margin:1rem 0 0; padding-left:1.2rem; color:rgba(255,255,255,0.9);">
+            {jellyfinPathGuides.map((item: any) => (
+              <li style="margin-bottom:0.4rem;">
+                <a href={item.url} style="color:#ffffff; text-decoration:underline; text-underline-offset:3px;">{item.title}</a>
+              </li>
+            ))}
+          </ol>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1rem;">
+            <a class="btn" href="/guides/jellyfin/" style="background:#ffffff;">Open the Jellyfin hub →</a>
+            <a class="btn" href="/checklists/" style="background:#ffffff;">View checklists →</a>
+          </div>
+        </section>
+      ) : null}
 
       <section class="grid" style="margin-bottom:1.25rem;">
         <article class="card" style="padding:1rem; border-left:4px solid #0e3d39;">
