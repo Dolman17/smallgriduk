@@ -230,9 +230,76 @@ const guideFocus = isJellyfinGuide
     ? "Small home lab virtualisation"
     : "Small home server setup";
 const quickAnswer = data.description;
+
+const canonicalPath = `/guides/${guide.slug}/`;
+const pageUrl = new URL(canonicalPath, Astro.site).toString();
+const siteHome = new URL("/", Astro.site).toString();
+const guidesHome = new URL("/guides/", Astro.site).toString();
+const aboutUrl = new URL("/about/", Astro.site).toString();
+const logoUrl = new URL("/brand/smallgrid-logo.svg", Astro.site).toString();
+const guideImageUrl = data.cover ? new URL(data.cover, Astro.site).toString() : logoUrl;
+const publishedIso = pubDate.toISOString();
+const modifiedIso = data?.updatedDate instanceof Date ? data.updatedDate.toISOString() : publishedIso;
+
+const guideStructuredData = JSON.stringify([
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: data.title,
+    description: data.description,
+    image: [guideImageUrl],
+    datePublished: publishedIso,
+    dateModified: modifiedIso,
+    author: {
+      "@type": "Organization",
+      name: "SmallGrid",
+      url: aboutUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "SmallGrid",
+      url: siteHome,
+      logo: {
+        "@type": "ImageObject",
+        url: logoUrl,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": pageUrl,
+    },
+    keywords: tags.join(", "),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteHome,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Guides",
+        item: guidesHome,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: data.title,
+        item: pageUrl,
+      },
+    ],
+  },
+]);
 ---
 
-<BaseLayout title={data.title} description={data.description} canonicalPath={`/guides/${guide.slug}/`}>
+<BaseLayout title={data.title} description={data.description} canonicalPath={canonicalPath}>
+  <script type="application/ld+json" set:html={guideStructuredData} />
+
   <header class="article-header">
     <p class="article-kicker">Guide · SmallGrid</p>
 
@@ -263,25 +330,25 @@ const quickAnswer = data.description;
     ) : null}
 
     <div class="guide-topline">
-        <div style="display:none;"> <!-- kept for accessibility/fallback -->
-          <div class="guide-byline">
-            <img class="guide-avatar" src={authorAvatar} alt="" width="36" height="36" loading="lazy" />
-            <span class="guide-byline-text">
-              <span class="muted">by</span> <span class="guide-author">{authorName}</span>
-            </span>
-          </div>
-
-          <div class="guide-meta-chips">
-            <span class="chip">
-              <span class="chip-label">Updated</span>
-              <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-            </span>
-
-            {tags.slice(0, 6).map((tag) => (
-              <span class="chip chip-tag">#{tag}</span>
-            ))}
-          </div>
+      <div style="display:none;">
+        <div class="guide-byline">
+          <img class="guide-avatar" src={authorAvatar} alt="" width="36" height="36" loading="lazy" />
+          <span class="guide-byline-text">
+            <span class="muted">by</span> <span class="guide-author">{authorName}</span>
+          </span>
         </div>
+
+        <div class="guide-meta-chips">
+          <span class="chip">
+            <span class="chip-label">Updated</span>
+            <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+          </span>
+
+          {tags.slice(0, 6).map((tag) => (
+            <span class="chip chip-tag">#{tag}</span>
+          ))}
+        </div>
+      </div>
     </div>
 
     <div class="guide-toolbar" data-guide-slug={guide.slug}>
