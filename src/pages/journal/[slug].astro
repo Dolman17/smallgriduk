@@ -25,6 +25,7 @@ const updated = entry.data.updatedDate
   : null;
 
 const tags = entry.data.tags || [];
+const journalHero = "/images/journal/journal-homelab-working-hero.webp";
 ---
 
 <BaseLayout
@@ -32,11 +33,12 @@ const tags = entry.data.tags || [];
   description={entry.data.description}
   canonicalPath={`/journal/${entry.slug}/`}
 >
-  <section class="card">
+  <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
     <p style="margin:0 0 10px;">
       <a class="btn" href="/journal/">← Back to journal</a>
     </p>
 
+    <p class="kicker">Homelab Journal</p>
     <h1 style="margin: 0 0 8px;">{entry.data.title}</h1>
 
     <div class="muted" style="font-size: 13px; margin-bottom: 10px;">
@@ -45,13 +47,21 @@ const tags = entry.data.tags || [];
     </div>
 
     {entry.data.description && (
-      <p class="muted" style="margin:0 0 12px;">
+      <p class="muted" style="margin:0 0 12px; font-size:1.02rem;">
         {entry.data.description}
       </p>
     )}
 
+    <img
+      src={journalHero}
+      alt="Cartoon homelab desk with Jellyfin working successfully"
+      loading="eager"
+      decoding="async"
+      style="width:100%; margin-top:1rem; border-radius:0.95rem; border:1px solid rgba(107,115,123,0.18); box-shadow:0 20px 45px -35px rgba(31,36,40,0.55); background:#f7f9fa;"
+    />
+
     {tags.length > 0 && (
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:1rem;">
         {tags.map((t) => (
           <span class="pill">#{t}</span>
         ))}
