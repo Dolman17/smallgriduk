@@ -1,0 +1,35 @@
+.btn,
+a.btn,
+button.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  height: auto;
+  max-width: 100%;
+  padding: 0.58rem 1rem;
+  border-radius: 999px;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  vertical-align: middle;
+}
+
+.btn.primary,
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .btn,
+  a.btn,
+  button.btn {
+    width: 100%;
+  }
+}
