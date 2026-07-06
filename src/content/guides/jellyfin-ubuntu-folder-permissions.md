@@ -1,45 +1,91 @@
 ---
-title: "Fix Jellyfin Folder Permissions on Ubuntu"
-description: "A practical guide to fixing Jellyfin media folder access problems on Ubuntu using users, groups, ACLs, and simple checks."
+title: "Give Jellyfin Access to Media Folders on Ubuntu"
+description: "Fix Jellyfin permission denied errors on Ubuntu. Check users, parent folders, mounted drives, ACLs, fstab options, and library paths step by step."
 pubDate: 2026-06-27
-tags: ["jellyfin", "ubuntu", "permissions", "media"]
+updatedDate: 2026-07-06
+tags: ["jellyfin", "ubuntu", "permissions", "media", "acl", "mounted-drives"]
 cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
 ---
 
-## Goal
+## Quick answer
 
-Fix the common Ubuntu problem where Jellyfin is installed correctly but cannot see your media folders.
-
-This guide focuses on one thing: giving the `jellyfin` service user reliable read access to your media without making the whole system messy or insecure.
-
----
-
-## The default recommendation
-
-Use ACLs to give the `jellyfin` user read and execute access to your media folder.
-
-For most home servers, this is cleaner than changing ownership of your entire media library or making the folder world-readable.
-
-Default command pattern:
+If Jellyfin cannot access a media folder on Ubuntu, test the exact path as the `jellyfin` service user:
 
 ```bash
+sudo -u jellyfin ls -la /mnt/media
+```
+
+If that returns `Permission denied`, Jellyfin cannot traverse or read one of the folders in the path.
+
+For a normal ext4 media folder, the cleanest fix is usually:
+
+```bash
+sudo apt install -y acl
 sudo setfacl -R -m u:jellyfin:rx /mnt/media
 sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
 sudo systemctl restart jellyfin
 ```
 
-Replace `/mnt/media` with your actual media path.
+Replace `/mnt/media` with your real media path.
+
+Do not start with `chmod -R 777`. Jellyfin normally needs read and execute access, not ownership of the whole library.
 
 ---
 
-## What you’ll need
+## Common Jellyfin permission errors
 
-- Jellyfin already installed on Ubuntu
-- SSH or terminal access
-- The path to your media folder
-- Permission to use `sudo`
+Typical symptoms include:
 
-Common media paths include:
+- `Permission denied`
+- Jellyfin can add the folder but shows no files
+- a library scan completes almost instantly
+- old files appear but newly copied files do not
+- media works until the server reboots
+- a USB drive or NAS path appears empty
+- Jellyfin can see `/mnt/media` but not `/mnt/media/movies`
+
+These problems are usually caused by one of four things:
+
+1. Jellyfin cannot traverse a parent folder.
+2. Existing files do not grant the `jellyfin` user read access.
+3. New files do not inherit the correct permissions.
+4. A mounted drive or network share uses unsuitable mount options.
+
+---
+
+## Step 1: Confirm which user Jellyfin runs as
+
+On a standard Ubuntu package install, Jellyfin normally runs as the Linux user `jellyfin`.
+
+Check it:
+
+```bash
+id jellyfin
+```
+
+You should see a user ID, group ID, and group list.
+
+Then confirm the service is running:
+
+```bash
+systemctl status jellyfin --no-pager
+```
+
+If `id jellyfin` fails, repair the Jellyfin installation before changing folder permissions.
+
+---
+
+## Step 2: Confirm the real media path
+
+Check where the files actually live:
+
+```bash
+ls -la /mnt/media
+ls -la /mnt/media/movies
+ls -la /mnt/media/tv
+```
+
+Common server paths include:
 
 ```text
 /mnt/media
@@ -48,223 +94,226 @@ Common media paths include:
 /home/YOUR-USER/media
 ```
 
-If you are still setting Jellyfin up from scratch, start with [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/).
-
----
-
-## Step 1: Check the Jellyfin user exists
-
-Jellyfin normally runs as a Linux user called `jellyfin`.
-
-Check it:
-
-```bash
-id jellyfin
-```
-
-You should see output showing a user ID, group ID, and groups.
-
-If that command fails, Jellyfin may not be installed correctly. Reinstall or repair Jellyfin before continuing.
-
----
-
-## Step 2: Find your media folder
-
-Check where your media actually lives.
-
-Example:
-
-```bash
-ls -la /mnt/media
-```
-
-If your folders are somewhere else, check that location instead:
-
-```bash
-ls -la /srv/media
-ls -la /media
-ls -la /home/$USER
-```
-
-For this guide, the example path is:
-
-```text
-/mnt/media
-```
-
-Inside it, you might have:
-
-```text
-/mnt/media/movies
-/mnt/media/tv
-/mnt/media/music
-```
-
----
-
-## Step 3: Test whether Jellyfin can read the folder
-
-Run this command:
-
-```bash
-sudo -u jellyfin ls -la /mnt/media
-```
-
-Then test the library folders:
-
-```bash
-sudo -u jellyfin ls -la /mnt/media/movies
-sudo -u jellyfin ls -la /mnt/media/tv
-```
-
-If Jellyfin can read them, you should see the folder contents.
-
-If you see `Permission denied`, Jellyfin does not have enough access.
-
----
-
-## Step 4: Install ACL support
-
-Most Ubuntu installs already support ACLs, but installing the package is harmless:
-
-```bash
-sudo apt update
-sudo apt install -y acl
-```
-
-ACLs let you give one specific user access to a folder without changing the main owner or group.
-
-That is useful because your normal user can keep managing media files, while Jellyfin gets the read access it needs.
-
----
-
-## Step 5: Give Jellyfin access to existing files
-
-Give the `jellyfin` user read and execute access to the whole media folder:
-
-```bash
-sudo setfacl -R -m u:jellyfin:rx /mnt/media
-```
-
-What this means:
-
-- `r` lets Jellyfin read files and list folders.
-- `x` lets Jellyfin enter folders.
-- `-R` applies the rule recursively.
-
-Do not use write access unless Jellyfin genuinely needs to write into that folder.
-
-For a normal media library, read access is enough.
-
----
-
-## Step 6: Make permissions apply to new files too
-
-Set a default ACL so new files and folders inherit Jellyfin access:
-
-```bash
-sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
-```
-
-This helps avoid the frustrating situation where today’s media works, but newly copied files disappear from Jellyfin later.
-
----
-
-## Step 7: Restart Jellyfin and test again
-
-Restart Jellyfin:
-
-```bash
-sudo systemctl restart jellyfin
-```
-
-Test folder access again:
-
-```bash
-sudo -u jellyfin ls -la /mnt/media
-sudo -u jellyfin ls -la /mnt/media/movies
-sudo -u jellyfin ls -la /mnt/media/tv
-```
-
-If those commands now show folder contents, go back to the Jellyfin web interface and rescan the library.
-
----
-
-## Step 8: Rescan your Jellyfin library
-
-In Jellyfin:
-
-1. Open **Dashboard**.
-2. Go to **Libraries**.
-3. Select the affected library.
-4. Run a library scan.
-
-If the folder still appears empty, check that the path in Jellyfin exactly matches the real Linux path.
-
-For example, these are not the same:
+Linux paths are case-sensitive. These are different:
 
 ```text
 /mnt/media/tv
 /mnt/Media/TV
 ```
 
-Linux paths are case-sensitive.
+The path configured in Jellyfin must exactly match the real Linux path.
+
+If the library is empty rather than showing an explicit permission error, work through [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/) alongside this guide.
 
 ---
 
-## Common problem: media inside your home folder
+## Step 3: Test the complete path as the Jellyfin user
 
-If your media is inside your home directory, such as:
+This is the most useful test:
 
-```text
-/home/sean/media
+```bash
+sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin ls -la /mnt/media/movies
+sudo -u jellyfin ls -la /mnt/media/tv
 ```
 
-Jellyfin may be blocked by the permissions on `/home/sean`, even if `/home/sean/media` looks readable.
+If Jellyfin can read the folders, you will see their contents.
 
-You can test it:
+If you see:
+
+```text
+ls: cannot open directory '/mnt/media': Permission denied
+```
+
+or:
+
+```text
+ls: cannot access '/mnt/media/movies': Permission denied
+```
+
+then the problem is confirmed.
+
+To identify the exact parent folder blocking access, use:
+
+```bash
+namei -l /mnt/media/movies
+```
+
+The output shows the owner and permissions for every part of the path. Jellyfin needs execute permission on each directory in the chain so it can traverse into the final folder.
+
+---
+
+## Step 4: Check parent-folder traversal
+
+A media folder can look readable while a parent directory blocks access.
+
+For example:
+
+```text
+/home/sean/media/movies
+```
+
+Jellyfin may have access to `media` but still be blocked by `/home/sean`.
+
+Test the path directly:
 
 ```bash
 sudo -u jellyfin ls -la /home/sean/media
 ```
 
-If that fails, either move the media to a server-style path:
+For shared service data, a cleaner long-term structure is usually:
 
 ```text
 /mnt/media
 /srv/media
 ```
 
-Or carefully grant traversal access on the parent directory.
-
-For a home server, the cleaner long-term answer is usually to keep shared service data under `/srv` or `/mnt`, not inside a personal home folder.
+If you keep media inside a home folder, grant traversal carefully rather than making the whole home directory broadly readable.
 
 ---
 
-## Common problem: external USB drives
+## Step 5: Install ACL support
 
-If the media is on a USB drive, check the mount point:
+Install the ACL tools:
 
 ```bash
-findmnt
+sudo apt update
+sudo apt install -y acl
 ```
 
-Then check permissions:
+ACLs let you give the `jellyfin` user access without changing the main owner or group of the media library.
+
+This is useful when your normal account, Sonarr, Radarr, or another service still manages the files.
+
+---
+
+## Step 6: Give Jellyfin access to existing files
+
+Grant read and execute access recursively:
 
 ```bash
-ls -la /mnt
+sudo setfacl -R -m u:jellyfin:rx /mnt/media
+```
+
+The flags mean:
+
+- `r`: read files and list directory contents
+- `x`: enter and traverse directories
+- `-R`: apply recursively
+
+For a normal media library, Jellyfin usually does not need write access.
+
+Check the resulting ACL:
+
+```bash
+getfacl /mnt/media
+getfacl /mnt/media/movies
+```
+
+You should see an entry similar to:
+
+```text
+user:jellyfin:r-x
+```
+
+---
+
+## Step 7: Make new files inherit access
+
+Existing files may work while newly copied media remains invisible.
+
+Set a default ACL on the media folder:
+
+```bash
+sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
+```
+
+This gives new files and folders an inherited Jellyfin rule.
+
+After copying a new file, verify it:
+
+```bash
+getfacl /mnt/media/movies/NEW-FOLDER
+sudo -u jellyfin ls -la /mnt/media/movies/NEW-FOLDER
+```
+
+If automated tools create the files, also check the service account and umask used by Sonarr, Radarr, qBittorrent, or your download client.
+
+---
+
+## Step 8: Restart Jellyfin and test again
+
+Restart the service:
+
+```bash
+sudo systemctl restart jellyfin
+```
+
+Retest folder access:
+
+```bash
+sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin ls -la /mnt/media/movies
+sudo -u jellyfin ls -la /mnt/media/tv
+```
+
+If those commands work, open Jellyfin and run a library scan.
+
+---
+
+## Mounted USB or internal drives
+
+If the media is stored on another disk, confirm it is mounted where you expect:
+
+```bash
+findmnt /mnt/media
+lsblk -f
+```
+
+Also inspect the filesystem type:
+
+```bash
+findmnt -no SOURCE,FSTYPE,OPTIONS /mnt/media
+```
+
+### ext4
+
+ACLs normally work as expected on ext4.
+
+### NTFS or exFAT
+
+Normal Linux ownership and ACL behaviour may not apply in the same way. Mount options often control access instead.
+
+Check `/etc/fstab`:
+
+```bash
+sudo nano /etc/fstab
+```
+
+For NTFS or exFAT, options such as `uid`, `gid`, `umask`, `fmask`, and `dmask` may determine what Jellyfin can access.
+
+Do not repeatedly run `chmod` on an NTFS or exFAT mount and expect persistent Linux permissions if the mount options override them.
+
+### Drive works until reboot
+
+If Jellyfin works before a reboot but the library becomes empty afterwards, the disk may not be mounting automatically.
+
+Check:
+
+```bash
+findmnt /mnt/media
 ls -la /mnt/media
 ```
 
-If the drive is formatted as NTFS or exFAT, Linux permissions may behave differently. In that case, the mount options in `/etc/fstab` matter more than normal `chmod` commands.
+An empty mount-point directory can look valid even when the real disk is not mounted.
 
-For a dedicated Ubuntu media server, ext4 is usually the simplest filesystem for internal or permanently attached drives.
+For permanently attached storage, use a stable UUID entry in `/etc/fstab` rather than relying on a desktop auto-mount path.
 
 ---
 
-## Common problem: network shares
+## Network shares and NAS mounts
 
-For SMB/CIFS or NAS shares, the mount options decide which Linux user owns the files.
+For SMB or CIFS shares, mount options decide which local user and group appear to own the files.
 
 Check the mount:
 
@@ -272,76 +321,121 @@ Check the mount:
 findmnt | grep -i cifs
 ```
 
-If Jellyfin cannot read a network-mounted folder, inspect `/etc/fstab` and confirm the share is mounted with suitable `uid`, `gid`, `file_mode`, and `dir_mode` options.
+Then inspect the options:
 
-A typical home-server approach is to mount the share somewhere predictable, such as:
-
-```text
-/mnt/media
+```bash
+findmnt -no TARGET,SOURCE,FSTYPE,OPTIONS /mnt/media
 ```
 
-Then give Jellyfin access to that mount point.
+Useful CIFS options may include:
+
+```text
+uid=
+gid=
+file_mode=
+dir_mode=
+```
+
+For NFS, access may depend on server-side export rules, UID matching, and root-squash behaviour.
+
+The fastest practical test remains:
+
+```bash
+sudo -u jellyfin ls -la /mnt/media
+```
+
+If the Jellyfin user cannot list the mounted path, Jellyfin cannot scan it.
 
 ---
 
-## Do not make everything world-writable
+## If Jellyfin runs in Docker
 
-Avoid quick fixes like this:
+A Docker container has two relevant paths:
+
+```text
+Host path:      /srv/media/movies
+Container path: /media/movies
+```
+
+Jellyfin must use the container path shown inside the container, not necessarily the host path.
+
+Also check the UID and GID used by the container. A host folder can be readable by the native `jellyfin` user while still being inaccessible to a container running under a different UID.
+
+Use the dedicated guide: [Jellyfin Docker Permissions: Fix Media Folder Access Properly](/guides/jellyfin-docker-permissions-media-folder/).
+
+---
+
+## Do not use chmod 777 as the permanent fix
+
+Avoid:
 
 ```bash
 sudo chmod -R 777 /mnt/media
 ```
 
-It may appear to fix Jellyfin, but it also gives every local user full read, write, and execute access.
+It gives every local user full read, write, and execute access.
 
-For a home server, ACLs are a better default:
+A safer default is:
 
 ```bash
 sudo setfacl -R -m u:jellyfin:rx /mnt/media
 sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
 ```
 
-Jellyfin needs to read your media. It usually does not need to own it.
+Jellyfin normally needs to read your media. It does not need to own it.
 
 ---
 
-## Quick verification checklist
+## Exact verification sequence
 
-Run these checks:
+Run this block after making changes:
 
 ```bash
 id jellyfin
+namei -l /mnt/media/movies
 sudo -u jellyfin ls -la /mnt/media
 sudo -u jellyfin ls -la /mnt/media/movies
 sudo -u jellyfin ls -la /mnt/media/tv
+getfacl /mnt/media
+findmnt /mnt/media
 systemctl status jellyfin --no-pager
 ```
 
-Then check Jellyfin itself:
+Then verify in Jellyfin:
 
-- The library path is correct.
-- The library scan completes.
-- Files appear in the right library.
-- New files appear after a rescan.
+1. The configured library path is exact.
+2. The library scan completes normally.
+3. Existing files appear.
+4. A newly copied file appears after a rescan.
+5. Logs do not show `Permission denied`.
 
 ---
 
-## Next steps
+## Related guides
 
-Useful follow-up guides:
-
+- [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/)
 - [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
-- [Remote Access Without Port Forwarding: Jellyfin + Tailscale](/guides/jellyfin-tailscale-remote-access/)
+- [Jellyfin Docker Permissions: Fix Media Folder Access Properly](/guides/jellyfin-docker-permissions-media-folder/)
 - [Jellyfin Direct Play vs Transcoding](/guides/jellyfin-direct-play-vs-transcoding/)
-- [3-2-1 Backups for Home Servers](/guides/backups-3-2-1-home-server/)
+- [Remote Access Without Port Forwarding: Jellyfin + Tailscale](/guides/jellyfin-tailscale-remote-access/)
 
 ---
 
 ## Recap
 
-If Jellyfin cannot see your media on Ubuntu, check permissions before reinstalling anything.
+If Jellyfin cannot access a media folder on Ubuntu, prove the problem with:
 
-The practical fix is usually:
+```bash
+sudo -u jellyfin ls -la /mnt/media
+```
+
+Then inspect the full path with:
+
+```bash
+namei -l /mnt/media
+```
+
+For a normal ext4 media library, the practical fix is usually:
 
 ```bash
 sudo apt install -y acl
@@ -350,4 +444,4 @@ sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
 sudo systemctl restart jellyfin
 ```
 
-A quiet, reliable Jellyfin server is mostly about boring fundamentals: sensible folders, clear permissions, and no exposed services unless you actually need them.
+If the media is mounted from USB, NTFS, exFAT, SMB, CIFS, or NFS, inspect the mount options as well as the folder permissions.
