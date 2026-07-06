@@ -21,10 +21,11 @@ const sections = [
   },
   {
     kicker: "Fix common problems",
-    title: "Solve empty libraries and folder access issues",
-    description: "Most beginner Jellyfin problems are path, mount, folder permission, or Docker volume mapping problems.",
+    title: "Solve missing media, empty libraries, and folder access issues",
+    description: "Most beginner Jellyfin problems are path, mount, folder permission, new-file inheritance, or Docker volume mapping problems.",
     accent: "#0a66ff",
     guides: [
+      findGuide("jellyfin-not-scanning-new-files"),
       findGuide("jellyfin-media-library-not-showing-files"),
       findGuide("jellyfin-docker-permissions-media-folder"),
       findGuide("jellyfin-ubuntu-folder-permissions"),
@@ -76,14 +77,14 @@ const featuredChecklistLinks = [
 
 <BaseLayout
   title="Jellyfin Beginner Guides"
-  description="Beginner-friendly Jellyfin guides for Ubuntu, Docker permissions, empty libraries, direct play, transcoding, mini PCs, and safe remote access."
+  description="Beginner-friendly Jellyfin guides for Ubuntu, Docker permissions, empty libraries, new files not scanning, direct play, transcoding, mini PCs, and safe remote access."
   canonicalPath="/guides/jellyfin/"
 >
   <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
     <p class="kicker">Jellyfin hub</p>
     <h1 style="margin:0 0 8px;">Jellyfin beginner guides that fix the real problems.</h1>
     <p class="muted" style="margin:0; font-size:1.05rem; max-width:800px;">
-      Start with a simple Jellyfin server, then work through media folders, permissions, Docker paths, direct play, transcoding, mini PC hardware, and safe remote access.
+      Start with a simple Jellyfin server, then work through media folders, permissions, new files not scanning, Docker paths, direct play, transcoding, mini PC hardware, and safe remote access.
     </p>
 
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 1rem 0;">
@@ -94,6 +95,7 @@ const featuredChecklistLinks = [
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
       <a class="btn primary" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin on Ubuntu</a>
+      <a class="btn" href="/guides/jellyfin-not-scanning-new-files/">Fix new files not scanning</a>
       <a class="btn" href="/guides/jellyfin-media-library-not-showing-files/">Fix an empty library</a>
       <a class="btn" href="/checklists/">Download checklists</a>
     </div>
@@ -114,11 +116,11 @@ const featuredChecklistLinks = [
 
     <article class="card hover" style="border-top:4px solid #0a66ff; background:linear-gradient(180deg,#ffffff,#f7faff);">
       <div class="kicker">Quick fix path</div>
-      <h2>Library empty?</h2>
+      <h2>New files missing?</h2>
       <p>
-        Do not reinstall Jellyfin first. Check the path, mount, folder access, Docker volume mapping, and library scan order.
+        If older media appears but new films or episodes do not, compare file ownership, default ACLs, mounts, and Docker paths before reinstalling anything.
       </p>
-      <a class="btn" href="/guides/jellyfin-media-library-not-showing-files/">Open the troubleshooting guide →</a>
+      <a class="btn" href="/guides/jellyfin-not-scanning-new-files/">Open the new-files scanning guide →</a>
     </article>
 
     <article class="card hover" style="border-top:4px solid #2fa4a9; background:linear-gradient(180deg,#ffffff,#f4fbfb);">
