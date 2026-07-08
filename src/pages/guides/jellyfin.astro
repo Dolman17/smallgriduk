@@ -21,24 +21,30 @@ const sections = [
   },
   {
     kicker: "Fix common problems",
-    title: "Solve missing media, empty libraries, and folder access issues",
-    description: "Most beginner Jellyfin problems are path, mount, folder permission, new-file inheritance, or Docker volume mapping problems.",
+    title: "Solve missing media, empty libraries, mounts, and Docker paths",
+    description: "Most beginner Jellyfin problems are path, mount, folder permission, new-file inheritance, USB storage, or Docker volume mapping problems.",
     accent: "#0a66ff",
     guides: [
       findGuide("jellyfin-not-scanning-new-files"),
       findGuide("jellyfin-media-library-not-showing-files"),
+      findGuide("jellyfin-media-disappears-after-reboot"),
+      findGuide("jellyfin-cannot-access-external-usb-drive"),
+      findGuide("jellyfin-docker-volume-paths-explained"),
       findGuide("jellyfin-docker-permissions-media-folder"),
-      findGuide("jellyfin-ubuntu-folder-permissions"),
     ].filter(Boolean),
   },
   {
     kicker: "Playback",
-    title: "Reduce transcoding and improve direct play",
-    description: "Understand why Jellyfin transcodes, which formats work best, and what hardware actually matters.",
+    title: "Reduce transcoding and improve Direct Play",
+    description: "Understand playback modes, subtitle burn-in, formats, client compatibility, and what hardware actually matters.",
     accent: "#2fa4a9",
     guides: [
       findGuide("jellyfin-direct-play-vs-transcoding"),
+      findGuide("how-to-check-why-jellyfin-is-transcoding"),
+      findGuide("jellyfin-direct-stream-vs-direct-play"),
+      findGuide("jellyfin-subtitles-causing-transcoding"),
       findGuide("best-file-formats-for-jellyfin-direct-play"),
+      findGuide("best-cheap-jellyfin-client-direct-play"),
       findGuide("jellyfin-hardware-transcoding-ubuntu"),
       findGuide("best-mini-pc-specs-for-jellyfin"),
     ].filter(Boolean),
@@ -77,14 +83,14 @@ const featuredChecklistLinks = [
 
 <BaseLayout
   title="Jellyfin Beginner Guides"
-  description="Beginner-friendly Jellyfin guides for Ubuntu, Docker permissions, empty libraries, new files not scanning, direct play, transcoding, mini PCs, and safe remote access."
+  description="Beginner-friendly Jellyfin guides for Ubuntu, Docker paths, USB storage, missing media, subtitles, Direct Play, transcoding, clients, mini PCs, and Tailscale remote access."
   canonicalPath="/guides/jellyfin/"
 >
   <section class="card" style="overflow:hidden; background: radial-gradient(circle at top right, rgba(10,102,255,0.18), transparent 32%), radial-gradient(circle at top left, rgba(14,61,57,0.16), transparent 34%), linear-gradient(135deg, #ffffff, #f4fbfb);">
     <p class="kicker">Jellyfin hub</p>
     <h1 style="margin:0 0 8px;">Jellyfin beginner guides that fix the real problems.</h1>
     <p class="muted" style="margin:0; font-size:1.05rem; max-width:800px;">
-      Start with a simple Jellyfin server, then work through media folders, permissions, new files not scanning, Docker paths, direct play, transcoding, mini PC hardware, and safe remote access.
+      Start with a simple Jellyfin server, then work through folders, mounts, Docker paths, USB storage, subtitles, Direct Play, transcoding, client devices, and safe remote access.
     </p>
 
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin: 1rem 0;">
@@ -93,9 +99,9 @@ const featuredChecklistLinks = [
       <img src="/images/guides/quiet-storage-without-noise-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
     </div>
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
       <a class="btn primary" href="/guides/jellyfin-ubuntu-low-power/">Start with Jellyfin on Ubuntu</a>
-      <a class="btn" href="/guides/jellyfin-not-scanning-new-files/">Fix new files not scanning</a>
+      <a class="btn" href="/guides/how-to-check-why-jellyfin-is-transcoding/">Find why Jellyfin is transcoding</a>
       <a class="btn" href="/guides/jellyfin-media-library-not-showing-files/">Fix an empty library</a>
       <a class="btn" href="/checklists/">Download checklists</a>
     </div>
@@ -107,35 +113,35 @@ const featuredChecklistLinks = [
       <h2>Follow this order</h2>
       <ol style="margin-bottom:0; padding-left:1.2rem;">
         <li>Install Jellyfin on a simple low-power server.</li>
-        <li>Put your media in clear folders.</li>
+        <li>Put media in stable folders and mounts.</li>
         <li>Fix Linux or Docker permissions properly.</li>
-        <li>Check direct play before buying new hardware.</li>
+        <li>Check playback mode before buying hardware.</li>
         <li>Use private remote access before exposing anything publicly.</li>
       </ol>
     </article>
 
     <article class="card hover" style="border-top:4px solid #0a66ff; background:linear-gradient(180deg,#ffffff,#f7faff); display:flex; flex-direction:column;">
-      <div class="kicker">Quick fix path</div>
-      <h2>New files missing?</h2>
+      <div class="kicker">Storage fix path</div>
+      <h2>Media missing after reboot?</h2>
       <p>
-        If older media appears but new films or episodes do not, compare file ownership, default ACLs, mounts, and Docker paths before reinstalling anything.
+        Verify the disk mount, UUID, fstab entry, service timing, and Jellyfin access before rescanning or reinstalling anything.
       </p>
-      <a class="btn" href="/guides/jellyfin-not-scanning-new-files/" style="margin-top:auto; align-self:center; text-align:center; max-width:100%; white-space:normal;">Open the new-files scanning guide →</a>
+      <a class="btn" href="/guides/jellyfin-media-disappears-after-reboot/" style="margin-top:auto; align-self:center;">Open the reboot and mount guide →</a>
     </article>
 
     <article class="card hover" style="border-top:4px solid #2fa4a9; background:linear-gradient(180deg,#ffffff,#f4fbfb); display:flex; flex-direction:column;">
-      <div class="kicker">Hardware path</div>
-      <h2>Choosing a mini PC?</h2>
+      <div class="kicker">Playback fix path</div>
+      <h2>Unexpected transcoding?</h2>
       <p>
-        Focus on idle power, Intel Quick Sync, enough RAM, SSD storage, and reliable networking before chasing headline CPU scores.
+        Read the dashboard reason, test subtitles and audio, compare clients, and inspect the file before changing the server.
       </p>
-      <a class="btn" href="/guides/best-mini-pc-specs-for-jellyfin/" style="margin-top:auto; align-self:center; text-align:center; max-width:100%; white-space:normal;">Read the mini PC specs guide →</a>
+      <a class="btn" href="/guides/how-to-check-why-jellyfin-is-transcoding/" style="margin-top:auto; align-self:center;">Open the transcoding diagnosis guide →</a>
     </article>
   </section>
 
   {sections.map((section) => (
     <section style="margin-top:16px;">
-      <div style={`display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap; border-left:5px solid ${section.accent}; padding-left:0.9rem;`}>
+      <div style={`display:flex; align-items:end; justify-content:space-between; gap:12px; flex-wrap:wrap; border-left:5px solid ${section.accent}; padding-left:0.9rem;`}>
         <div>
           <p class="kicker" style="margin-bottom:0.3rem;">{section.kicker}</p>
           <h2 style="margin:0;">{section.title}</h2>
@@ -145,14 +151,14 @@ const featuredChecklistLinks = [
 
       <div class="grid" style="margin-top:10px;">
         {section.guides.map((guide) => (
-          <article class="card hover" style="padding:0; overflow:hidden; background:linear-gradient(180deg,#ffffff,#f8fbfb);">
+          <article class="card hover" style="padding:0; overflow:hidden; background:linear-gradient(180deg,#ffffff,#f8fbfb); display:flex; flex-direction:column;">
             {guide.data.cover ? (
               <img src={guide.data.cover} alt="" loading="lazy" decoding="async" style="width:100%; height:140px; object-fit:contain; background:#f7f9fa;" />
             ) : null}
-            <div style="padding:1.05rem;">
+            <div style="padding:1.05rem; display:flex; flex-direction:column; flex:1;">
               <h3 style="margin-top:0; font-size:1rem;"><a href={`/guides/${guide.slug}/`}>{guide.data.title}</a></h3>
               <p class="muted">{guide.data.description}</p>
-              <a class="btn" href={`/guides/${guide.slug}/`}>Read guide →</a>
+              <a class="btn" href={`/guides/${guide.slug}/`} style="margin-top:auto; align-self:center;">Read guide →</a>
             </div>
           </article>
         ))}
@@ -168,10 +174,10 @@ const featuredChecklistLinks = [
     </p>
     <div class="grid" style="margin-top:1rem;">
       {featuredChecklistLinks.map((item) => (
-        <article class="card" style="background:#ffffff; color:#1f2428; padding:1rem;">
+        <article class="card" style="background:#ffffff; color:#1f2428; padding:1rem; display:flex; flex-direction:column;">
           <h3 style="margin-top:0; font-size:1rem;"><a href={item.href} download>{item.title}</a></h3>
           <p class="muted">{item.description}</p>
-          <a class="btn primary" href={item.href} download>Download PDF</a>
+          <a class="btn primary" href={item.href} download style="margin-top:auto; align-self:center;">Download PDF</a>
         </article>
       ))}
     </div>
