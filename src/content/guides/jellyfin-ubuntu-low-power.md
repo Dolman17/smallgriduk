@@ -1,43 +1,78 @@
 ---
-title: "Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions"
-description: "Install Jellyfin on Ubuntu, give it access to your media folders, and avoid the usual Linux permissions problems."
+title: "Install Jellyfin on Ubuntu: Low-Power Setup, Media Folders and Permissions"
+description: "Install Jellyfin on Ubuntu, create media folders, fix permission denied errors, survive reboots, and build a reliable low-power home media server."
 pubDate: 2026-01-20
-tags: ["jellyfin", "ubuntu", "low-power", "media"]
+updatedDate: 2026-07-08
+tags: ["jellyfin", "ubuntu", "low-power", "media", "permissions", "installation"]
 cover: "/images/guides/jellyfin-ubuntu-low-power-hero.webp"
 ---
 
-## Goal
+## Quick answer
 
-Install Jellyfin on Ubuntu with a setup that is:
+A reliable low-power Jellyfin setup on Ubuntu needs four things:
 
-- reliable
-- low-maintenance
-- friendly to low-power hardware
-- clear about media folder permissions
+1. Jellyfin installed as a system service.
+2. Media stored in a stable path such as `/mnt/media` or `/srv/media`.
+3. The `jellyfin` user given read and execute access.
+4. The media disk mounted automatically before Jellyfin starts.
 
-The aim is simple: Jellyfin should start, see your media, survive reboots, and not become a second job.
+The basic permission test is:
+
+```bash
+sudo -u jellyfin ls -la /mnt/media
+```
+
+If that returns `Permission denied`, fix the folder access before rescanning or reinstalling Jellyfin.
+
+For a normal ext4 media folder, the practical ACL fix is:
+
+```bash
+sudo apt install -y acl
+sudo setfacl -R -m u:jellyfin:rx /mnt/media
+sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
+sudo systemctl restart jellyfin
+```
+
+Replace `/mnt/media` with your actual media path.
 
 ---
 
-## What you’ll need
+## What this setup is designed for
 
-- Ubuntu 22.04 or newer, server or desktop
-- SSH access to the machine
-- A media disk or folder
-- A browser on another device on the same network
+This guide builds a Jellyfin server that is:
 
-For the rest of this guide we’ll assume:
+- reliable after reboots
+- suitable for a small mini PC or older desktop
+- simple to maintain
+- clear about Linux folder permissions
+- focused on Direct Play rather than unnecessary transcoding
 
-- your media lives at `/mnt/media`
-- the server’s IP address is `192.168.1.50`
+The target is not a complicated media stack. It is a server that starts, sees the media, scans correctly, and stays quiet.
 
-Adjust paths and IP addresses to match your own setup.
+---
+
+## What you need
+
+- Ubuntu 22.04 or newer
+- SSH or terminal access
+- permission to use `sudo`
+- a media folder or mounted disk
+- another device with a web browser
+
+This guide uses:
+
+```text
+Media path: /mnt/media
+Server IP:  192.168.1.50
+```
+
+Adjust both values for your environment.
 
 ---
 
 ## 1. Install Jellyfin on Ubuntu
 
-First, update Ubuntu and install the packages needed to add the Jellyfin repository.
+Update Ubuntu and install the repository tools:
 
 ```bash
 sudo apt update
@@ -68,14 +103,21 @@ sudo apt install -y jellyfin
 Enable and start the service:
 
 ```bash
-sudo systemctl enable jellyfin
-sudo systemctl start jellyfin
+sudo systemctl enable --now jellyfin
 sudo systemctl status jellyfin --no-pager
 ```
 
-You want to see `active (running)`.
+You want to see:
 
-If Jellyfin is not running, fix that before adding libraries or changing network settings.
+```text
+active (running)
+```
+
+If the service is not running, inspect the logs before adding libraries:
+
+```bash
+sudo journalctl -u jellyfin --no-pager -n 100
+```
 
 ---
 
@@ -93,21 +135,19 @@ Example:
 http://192.168.1.50:8096
 ```
 
-You should see the Jellyfin setup wizard.
+Complete the setup wizard:
 
-Walk through the first setup screens:
+1. Create an administrator account.
+2. Choose the language and region.
+3. Skip adding libraries temporarily.
 
-1. Create an admin user with a strong password.
-2. Choose your language and region.
-3. Skip adding libraries for the moment.
-
-Set up folders and permissions first. This avoids the common problem where Jellyfin installs correctly but cannot see your media.
+Set up the media folders and permissions first. That prevents the common situation where Jellyfin installs correctly but the folder picker is empty.
 
 ---
 
-## 3. Create media folders
+## 3. Create a simple media folder structure
 
-We’ll use a simple folder layout:
+Use a stable server path:
 
 ```text
 /mnt/media/
@@ -124,46 +164,67 @@ sudo mkdir -p /mnt/media/tv
 sudo mkdir -p /mnt/media/music
 ```
 
-Put your media files into the right folders before adding them to Jellyfin.
-
-Recommended examples:
+Recommended naming examples:
 
 ```text
 /mnt/media/movies/Blade Runner (1982)/Blade Runner (1982).mkv
 /mnt/media/tv/The Expanse/Season 01/The Expanse - S01E01 - Dulcinea.mkv
 ```
 
-Good naming fixes more Jellyfin problems than most people expect.
+Avoid storing a shared Jellyfin library inside a personal home folder unless you understand the parent-folder permissions.
+
+Better long-term locations include:
+
+```text
+/mnt/media
+/srv/media
+```
 
 ---
 
-## 4. How to give Jellyfin access to your media folders on Ubuntu
+## 4. Give Jellyfin access to the media folders
 
-On Ubuntu, Jellyfin usually runs as the `jellyfin` user.
+Jellyfin normally runs as the Linux user `jellyfin`.
 
-Check that first:
+Confirm it:
 
 ```bash
 id jellyfin
 ```
 
-If Jellyfin cannot see your media folder, the problem is usually Linux permissions, not Jellyfin itself.
+Test the media path as that user:
 
-The safest beginner-friendly fix is to give the `jellyfin` user read and execute access to the media folder using ACLs.
+```bash
+sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin ls -la /mnt/media/movies
+sudo -u jellyfin ls -la /mnt/media/tv
+```
 
-Install ACL support if needed:
+If those commands list the folders, Jellyfin can read them.
+
+If they return `Permission denied`, inspect the complete path:
+
+```bash
+namei -l /mnt/media/movies
+```
+
+Jellyfin needs execute permission on every parent directory so it can traverse the path.
+
+### Apply safer ACL access
+
+Install ACL support:
 
 ```bash
 sudo apt install -y acl
 ```
 
-Give Jellyfin access to the existing folders and files:
+Grant read and execute access to existing files and folders:
 
 ```bash
 sudo setfacl -R -m u:jellyfin:rx /mnt/media
 ```
 
-Set default permissions so new files and folders inherit the same access:
+Set a default ACL for newly copied files:
 
 ```bash
 sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
@@ -175,63 +236,55 @@ Restart Jellyfin:
 sudo systemctl restart jellyfin
 ```
 
-Then check the service:
+Verify the result:
 
 ```bash
-systemctl status jellyfin --no-pager
-```
-
-This approach means:
-
-- your normal user can still manage the media files
-- Jellyfin can read the library
-- you do not need to make the whole folder world-readable
-
-If your media folder is somewhere else, replace `/mnt/media` with your own path.
-
----
-
-## 5. Why Jellyfin cannot see your media folder
-
-The most common causes are:
-
-- Jellyfin does not have permission to read the folder.
-- Jellyfin can read the folder but not the parent directory.
-- The media disk is mounted with restrictive permissions.
-- A network share is mounted as the wrong user.
-- The files are inside a user home folder such as `/home/sean/media` without traversal permissions.
-
-A quick check:
-
-```bash
+getfacl /mnt/media
 sudo -u jellyfin ls -la /mnt/media
-sudo -u jellyfin ls -la /mnt/media/movies
-sudo -u jellyfin ls -la /mnt/media/tv
 ```
 
-If those commands fail with `Permission denied`, Jellyfin will not be able to scan the library.
-
-Re-apply the ACL commands:
-
-```bash
-sudo setfacl -R -m u:jellyfin:rx /mnt/media
-sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
-sudo systemctl restart jellyfin
-```
-
-For a deeper permissions-only walkthrough, see: [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
+For a deeper permissions workflow, read [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
 
 ---
 
-## 6. Point Jellyfin at your media
+## 5. Check mounted drives before adding libraries
 
-Back in the Jellyfin web interface:
+If the media is on another disk, USB drive, or NAS share, confirm it is mounted:
 
-1. Go to **Dashboard → Libraries → Add Media Library**.
-2. Choose a content type.
-3. Add the matching folder path.
+```bash
+findmnt /mnt/media
+lsblk -f
+```
 
-Use:
+Inspect the path:
+
+```bash
+ls -la /mnt/media
+```
+
+A mount-point directory can exist even when the real disk is not mounted. Jellyfin then scans an empty folder.
+
+Check the filesystem and options:
+
+```bash
+findmnt -no SOURCE,FSTYPE,OPTIONS /mnt/media
+```
+
+For permanent storage, use a stable UUID entry in `/etc/fstab` rather than a desktop auto-mount path.
+
+If the media works before reboot but disappears afterwards, the mount is the first thing to investigate.
+
+---
+
+## 6. Add the media libraries in Jellyfin
+
+Open:
+
+```text
+Dashboard → Libraries → Add Media Library
+```
+
+Use the real Linux paths:
 
 ```text
 Movies:   /mnt/media/movies
@@ -239,34 +292,65 @@ TV Shows: /mnt/media/tv
 Music:    /mnt/media/music
 ```
 
-Save each library and let Jellyfin scan.
+Save each library and run a scan.
 
-If the folder picker is empty or the scan finds nothing, go back to the permissions section before changing anything else.
+If the folder picker is empty or the scan finds nothing, repeat:
+
+```bash
+sudo -u jellyfin ls -la /mnt/media
+```
+
+Do not change metadata settings or reinstall Jellyfin until the service user can list the files.
+
+For a complete empty-library diagnosis, use [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/).
 
 ---
 
-## 7. File naming that works well in Jellyfin
+## 7. Fix new files that do not appear
 
-Jellyfin’s metadata matching depends heavily on file and folder names.
+A common pattern is:
+
+- older media appears
+- newly added episodes or films do not
+
+This normally means the new files were created by another service with different ownership or permissions.
+
+Test a new folder:
+
+```bash
+sudo -u jellyfin ls -la "/mnt/media/tv/New Show"
+```
+
+Compare the ACLs:
+
+```bash
+getfacl "/mnt/media/tv/Working Show"
+getfacl "/mnt/media/tv/New Show"
+```
+
+The default ACL applied earlier should help future files inherit access.
+
+If Sonarr, Radarr, qBittorrent, or another service creates the files, also inspect its user, group, and umask.
+
+Use [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/) for the full workflow.
+
+---
+
+## 8. Use file names Jellyfin can identify
 
 ### Movies
-
-Use:
 
 ```text
 Movie Name (Year)/Movie Name (Year).ext
 ```
 
-Examples:
+Example:
 
 ```text
-movies/Blade Runner (1982)/Blade Runner (1982).mkv
-movies/Dune (2021)/Dune (2021).mp4
+movies/Dune (2021)/Dune (2021).mkv
 ```
 
 ### TV shows
-
-Use:
 
 ```text
 Show Name/Season 01/Show Name - S01E01 - Episode Title.ext
@@ -278,48 +362,65 @@ Example:
 tv/The Expanse/Season 01/The Expanse - S01E01 - Dulcinea.mkv
 ```
 
-You do not need perfection, but this pattern avoids most metadata issues.
+Poor naming usually causes incorrect identification rather than an entirely empty library, but clean naming avoids a large amount of manual correction.
 
 ---
 
-## 8. Optional: hardware-accelerated transcoding
+## 9. Keep the server low power
 
-If your machine has an Intel iGPU or compatible NVIDIA GPU, you can offload transcoding and keep CPU usage lower.
+For a small Jellyfin server, prioritise:
 
-For many low-power Jellyfin setups, direct play matters more than transcoding. Direct play means the client plays the file as-is, without the server converting it.
+- Direct Play on capable clients
+- an SSD for Ubuntu and Jellyfin metadata
+- wired Ethernet
+- sensible CPU power settings
+- spinning disks only when needed
+- hardware transcoding only where there is a real requirement
 
-If most of your devices can direct play your media, you may not need hardware transcoding at all.
+The server does very little work during Direct Play. Transcoding moves video conversion back to the CPU or GPU and increases power use.
 
-### Enable Intel Quick Sync
+Before changing hardware, read [Jellyfin Direct Play vs Transcoding](/guides/jellyfin-direct-play-vs-transcoding/) and [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/).
 
-Install the VAAPI tools:
+---
+
+## 10. Optional hardware transcoding
+
+If your server has a supported Intel iGPU or NVIDIA GPU, hardware acceleration can reduce CPU load when transcoding is necessary.
+
+For Intel hardware, install the VAAPI tools:
 
 ```bash
 sudo apt install -y vainfo intel-media-va-driver-non-free
 vainfo | grep -i "driver"
 ```
 
-Then in Jellyfin:
+Then open:
 
-1. Go to **Dashboard → Playback → Transcoding**.
-2. Set **Hardware acceleration** to **VAAPI**.
-3. Use VAAPI device path `/dev/dri/renderD128`.
+```text
+Dashboard → Playback → Transcoding
+```
 
-Start conservatively. Enable H.264 first, test playback, and only expand the options when needed.
+For a typical Intel VAAPI setup, the render device is:
 
-If this feels unreliable on your hardware, leave hardware acceleration off. A stable direct-play setup is better than a clever setup that breaks every other evening.
+```text
+/dev/dri/renderD128
+```
+
+Enable only the codecs your hardware supports and test one file at a time.
+
+Use [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/) for the detailed setup.
 
 ---
 
-## 9. Make sure Jellyfin survives reboots
+## 11. Make sure Jellyfin survives reboots
 
-Check whether Jellyfin is enabled on boot:
+Check whether the service is enabled:
 
 ```bash
 sudo systemctl is-enabled jellyfin
 ```
 
-If it does not say `enabled`, run:
+If necessary:
 
 ```bash
 sudo systemctl enable jellyfin
@@ -331,38 +432,64 @@ Reboot once:
 sudo reboot
 ```
 
-After the server comes back, visit:
+After the server returns, verify:
+
+```bash
+systemctl status jellyfin --no-pager
+findmnt /mnt/media
+sudo -u jellyfin ls -la /mnt/media
+```
+
+Then open:
 
 ```text
 http://YOUR-SERVER-IP:8096
 ```
 
-Confirm that Jellyfin still loads and the libraries are still visible.
+Confirm that Jellyfin loads and the media libraries remain visible.
 
 ---
 
-## 10. Next steps
+## Exact verification checklist
 
-Useful follow-up guides:
+Run:
 
-- [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
-- [Remote Access Without Port Forwarding: Jellyfin + Tailscale](/guides/jellyfin-tailscale-remote-access/)
+```bash
+systemctl status jellyfin --no-pager
+id jellyfin
+findmnt /mnt/media
+namei -l /mnt/media/movies
+sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin ls -la /mnt/media/movies
+sudo -u jellyfin ls -la /mnt/media/tv
+getfacl /mnt/media
+```
+
+Then check:
+
+- Jellyfin loads on port 8096
+- the media disk remains mounted after reboot
+- the `jellyfin` user can list every library folder
+- existing media appears
+- newly copied media appears after a scan
+- logs do not show permission or path errors
+
+---
+
+## Related guides
+
+- [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
+- [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/)
+- [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/)
 - [Jellyfin Direct Play vs Transcoding](/guides/jellyfin-direct-play-vs-transcoding/)
-- [3-2-1 Backups for Home Servers](/guides/backups-3-2-1-home-server/)
-
-For SmallGrid-style setups, the default remote access recommendation is simple: do not expose Jellyfin directly to the internet unless you have a very good reason. Use a private mesh network such as Tailscale instead.
+- [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/)
+- [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
+- [Remote Access Without Port Forwarding: Jellyfin and Tailscale](/guides/jellyfin-tailscale-remote-access/)
 
 ---
 
 ## Recap
 
-By now you should have:
+A reliable Ubuntu Jellyfin server depends more on stable paths, mounts, and permissions than on powerful hardware.
 
-- Jellyfin installed on Ubuntu
-- media folders under `/mnt/media`
-- Jellyfin permission to read those folders
-- libraries added and scanning
-- optional hardware transcoding configured or safely ignored
-- Jellyfin enabled at boot
-
-The key lesson: most “Jellyfin cannot see my media” problems are Linux permissions problems. Fix the folder access first, then tune the media server later.
+Install Jellyfin as a service, store media under `/mnt` or `/srv`, test access as the `jellyfin` user, apply default ACLs, verify the disk after reboot, and prefer Direct Play wherever possible.
