@@ -3,7 +3,7 @@ title: "Jellyfin Media Disappears After Reboot: Fix Missing Mounts"
 description: "Fix Jellyfin libraries that disappear after reboot. Check mount points, UUID entries, fstab, service timing, permissions, and empty media folders."
 pubDate: 2026-07-08
 tags: ["jellyfin", "reboot", "mounts", "fstab", "ubuntu", "media"]
-cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
+cover: "/images/guides/jellyfin-media-disappears-after-reboot.svg"
 ---
 
 ## Quick answer
