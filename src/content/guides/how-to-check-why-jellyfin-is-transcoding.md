@@ -3,7 +3,7 @@ title: "How to Check Why Jellyfin Is Transcoding"
 description: "Find the exact reason Jellyfin is transcoding. Check the dashboard, codecs, bitrate, subtitles, audio, client limits, and hardware acceleration step by step."
 pubDate: 2026-07-08
 tags: ["jellyfin", "transcoding", "troubleshooting", "direct-play", "dashboard"]
-cover: "/images/guides/jellyfin-direct-play-vs-transcoding-diagram.webp"
+cover: "/images/guides/jellyfin-transcoding-diagnosis.svg"
 ---
 
 ## Quick answer
