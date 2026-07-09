@@ -3,7 +3,7 @@ title: "Jellyfin Cannot Access an External USB Drive on Ubuntu"
 description: "Fix Jellyfin access to USB media drives on Ubuntu. Check mount paths, filesystem type, permissions, fstab options, and reboot behaviour step by step."
 pubDate: 2026-07-08
 tags: ["jellyfin", "usb", "ubuntu", "permissions", "mounts", "storage"]
-cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
+cover: "/images/guides/jellyfin-external-usb-drive.svg"
 ---
 
 ## Quick answer
