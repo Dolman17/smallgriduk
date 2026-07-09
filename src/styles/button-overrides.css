@@ -42,6 +42,87 @@ button.btn {
   width: 100%;
 }
 
+/*
+ * Shared table styling for guides, tutorials, hubs and article pages.
+ */
+.article-card table {
+  width: 100%;
+  margin: 1.1rem 0 1.5rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #cfd8df;
+  border-radius: 0.8rem;
+  background: #ffffff;
+  box-shadow: 0 14px 32px -30px rgba(31, 36, 40, 0.55);
+  overflow: hidden;
+  font-size: 0.95rem;
+}
+
+.article-card thead {
+  background: linear-gradient(90deg, #0e3d39, #0b4f49);
+  color: #ffffff;
+}
+
+.article-card th,
+.article-card td {
+  padding: 0.78rem 0.9rem;
+  border-right: 1px solid #d8e0e6;
+  border-bottom: 1px solid #d8e0e6;
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-card th {
+  color: #ffffff;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.article-card tr > :last-child {
+  border-right: 0;
+}
+
+.article-card tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.article-card tbody tr:nth-child(even) {
+  background: #f6f9fa;
+}
+
+.article-card tbody tr:hover {
+  background: #eef6f5;
+}
+
+.article-card td:first-child,
+.article-card th:first-child {
+  padding-left: 1rem;
+}
+
+.article-card td:last-child,
+.article-card th:last-child {
+  padding-right: 1rem;
+}
+
+.article-card table code {
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .article-card table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .article-card th,
+  .article-card td {
+    min-width: 130px;
+    padding: 0.7rem 0.75rem;
+  }
+}
+
 @media (max-width: 520px) {
   .btn,
   a.btn,
