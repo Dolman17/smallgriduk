@@ -3,7 +3,7 @@ title: "Jellyfin Docker Volume Paths Explained: Host Paths vs Container Paths"
 description: "Understand Jellyfin Docker volume mappings, host paths, container paths, read-only mounts, PUID and PGID, and why media folders appear empty."
 pubDate: 2026-07-08
 tags: ["jellyfin", "docker", "volumes", "permissions", "media", "paths"]
-cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
+cover: "/images/guides/jellyfin-docker-volume-paths.svg"
 ---
 
 ## Quick answer
