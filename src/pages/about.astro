@@ -11,32 +11,54 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p class="kicker">About SmallGrid</p>
     <h1 style="margin:0 0 10px;">Tiny tools. Solid systems.</h1>
     <p class="muted" style="margin:0; font-size:1.05rem; max-width: 760px;">
-      SmallGrid is a practical guide site for building home labs that are small, quiet, efficient, and understandable. It is for normal homes, normal budgets, and people who want useful systems without turning a cupboard into a miniature datacentre.
+      SmallGrid is an independent practical guide site created and maintained by Sean Dolman. It focuses on home labs that are small, quiet, efficient, and understandable: realistic equipment, tested configurations, clear troubleshooting, and recovery steps that can be followed later.
     </p>
 
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
-      <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
-      <img src="/images/guides/mini-pc-under-200-hero.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
-      <img src="/images/guides/backups-3-2-1-diagram.webp" alt="" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      <picture>
+        <source media="(max-width: 720px)" srcset="/images/guides/jellyfin-ubuntu-low-power-hero-320.webp" />
+        <img src="/images/guides/jellyfin-ubuntu-low-power-hero.webp" alt="Jellyfin on Ubuntu home server guide" width="640" height="427" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      </picture>
+      <picture>
+        <source media="(max-width: 720px)" srcset="/images/guides/mini-pc-under-200-hero-320.webp" />
+        <img src="/images/guides/mini-pc-under-200-hero.webp" alt="Low-power mini PC used for a home lab" width="640" height="360" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      </picture>
+      <picture>
+        <source media="(max-width: 720px)" srcset="/images/guides/backups-3-2-1-diagram-320.webp" />
+        <img src="/images/guides/backups-3-2-1-diagram.webp" alt="3-2-1 home server backup strategy" width="640" height="360" loading="lazy" decoding="async" style="width:100%; height:135px; object-fit:contain; background:#f7f9fa; border-radius:0.75rem; border:1px solid rgba(107,115,123,0.16);" />
+      </picture>
     </div>
   </section>
 
   <section class="grid" style="margin-top:16px;">
     <article class="card" style="border-top:4px solid #0e3d39;">
-      <div class="kicker">What SmallGrid is</div>
-      <h2>Practical home lab guidance</h2>
+      <div class="kicker">Who writes SmallGrid</div>
+      <h2>Created by Sean Dolman</h2>
       <p class="muted">
-        SmallGrid focuses on realistic, beginner-friendly home lab setups: a mini PC, a media server, a backup plan, private remote access, and a maintenance routine that does not become another unpaid job.
+        SmallGrid documents practical home-server work carried out on real hardware, including Ubuntu Server, Docker, Jellyfin, Sonarr, Radarr, qBittorrent, MergerFS storage, Tailscale, mini PCs, and backup and recovery workflows.
       </p>
     </article>
 
     <article class="card" style="border-top:4px solid #0a66ff;">
-      <div class="kicker">What it is not</div>
-      <h2>No rack cosplay</h2>
+      <div class="kicker">Editorial standard</div>
+      <h2>Useful before publishable</h2>
       <p class="muted">
-        This is not about building the loudest, most complicated setup possible. The aim is not to recreate enterprise IT at home. The aim is to build small systems that work, recover cleanly, and stay understandable six months later.
+        A guide should solve a defined problem, explain why the steps work, show commands or checks where useful, identify risks, and link to related troubleshooting. Articles are updated when the setup, software, or evidence changes.
       </p>
     </article>
+  </section>
+
+  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
+    <p class="kicker" style="color:rgba(255,255,255,0.78);">How guides are tested</p>
+    <h2 style="margin-top:0; color:#ffffff;">The SmallGrid testing method</h2>
+    <ul style="margin:0; padding-left:1.2rem; color:rgba(255,255,255,0.9);">
+      <li>Start with a specific real-world problem or build objective.</li>
+      <li>Verify commands, paths, services, permissions, and expected results on an appropriate test system.</li>
+      <li>Record failure points and recovery steps instead of showing only the successful path.</li>
+      <li>Prefer direct checks such as logs, service status, mount information, permissions, playback details, power measurements, and restore tests.</li>
+      <li>Separate tested facts from recommendations and clearly explain trade-offs.</li>
+      <li>Review and update guides when software versions, hardware behaviour, or recommended practices change.</li>
+    </ul>
   </section>
 
   <section class="card" style="margin-top:16px;">
@@ -47,7 +69,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <p class="muted">
       SmallGrid exists to make that path less messy. The guides are written around the problems people actually hit: Jellyfin cannot see a folder, a server uses more power than expected, remote access feels risky, backups exist but have never been restored, or a simple update suddenly feels more dramatic than it should.
     </p>
-    <p class="muted">
+    <p class="muted" style="margin-bottom:0;">
       The preferred answer is usually the boring one: fewer moving parts, sensible defaults, clear notes, tested backups, and no public exposure unless there is a good reason.
     </p>
   </section>
@@ -74,28 +96,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </div>
   </section>
 
-  <section class="card" style="margin-top:16px; background:linear-gradient(135deg,#0e3d39,#0b4f49); color:#ffffff;">
-    <h2 style="margin-top:0; color:#ffffff;">The SmallGrid approach</h2>
-    <ul style="margin:0; padding-left: 1.2rem; color:rgba(255,255,255,0.88);">
-      <li>Start with one useful service before adding five more.</li>
-      <li>Prefer low power, low noise, and low maintenance.</li>
-      <li>Use private remote access before exposing anything publicly.</li>
-      <li>Measure power usage instead of guessing.</li>
-      <li>Test backups before trusting them.</li>
-      <li>Write down enough that future you can recover without detective work.</li>
-    </ul>
-  </section>
-
-  <section class="card" style="margin-top:16px;">
-    <h2 style="margin-top:0;">Who it is for</h2>
-    <p class="muted">
-      SmallGrid is for people who want a useful home server without disappearing into endless planning. You might be setting up Jellyfin for the first time, buying a used mini PC, trying Proxmox carefully, or just working out how to back up a small server properly.
-    </p>
-    <p class="muted">
-      It is especially aimed at beginner and early-stage home lab builders who want clear, practical steps rather than a list of every possible option. The guides will still mention trade-offs, but the goal is to help you make a decision and move forward.
-    </p>
-  </section>
-
   <section class="grid" style="margin-top:16px;">
     <article class="card hover">
       <div class="kicker">Start here</div>
@@ -107,22 +107,22 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <article class="card hover">
       <div class="kicker">Read the journal</div>
       <h2>Realistic progress notes</h2>
-      <p class="muted">The Homelab Journal tracks a realistic beginner setup over time, including mistakes, fixes, and useful lessons.</p>
+      <p class="muted">The Homelab Journal tracks realistic setup work over time, including mistakes, fixes, measurements, and useful lessons.</p>
       <a class="btn" href="/journal/">Read the Journal →</a>
     </article>
 
     <article class="card hover">
-      <div class="kicker">Browse guides</div>
-      <h2>Find a specific fix</h2>
-      <p class="muted">Jump into practical tutorials for Jellyfin, backups, storage, Proxmox, mini PCs, and safe remote access.</p>
-      <a class="btn" href="/guides/">Browse Guides →</a>
+      <div class="kicker">Report a problem</div>
+      <h2>Corrections are welcome</h2>
+      <p class="muted">Technical guidance should be correct and reproducible. Use the contact page to report a broken command, unclear step, outdated recommendation, or accessibility problem.</p>
+      <a class="btn" href="/contact/">Contact SmallGrid →</a>
     </article>
   </section>
 
   <section class="card" style="margin-top:16px;">
     <h2 style="margin-top:0;">Advertising and recommendations</h2>
     <p class="muted">
-      SmallGrid may include advertising or recommendation links to help cover basic running costs. The aim is to keep the advice useful even if you ignore every recommendation. The site is built around practical setups first, not pushing unnecessary hardware.
+      SmallGrid may include clearly labelled advertising or recommendation links to help cover basic running costs. Editorial decisions are made independently, and the guidance should remain useful even when every advert or recommendation is ignored.
     </p>
     <p class="muted" style="margin-bottom:0;">
       For privacy and cookie details, see the <a href="/privacy/">Privacy Notice</a> and <a href="/cookies/">Cookies page</a>.
