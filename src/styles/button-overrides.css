@@ -26,6 +26,22 @@ button.btn {
   text-align: center;
 }
 
+/*
+ * Wider desktop content shell.
+ * 1180px uses more of a wide screen while retaining generous page margins.
+ * The !important declarations override the older 980px values in the shared layout.
+ */
+.page-with-ad-rails {
+  grid-template-columns: minmax(0, 1180px) !important;
+  max-width: 1180px !important;
+  width: 100%;
+}
+
+.page-inner {
+  max-width: 1180px !important;
+  width: 100%;
+}
+
 @media (max-width: 520px) {
   .btn,
   a.btn,
