@@ -3,7 +3,7 @@ title: "Jellyfin Subtitles Causing Transcoding: How to Stop Burn-In"
 description: "Fix Jellyfin subtitle burn-in and unnecessary transcoding. Learn which subtitle formats Direct Play, why PGS causes problems, and how to test client support."
 pubDate: 2026-07-08
 tags: ["jellyfin", "subtitles", "transcoding", "direct-play", "pgs", "srt"]
-cover: "/images/guides/jellyfin-direct-play-vs-transcoding-diagram.webp"
+cover: "/images/guides/jellyfin-subtitles-transcoding.svg"
 ---
 
 ## Quick answer
