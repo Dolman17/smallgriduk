@@ -10,6 +10,54 @@ const {
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const guidePathMatch = Astro.url.pathname.match(/^\/guides\/([^/]+)\/?$/);
+const guideSlug = guidePathMatch?.[1] ?? "";
+const excludedGuidePages = new Set(["jellyfin"]);
+const isGuideArticle = Boolean(guideSlug && !excludedGuidePages.has(guideSlug));
+
+const getGuideTrustDetails = (slug: string) => {
+  if (slug.includes("docker")) {
+    return {
+      environment: "Ubuntu Server, Docker, Jellyfin, Linux users, bind mounts and media-folder permissions.",
+      verification: "Verified with host-path and container-path checks, bind-mount inspection, user and group checks, and direct file-access tests.",
+    };
+  }
+
+  if (slug.includes("jellyfin")) {
+    return {
+      environment: "Ubuntu Server, Jellyfin and a Linux-based home media-server environment.",
+      verification: "Verified with service status, logs, filesystem and permission checks, library scans, playback information, or client testing as relevant to the guide.",
+    };
+  }
+
+  if (slug.includes("proxmox")) {
+    return {
+      environment: "A small Proxmox VE home-lab environment using practical virtual-machine, storage and recovery workflows.",
+      verification: "Verified by carrying out the configuration, checking the resulting state, and documenting recovery or rollback steps where applicable.",
+    };
+  }
+
+  if (slug.includes("backup") || slug.includes("snapshot")) {
+    return {
+      environment: "A Linux home-server environment using local storage, removable or secondary storage, and recovery-focused backup workflows.",
+      verification: "Verified through backup inspection, restore-oriented checks, and comparison of snapshots, copies and off-site protection where relevant.",
+    };
+  }
+
+  if (slug.includes("power") || slug.includes("mini-pc") || slug.includes("storage")) {
+    return {
+      environment: "Small low-power home-server hardware, mini PCs, storage devices and Linux-based services.",
+      verification: "Verified using practical setup checks, observed hardware behaviour, power or storage measurements where available, and comparison against the stated requirements.",
+    };
+  }
+
+  return {
+    environment: "The SmallGrid home-lab test environment using Linux, small-form-factor hardware and self-hosted services.",
+    verification: "Verified by following the documented process, checking the resulting configuration, and recording relevant failure, recovery and validation steps.",
+  };
+};
+
+const guideTrustDetails = getGuideTrustDetails(guideSlug);
 
 const base = import.meta.env.BASE_URL;
 const brandVersion = "2026-06-29-2";
@@ -172,6 +220,47 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
         background: #f7f9fa;
       }
 
+      .guide-trust-panel {
+        margin-top: 1.5rem;
+        padding: 1.15rem;
+        border: 1px solid rgba(14, 61, 57, 0.18);
+        border-left: 5px solid #0e3d39;
+        border-radius: 0.9rem;
+        background: linear-gradient(135deg, #f4fbfb, #ffffff);
+      }
+
+      .guide-trust-panel h2 {
+        margin: 0 0 0.85rem;
+        font-size: 1.15rem;
+      }
+
+      .guide-trust-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.85rem;
+      }
+
+      .guide-trust-item {
+        padding: 0.85rem;
+        border: 1px solid rgba(107, 115, 123, 0.18);
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .guide-trust-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: #0e3d39;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .guide-trust-item p {
+        margin: 0;
+      }
+
       @media (min-width: 980px) {
         .toc {
           top: calc(var(--sg-sticky-header-offset) + 18px) !important;
@@ -181,6 +270,10 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
       @media (max-width: 720px) {
         :root {
           --sg-sticky-header-offset: 190px;
+        }
+
+        .guide-trust-grid {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -276,6 +369,43 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
           <div class="page-inner">
             <article class="article-card">
               <slot />
+
+              {isGuideArticle ? (
+                <section class="guide-trust-panel" aria-labelledby="guide-trust-title">
+                  <p class="kicker">About this guide</p>
+                  <h2 id="guide-trust-title">Written, tested and maintained by SmallGrid</h2>
+
+                  <div class="guide-trust-grid">
+                    <div class="guide-trust-item">
+                      <span class="guide-trust-label">Written by</span>
+                      <p><a href={`${base}about/`}><strong>Sean Dolman</strong></a>, creator of SmallGrid.uk.</p>
+                    </div>
+
+                    <div class="guide-trust-item">
+                      <span class="guide-trust-label">Dates</span>
+                      <p>
+                        Published <time id="guide-trust-published">date shown in the guide metadata</time>.
+                        Updated <time id="guide-trust-updated">when the guide was last reviewed</time>.
+                      </p>
+                    </div>
+
+                    <div class="guide-trust-item">
+                      <span class="guide-trust-label">Tested environment</span>
+                      <p>{guideTrustDetails.environment}</p>
+                    </div>
+
+                    <div class="guide-trust-item">
+                      <span class="guide-trust-label">How it was verified</span>
+                      <p>{guideTrustDetails.verification}</p>
+                    </div>
+                  </div>
+
+                  <p style="margin:0.9rem 0 0;">
+                    Found an error, outdated step or unclear instruction?
+                    <a href={`${base}contact/?subject=${encodeURIComponent(`Correction: ${title}`)}`}>Report a correction</a>.
+                  </p>
+                </section>
+              ) : null}
             </article>
           </div>
 
@@ -308,5 +438,53 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
         </div>
       </footer>
     </div>
+
+    {isGuideArticle ? (
+      <script is:inline>
+        (() => {
+          const formatDate = (value) => {
+            if (!value) return "not recorded";
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return "not recorded";
+            return date.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            });
+          };
+
+          const schemas = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
+          let article = null;
+
+          for (const schema of schemas) {
+            try {
+              const parsed = JSON.parse(schema.textContent || "null");
+              const items = Array.isArray(parsed) ? parsed : [parsed];
+              article = items.find((item) => item && (item["@type"] === "Article" || item["@type"] === "TechArticle"));
+              if (article) break;
+            } catch (_) {
+              // Ignore unrelated or malformed structured-data blocks.
+            }
+          }
+
+          const published = document.getElementById("guide-trust-published");
+          const updated = document.getElementById("guide-trust-updated");
+
+          if (published && article?.datePublished) {
+            published.textContent = formatDate(article.datePublished);
+            published.setAttribute("datetime", article.datePublished);
+          }
+
+          if (updated && article?.dateModified) {
+            updated.textContent = formatDate(article.dateModified);
+            updated.setAttribute("datetime", article.dateModified);
+          }
+
+          document.querySelectorAll(".guide-author").forEach((element) => {
+            element.textContent = "Sean Dolman";
+          });
+        })();
+      </script>
+    ) : null}
   </body>
 </html>
