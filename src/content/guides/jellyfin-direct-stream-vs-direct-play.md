@@ -3,7 +3,7 @@ title: "Jellyfin Direct Stream vs Direct Play: What Is the Difference?"
 description: "Understand Jellyfin Direct Stream vs Direct Play, when remuxing happens, how server load changes, and whether Direct Stream is a problem."
 pubDate: 2026-07-08
 tags: ["jellyfin", "direct-stream", "direct-play", "transcoding", "remux"]
-cover: "/images/guides/jellyfin-direct-play-vs-transcoding-diagram.webp"
+cover: "/images/guides/jellyfin-direct-stream-vs-direct-play.svg"
 ---
 
 ## Quick answer
