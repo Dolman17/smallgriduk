@@ -571,12 +571,6 @@ The host check comes first:
 
 ```bash
 findmnt /srv/media_pool
-a ls -la /srv/media_pool/TV
-```
-
-The second command should be entered without the leading `a`:
-
-```bash
 ls -la /srv/media_pool/TV
 ```
 
