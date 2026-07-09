@@ -6,18 +6,17 @@ const {
   title = "SmallGrid.uk",
   description = "Small, useful systems. Clear technical guidance.",
   ogImage = "brand/smallgrid-logo.svg",
+  robots = "index,follow",
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 
-// Base-path safe URLs (works on / and on subpaths like /smallgrid/)
 const base = import.meta.env.BASE_URL;
 const brandVersion = "2026-06-29-2";
 const iconSvg = `${base}brand/smallgrid-icon.svg?v=${brandVersion}`;
 const iconMonoSvg = `${base}brand/smallgrid-icon-mono.svg?v=${brandVersion}`;
 const wordmarkDarkSvg = `${base}brand/smallgrid-wordmark-dark.svg?v=${brandVersion}`;
 const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.replace(/^\//, "")}`;
-const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
 ---
 
 <!doctype html>
@@ -28,6 +27,7 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
     <link rel="canonical" href={canonicalUrl.toString()} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,18 +50,16 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
       />
     </noscript>
 
-    <!-- Google AdSense -->
+    <!-- Keep AdSense installed for ownership verification, but do not show empty ad placeholders. -->
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9818469763709297"
       crossorigin="anonymous"
     ></script>
 
-    <!-- Favicons (SVG-first) -->
     <link rel="icon" type="image/svg+xml" href={iconSvg} />
     <link rel="mask-icon" href={iconMonoSvg} color="#0E3D39" />
 
-    <!-- Social -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -107,34 +105,13 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
         grid-template-columns: minmax(0, 980px);
         justify-content: center;
         gap: 1.25rem;
-        max-width: 1480px;
+        max-width: 980px;
         margin: 0 auto;
       }
 
-      .ad-rail {
-        display: none;
-      }
-
+      .ad-rail,
       .ad-rail-box {
-        position: sticky;
-        top: calc(var(--sg-sticky-header-offset) + 18px);
-        min-height: 600px;
-        border: 1px dashed rgba(107, 115, 123, 0.35);
-        border-radius: 0.9rem;
-        background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.48)),
-          rgba(255, 255, 255, 0.64);
-        color: rgba(107, 115, 123, 0.72);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        writing-mode: vertical-rl;
-        box-shadow: 0 20px 45px -42px rgba(31, 36, 40, 0.45);
+        display: none !important;
       }
 
       .site-search-bar {
@@ -201,24 +178,6 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
         }
       }
 
-      @media (min-width: 1280px) {
-        .page-with-ad-rails {
-          grid-template-columns: 160px minmax(0, 980px) 160px;
-          align-items: start;
-        }
-
-        .ad-rail {
-          display: block;
-        }
-      }
-
-      @media (min-width: 1500px) {
-        .page-with-ad-rails {
-          grid-template-columns: 200px minmax(0, 980px) 200px;
-          gap: 1.5rem;
-        }
-      }
-
       @media (max-width: 720px) {
         :root {
           --sg-sticky-header-offset: 190px;
@@ -249,7 +208,6 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
         }
       }
     </style>
-    <link rel="stylesheet" href={heroFixCss} />
   </head>
 
   <body>
@@ -313,9 +271,7 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
 
       <main class="page-shell">
         <div class="page-with-ad-rails">
-          <aside class="ad-rail ad-rail-left" aria-label="Advertisement placeholder">
-            <div class="ad-rail-box">Advertisement</div>
-          </aside>
+          <aside class="ad-rail ad-rail-left" aria-hidden="true"></aside>
 
           <div class="page-inner">
             <article class="article-card">
@@ -323,9 +279,7 @@ const heroFixCss = `${base}hero-image-fix.css?v=2026-06-29-1`;
             </article>
           </div>
 
-          <aside class="ad-rail ad-rail-right" aria-label="Advertisement placeholder">
-            <div class="ad-rail-box">Advertisement</div>
-          </aside>
+          <aside class="ad-rail ad-rail-right" aria-hidden="true"></aside>
         </div>
       </main>
 
