@@ -3,7 +3,7 @@ title: "Best Cheap Jellyfin Client for Direct Play"
 description: "Choose a low-cost Jellyfin client that supports Direct Play. Compare Android TV devices, mini PCs, smart TVs, browsers, and what codec support actually matters."
 pubDate: 2026-07-08
 tags: ["jellyfin", "client", "direct-play", "android-tv", "mini-pc", "streaming"]
-cover: "/images/guides/mini-pc-under-200-hero.webp"
+cover: "/images/guides/best-cheap-jellyfin-client.svg"
 ---
 
 ## Quick answer
