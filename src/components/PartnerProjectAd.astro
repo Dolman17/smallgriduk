@@ -7,6 +7,7 @@ interface Props {
   cta: string;
   logo?: string;
   theme?: "teal" | "blue";
+  showDirectoryLink?: boolean;
 }
 
 const {
@@ -17,6 +18,7 @@ const {
   cta,
   logo,
   theme = "teal",
+  showDirectoryLink = true,
 } = Astro.props;
 ---
 
@@ -41,14 +43,22 @@ const {
 
     <p class="partner-project-ad__description">{description}</p>
 
-    <a
-      class="partner-project-ad__link"
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {cta}
-    </a>
+    <div class="partner-project-ad__actions">
+      <a
+        class="partner-project-ad__link"
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {cta}
+      </a>
+
+      {showDirectoryLink && (
+        <a class="partner-project-ad__directory-link" href="/partner-projects/">
+          View all partner projects
+        </a>
+      )}
+    </div>
   </div>
 </aside>
 
@@ -117,6 +127,13 @@ const {
     line-height: 1.65;
   }
 
+  .partner-project-ad__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .partner-project-ad__link {
     display: inline-flex;
     align-items: center;
@@ -134,12 +151,20 @@ const {
       box-shadow 0.15s ease;
   }
 
+  .partner-project-ad__directory-link {
+    color: var(--partner-accent);
+    font-size: 0.9rem;
+    font-weight: 750;
+    text-underline-offset: 0.2em;
+  }
+
   .partner-project-ad__link:hover {
     transform: translateY(-1px);
     box-shadow: 0 12px 24px -18px rgba(31, 36, 40, 0.75);
   }
 
-  .partner-project-ad__link:focus-visible {
+  .partner-project-ad__link:focus-visible,
+  .partner-project-ad__directory-link:focus-visible {
     outline: 3px solid var(--partner-accent-soft);
     outline-offset: 3px;
   }
