@@ -1,0 +1,156 @@
+---
+interface Props {
+  label?: string;
+  name: string;
+  description: string;
+  href: string;
+  cta: string;
+  logo?: string;
+  theme?: "teal" | "blue";
+}
+
+const {
+  label = "SmallGrid Partner Project",
+  name,
+  description,
+  href,
+  cta,
+  logo,
+  theme = "teal",
+} = Astro.props;
+---
+
+<aside class={`partner-project-ad partner-project-ad--${theme}`} aria-label={`${label}: ${name}`}>
+  <div class="partner-project-ad__content">
+    <p class="partner-project-ad__label">{label}</p>
+
+    <div class="partner-project-ad__heading">
+      {logo && (
+        <img
+          class="partner-project-ad__logo"
+          src={logo}
+          alt=""
+          width="48"
+          height="48"
+          loading="lazy"
+          decoding="async"
+        />
+      )}
+      <h2>{name}</h2>
+    </div>
+
+    <p class="partner-project-ad__description">{description}</p>
+
+    <a
+      class="partner-project-ad__link"
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {cta}
+    </a>
+  </div>
+</aside>
+
+<style>
+  .partner-project-ad {
+    --partner-accent: #0e3d39;
+    --partner-accent-soft: rgba(14, 61, 57, 0.12);
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(107, 115, 123, 0.2);
+    border-top: 4px solid var(--partner-accent);
+    border-radius: 0.9rem;
+    background:
+      radial-gradient(circle at top right, var(--partner-accent-soft), transparent 42%),
+      linear-gradient(180deg, #ffffff, #f7fbfb);
+    box-shadow: 0 22px 45px -35px rgba(31, 36, 40, 0.55);
+  }
+
+  .partner-project-ad--blue {
+    --partner-accent: #0a66ff;
+    --partner-accent-soft: rgba(10, 102, 255, 0.12);
+  }
+
+  .partner-project-ad__content {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.15rem;
+  }
+
+  .partner-project-ad__label {
+    margin: 0 0 0.65rem;
+    color: #6b737b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .partner-project-ad__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .partner-project-ad__heading h2 {
+    margin: 0;
+    color: #1f2428;
+    font-size: 1.35rem;
+    line-height: 1.2;
+  }
+
+  .partner-project-ad__logo {
+    flex: 0 0 auto;
+    border-radius: 0.65rem;
+    object-fit: contain;
+  }
+
+  .partner-project-ad__description {
+    flex: 1;
+    margin: 0.65rem 0 1rem;
+    color: #505860;
+    line-height: 1.65;
+  }
+
+  .partner-project-ad__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0.58rem 0.9rem;
+    border: 1px solid var(--partner-accent);
+    border-radius: 0.65rem;
+    background: var(--partner-accent);
+    color: #ffffff;
+    font-weight: 750;
+    line-height: 1.2;
+    text-decoration: none;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .partner-project-ad__link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -18px rgba(31, 36, 40, 0.75);
+  }
+
+  .partner-project-ad__link:focus-visible {
+    outline: 3px solid var(--partner-accent-soft);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .partner-project-ad__link {
+      transition: none;
+    }
+
+    .partner-project-ad__link:hover {
+      transform: none;
+    }
+  }
+</style>
