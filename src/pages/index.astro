@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PartnerProjectAd from "../components/PartnerProjectAd.astro";
 import { getCollection } from "astro:content";
 
 const guidesAll = await getCollection("guides", ({ data }) => !data.draft);
@@ -232,6 +233,32 @@ const latestJournal = journalSorted[0];
           </div>
         </article>
       ))}
+    </div>
+  </section>
+
+  <section style="margin-top: 16px;" aria-labelledby="partner-projects-heading">
+    <div style="display:flex; align-items:end; justify-content:space-between; gap: 12px; flex-wrap:wrap;">
+      <div>
+        <div class="kicker">Built by the same team</div>
+        <h2 id="partner-projects-heading" style="margin-bottom:0;">More from SmallGrid</h2>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top: 10px;">
+      <PartnerProjectAd
+        name="PayScope"
+        description="UK pay intelligence and workforce benchmarking tools."
+        href="https://payscope.uk"
+        cta="Visit PayScope →"
+        theme="teal"
+      />
+      <PartnerProjectAd
+        name="Pathly Hire"
+        description="Recruitment and applicant tracking software built for practical hiring workflows."
+        href="https://pathly-hire.uk"
+        cta="Visit Pathly Hire →"
+        theme="blue"
+      />
     </div>
   </section>
 
