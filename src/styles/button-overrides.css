@@ -1,5 +1,6 @@
 :root {
-  --sg-font-display: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --sg-font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sg-font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 /*
