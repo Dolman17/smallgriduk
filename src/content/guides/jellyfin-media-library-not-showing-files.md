@@ -1,8 +1,8 @@
 ---
 title: "Jellyfin Library Not Showing Files: Fix Scans, Paths and Permissions"
-description: "Fix an empty Jellyfin library when scans find no media. Check paths, permissions, mounted drives, Docker mappings, file structure, and logs step by step."
+description: "Fix an empty Jellyfin library when scans find no media. Check storage mounts, paths, Linux permissions, Docker mappings, new-file access, scans, and logs in the correct order."
 pubDate: 2026-07-02
-updatedDate: 2026-07-09
+updatedDate: 2026-07-12
 tags: ["jellyfin", "library", "permissions", "media", "troubleshooting", "scanning"]
 cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
 ---
@@ -11,30 +11,36 @@ cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
 
 If Jellyfin is not showing files, do not reinstall it first.
 
-Check these four things in order:
+Check the path from the storage layer upwards:
 
-1. The media path exists on the server.
-2. The path configured in Jellyfin exactly matches it.
-3. The Jellyfin service or container can list the files.
-4. The disk or network share is actually mounted.
+1. confirm the media exists on the host
+2. confirm the disk, pool, USB drive, or network share is mounted
+3. confirm the Jellyfin service or Docker container can list the files
+4. confirm Jellyfin uses the exact path visible inside its own environment
+5. run a scan and inspect the logs
 
-For a native Ubuntu installation, the fastest useful test is:
-
-```bash
-sudo -u jellyfin ls -la /mnt/media
-```
-
-For Docker, test the path inside the running container:
+For a native Ubuntu installation:
 
 ```bash
-docker exec -it jellyfin ls -la /media
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
-If the command returns `Permission denied`, fix folder access.
+For Docker:
 
-If it shows an empty folder even though the disk should contain media, the storage may not be mounted or the Docker bind mount may be wrong.
+```bash
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+```
 
-If it lists the media correctly, move on to the Jellyfin library path, scan, file structure, and logs.
+Interpret the result:
+
+| Result | Meaning |
+|---|---|
+| Files are listed | Filesystem access works; check the Jellyfin library path, scan, naming, library type, and logs |
+| `Permission denied` | The service account or container identity cannot traverse or read the path |
+| Path does not exist | The configured path or Docker destination is wrong |
+| Folder is empty | The storage may not be mounted, the host source may be wrong, or the bind mount points at an empty directory |
+
+The important test is not whether your own SSH user can see the files. It is whether **Jellyfin can see them from the environment in which Jellyfin actually runs**.
 
 ---
 
@@ -42,280 +48,420 @@ If it lists the media correctly, move on to the Jellyfin library path, scan, fil
 
 This is the broad diagnostic guide for a Jellyfin library that is empty, incomplete, or unable to find files.
 
-Use it to identify which layer has failed:
+It helps you locate the failing layer:
 
-- the files are missing from the server path
-- the storage is not mounted
-- Linux permissions block access
-- Docker maps the wrong path
-- Jellyfin uses the wrong library folder
-- only newly created files have unsuitable permissions
-- the scan or file layout needs attention
+- host storage
+- persistent mount
+- Linux path traversal and read access
+- Docker bind mount
+- Jellyfin library path
+- inherited permissions on newly created files
+- library scan
+- naming, extensions, and library type
+- Jellyfin logs
 
-Once the fault is identified, use the narrower guide linked in the relevant section for the complete repair workflow.
+Once the failing layer is known, use the narrower guide linked in that section.
 
-This page is not intended to duplicate every permissions, Docker, mount, or playback fix. Its purpose is to help you locate the failing layer quickly.
+This page intentionally does not repeat every detailed repair procedure:
+
+- use [Jellyfin Docker Volume Paths Explained](/guides/jellyfin-docker-volume-paths-explained/) for host-to-container mappings
+- use [Jellyfin Docker Permissions](/guides/jellyfin-docker-permissions-media-folder/) when the container mount is correct but access is denied
+- use [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/) for native service-user permissions and ACLs
+- use [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/) when old files work but new imports do not
+- use [Jellyfin Media Disappears After Reboot](/guides/jellyfin-media-disappears-after-reboot/) when the problem starts after restart
 
 ---
 
 ## SmallGrid verification environment
 
-This troubleshooting sequence is checked against the SmallGrid home-server environment, which uses:
-
-- Ubuntu Server
-- Jellyfin running as a Docker service
-- media stored under `/srv/media_pool/TV`
-- a MergerFS-backed media pool
-- Sonarr and qBittorrent creating and moving television files
-- persistent Linux mounts that must remain available after reboot
-
-The example paths in the main guide use `/mnt/media` because it is easier to read and adapt. On the SmallGrid server, equivalent checks use the real host path and the container path configured in Docker Compose.
-
-For example:
+This workflow is based on the SmallGrid home media server:
 
 ```text
-Host path:      /srv/media_pool/TV
-Container path: /tv
-Jellyfin path:  /tv
+Host:             Ubuntu Server
+Storage pool:     MergerFS
+Host TV path:     /srv/media_pool/TV
+Jellyfin runtime: Docker
+Container TV path:/tv
+Jellyfin path:    /tv
 ```
 
-Do not copy these paths blindly. Use the paths from your own server and Compose file.
+The server also uses Sonarr and qBittorrent, so the diagnostic order has to distinguish between:
+
+- storage not being mounted
+- a Docker source/destination mismatch
+- Jellyfin being unable to read the mounted files
+- newly imported files receiving different access
+- a scan or identification problem
+
+Example paths such as `/mnt/media` and `/media` are used elsewhere in this guide because they are easier to adapt. Use the real paths from your own host and Compose configuration.
 
 ---
 
 ## Diagnostic decision table
 
-| What the check shows | Most likely problem | Next action |
+| What the check shows | Most likely cause | Next action |
 |---|---|---|
-| The host path does not exist | Incorrect path or missing mount point | Confirm the real storage path and inspect `findmnt` and `lsblk -f` |
-| The host path exists but is empty | Disk, MergerFS pool, NAS share, or USB storage is not mounted | Fix the mount before changing Jellyfin settings |
-| Your normal user sees files but the `jellyfin` user does not | Linux permissions or parent-folder traversal | Check `namei -l`, ACLs, ownership, and inherited permissions |
-| The host sees files but the Docker container does not | Incorrect bind mount or container path | Inspect Docker Compose and test the path inside the container |
-| The container sees files but Jellyfin does not | Incorrect Jellyfin library folder or scan issue | Use the exact container path in Jellyfin and rescan |
-| Old files appear but new files do not | Downloader/importer ownership, group, umask, or default ACL | Compare a working file with a new file and fix inheritance |
-| Files appear until the server reboots | Storage starts late or fails to mount | Validate `/etc/fstab`, mount dependencies, and service order |
-| Files are visible and readable but not identified correctly | Naming, extensions, metadata, or library type | Check folder structure, extensions, library type, and logs |
+| Host path does not exist | Wrong path or missing mount point | Confirm the real storage path with `findmnt`, `lsblk -f`, and the Compose file |
+| Host path exists but is empty | Disk, pool, USB drive, or network share is not mounted | Repair the mount before changing Jellyfin |
+| Your user sees files but native `jellyfin` does not | Linux permissions or parent-folder traversal | Check `namei -l`, ownership, groups, and ACLs |
+| Host sees files but Docker container does not | Wrong bind mount, wrong destination, or old container configuration | Inspect active mounts and recreate the service from the correct Compose project |
+| Container sees files but Jellyfin does not | Wrong library folder, wrong library type, or scan problem | Use the exact container path and rescan |
+| Old media appears but new imports do not | Ownership, group, umask, or default ACL differs | Compare one working file with one missing file |
+| Media disappears after reboot | Storage was not mounted when Jellyfin started | Validate persistent mounts and service ordering |
+| Files are readable but unidentified | Naming, extension, folder structure, or library type | Check layout and logs |
 
 ---
 
-## Common symptoms
+## Step 1: Confirm the media exists on the host
 
-This guide applies when:
-
-- the Jellyfin library is empty
-- Jellyfin can add a folder but shows no media
-- a scan completes almost instantly
-- new episodes or films do not appear
-- files exist on disk but not in Jellyfin
-- media disappears after a reboot
-- one library works but another does not
-- Docker Jellyfin sees an empty path
-
-These problems are usually caused by:
-
-- an incorrect or case-sensitive path
-- missing execute permission on a parent folder
-- the `jellyfin` user lacking read access
-- an unmounted drive or NAS share
-- an incorrect Docker volume mapping
-- new files inheriting different permissions
-- unsupported or badly organised files
-
----
-
-## Step 1: Confirm the media exists on the server
-
-SSH into the server and inspect the exact folder:
+Inspect the exact host path:
 
 ```bash
-ls -la /mnt/media
-ls -la /mnt/media/movies
-ls -la /mnt/media/tv
+ls -ld /mnt/media
+find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
-If the files do not appear here, Jellyfin cannot find them either.
-
-Check a specific media file:
+For the SmallGrid TV path, the equivalent check is:
 
 ```bash
-find /mnt/media/movies -maxdepth 2 -type f | head -20
+ls -ld /srv/media_pool/TV
+find /srv/media_pool/TV -maxdepth 3 -type f | head -20
 ```
 
-Common path mistakes include:
+A useful result contains real media files:
+
+```text
+/mnt/media/tv/Show Name/Season 01/Show Name - S01E01.mkv
+```
+
+If `find` returns nothing, stop here. Jellyfin cannot index files that are absent from the host path.
+
+Check for case-sensitive path mistakes:
 
 ```text
 /mnt/media/tv
 /mnt/Media/TV
 ```
 
-Linux paths are case-sensitive. Those are different locations.
+These are different paths on Linux.
 
-### What to record
+### Count files for later comparison
 
-Record the exact path that contains the files. Avoid relying on the path you expected to use.
+A count is useful when comparing the host with the container:
 
-A useful result looks like this:
-
-```text
-/mnt/media/tv/Show Name/Season 01/Show Name - S01E01.mkv
+```bash
+find /mnt/media -type f | wc -l
 ```
 
-If `find` returns no media files, stop here and investigate the storage or import process before changing Jellyfin.
+Record the result. The container-side count should be broadly consistent for the same mounted tree.
 
 ---
 
-## Step 2: Check the library path inside Jellyfin
+## Step 2: Confirm the storage is mounted
 
-In Jellyfin, open:
+A mount-point directory can exist even when the actual storage is absent. Jellyfin may then scan an empty directory underneath the intended mount.
 
-```text
-Dashboard → Libraries → Select library → Manage folders
-```
-
-The configured path must exactly match the path visible to Jellyfin.
-
-For a native installation, this may be:
-
-```text
-/mnt/media/movies
-```
-
-For Docker, it may instead be:
-
-```text
-/media/movies
-```
-
-Incorrect examples include:
-
-```text
-/mnt/media/movie
-/media/movies when /media is not mounted into the container
-/home/user/Downloads/Movies
-```
-
-A path that looks close is still wrong.
-
-After correcting it, save the library and run another scan.
-
----
-
-## Step 3: Test access as the Jellyfin user
-
-For a native Ubuntu installation, run:
-
-```bash
-sudo -u jellyfin ls -la /mnt/media
-sudo -u jellyfin ls -la /mnt/media/movies
-sudo -u jellyfin find /mnt/media/movies -maxdepth 2 -type f | head -20
-```
-
-Possible results:
-
-### Files are listed
-
-Jellyfin can read the path. Continue to mounts, scans, structure, and logs.
-
-### Permission denied
-
-The issue is Linux folder access.
-
-Use:
-
-```bash
-namei -l /mnt/media/movies
-```
-
-This shows the permissions on every parent folder. Jellyfin needs execute permission on each directory in the chain.
-
-Then follow [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
-
-### Folder is empty
-
-If your normal user sees files but `jellyfin` does not, permissions or mount visibility are still the likely cause.
-
-If both users see an empty folder, check whether the disk or share is mounted.
-
----
-
-## Step 4: Fix permissions safely
-
-For a native Ubuntu package install on a normal Linux filesystem, ACLs are usually the cleanest fix:
-
-```bash
-sudo apt update
-sudo apt install -y acl
-sudo setfacl -R -m u:jellyfin:rx /mnt/media
-sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
-sudo systemctl restart jellyfin
-```
-
-Replace `/mnt/media` with the real path.
-
-Verify it:
-
-```bash
-getfacl /mnt/media
-sudo -u jellyfin ls -la /mnt/media
-```
-
-The verification should show that the service account can list the directory and that the ACL contains a `jellyfin` read-and-execute entry.
-
-Do not use `chmod -R 777` as the permanent fix. Jellyfin normally needs read and execute access, not unrestricted write access.
-
----
-
-## Step 5: Check whether the drive is mounted
-
-A missing mount is one of the most common reasons a library becomes empty after reboot.
-
-Run:
+Check the target:
 
 ```bash
 findmnt /mnt/media
+findmnt -no SOURCE,TARGET,FSTYPE,OPTIONS /mnt/media
 lsblk -f
 ```
 
-Then inspect the folder:
+For a MergerFS pool:
 
 ```bash
-ls -la /mnt/media
+findmnt -T /srv/media_pool
+findmnt -no SOURCE,TARGET,FSTYPE,OPTIONS -T /srv/media_pool
 ```
 
-A mount-point directory can exist even when the actual disk is not mounted. In that situation, Jellyfin scans the empty directory underneath the expected mount.
+Expected evidence includes:
 
-Check the filesystem and options:
+- the intended source
+- the intended target
+- the expected filesystem type
+- mount options that permit the required access
+
+If `findmnt` returns nothing, fix the storage layer before changing permissions or Jellyfin settings.
+
+### Validate persistent mounts
+
+Inspect `/etc/fstab`:
 
 ```bash
-findmnt -no SOURCE,FSTYPE,OPTIONS /mnt/media
+grep -vE '^\s*(#|$)' /etc/fstab
 ```
 
-If the drive should mount automatically, inspect `/etc/fstab`:
-
-```bash
-cat /etc/fstab
-```
-
-For permanent storage, prefer a UUID-based mount rather than a desktop auto-mount path such as `/media/username/DriveName`.
-
-After editing `/etc/fstab`, validate it before rebooting:
+After making a change:
 
 ```bash
 sudo mount -a
 findmnt /mnt/media
 ```
 
-A silent `mount -a` followed by the expected `findmnt` result is a much stronger validation than waiting for the next reboot.
+A silent `mount -a` followed by the expected `findmnt` result is a useful pre-reboot validation.
 
 ---
 
-## Step 6: Check USB, NTFS and exFAT storage
+## Step 3: Check the path configured in Jellyfin
 
-If the media is on NTFS or exFAT, Linux ACLs and `chmod` may not behave as expected.
+Open:
 
-Mount options often control ownership and permissions.
+```text
+Dashboard → Libraries → select the library → Manage folders
+```
 
-Check:
+The path must match what Jellyfin can see.
+
+Native installation example:
+
+```text
+/mnt/media/movies
+```
+
+Docker example:
+
+```text
+/media/movies
+```
+
+SmallGrid Docker example:
+
+```text
+/tv
+```
+
+Do not put a host-only path into Jellyfin unless the same path is mounted at the same destination inside the container.
+
+For this mapping:
+
+```yaml
+volumes:
+  - /srv/media/movies:/media/movies:ro
+```
+
+Jellyfin must use:
+
+```text
+/media/movies
+```
+
+not:
+
+```text
+/srv/media/movies
+```
+
+---
+
+## Step 4: Test access as Jellyfin
+
+### Native Ubuntu installation
+
+Run the checks as the service account:
+
+```bash
+sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
+```
+
+Possible outcomes:
+
+#### Files are listed
+
+The native Jellyfin service can read the path. Continue to library settings, scans, naming, and logs.
+
+#### Permission denied
+
+Check every parent directory:
+
+```bash
+namei -l /mnt/media/movies
+```
+
+Jellyfin needs directory traversal permission on every directory in the path, not only read permission on the final folder.
+
+Inspect ACLs:
+
+```bash
+getfacl -p /mnt/media
+getfacl -p /mnt/media/movies
+```
+
+Follow the dedicated [Ubuntu permissions guide](/guides/jellyfin-ubuntu-folder-permissions/) for the full repair workflow.
+
+#### Folder is empty
+
+Compare the result with your normal user:
+
+```bash
+find /mnt/media -maxdepth 3 -type f | head -20
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
+```
+
+If both are empty, return to the mount and source path. If only Jellyfin is empty or denied, investigate access.
+
+### Docker installation
+
+Test the destination inside the running container:
+
+```bash
+docker exec jellyfin ls -la /media
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+```
+
+For the SmallGrid TV mapping:
+
+```bash
+docker exec jellyfin find /tv -maxdepth 3 -type f | head -20
+```
+
+This is stronger evidence than reading the Compose file alone because it tests the running container.
+
+---
+
+## Step 5: Verify the active Docker bind mount
+
+Inspect the active mounts:
+
+```bash
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Type "|" .Source "|" .Destination "|" .Mode}}{{end}}'
+```
+
+Expected shape:
+
+```text
+bind | /srv/media/movies | /media/movies | ro
+```
+
+SmallGrid path relationship:
+
+```text
+bind | /srv/media_pool/TV | /tv | ro
+```
+
+Check all three values:
+
+1. **Source** exists and contains files on the host.
+2. **Destination** is the path used inside Jellyfin.
+3. **Mode** is appropriate; read-only is normally enough for media.
+
+If the expected mapping is absent, check which Compose project created the container:
+
+```bash
+docker inspect jellyfin \
+  --format '{{index .Config.Labels "com.docker.compose.project.working_dir"}}'
+
+docker inspect jellyfin \
+  --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}'
+```
+
+Then apply the correct configuration:
+
+```bash
+docker compose config
+docker compose up -d
+```
+
+Re-check `docker inspect` after recreation.
+
+---
+
+## Step 6: Separate mapping problems from permission problems
+
+Use this sequence:
+
+```bash
+find /srv/media/movies -maxdepth 2 -type f | head
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+docker exec jellyfin find /media/movies -maxdepth 2 -type f | head
+```
+
+Interpretation:
+
+| Host | Active mapping | Container | Diagnosis |
+|---|---|---|---|
+| Files visible | Correct | Files visible | Mapping and basic access work |
+| Files visible | Missing or wrong | Empty/missing | Bind-mount problem |
+| Files visible | Correct | `Permission denied` | Container identity or host permissions |
+| Empty | Correct or wrong | Empty | Host storage or source path problem |
+
+Do not apply `chmod -R 777`. It hides the diagnostic signal and grants more access than Jellyfin normally needs.
+
+---
+
+## Step 7: Check parent traversal and permissions safely
+
+For a native service:
+
+```bash
+namei -l /mnt/media/movies
+id jellyfin
+```
+
+For a container, first identify the runtime user:
+
+```bash
+docker exec jellyfin id
+```
+
+Then inspect the host path:
+
+```bash
+namei -l /srv/media/movies
+getfacl -p /srv/media/movies
+```
+
+The required fix depends on the container image and user model. LinuxServer images commonly use `PUID` and `PGID`; other images may use different configuration.
+
+Keep this broad guide diagnostic. Apply the detailed repair from [Jellyfin Docker Permissions](/guides/jellyfin-docker-permissions-media-folder/) once the failure is confirmed as access rather than mapping.
+
+---
+
+## Step 8: Check whether only new files are missing
+
+A different problem exists when:
+
+- old files remain visible
+- files imported recently by Sonarr, Radarr, qBittorrent, or another service do not appear
+
+Compare one working item and one missing item:
+
+```bash
+stat -c '%A %U:%G %n' \
+  "/mnt/media/tv/Working Show" \
+  "/mnt/media/tv/New Show"
+
+getfacl -p "/mnt/media/tv/Working Show"
+getfacl -p "/mnt/media/tv/New Show"
+```
+
+Compare:
+
+- owner
+- group
+- directory execute permission
+- file read permission
+- ACL entries
+- default ACL inheritance
+- downloader or importer umask
+
+Do not recursively rewrite the whole library before identifying the difference.
+
+Use [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/) for the dedicated workflow.
+
+---
+
+## Step 9: Check removable and network storage
+
+### NTFS and exFAT
+
+On NTFS and exFAT, mount options often control effective ownership and permissions.
+
+Inspect them:
 
 ```bash
 findmnt -no TARGET,SOURCE,FSTYPE,OPTIONS /mnt/media
@@ -331,26 +477,20 @@ fmask=
 dmask=
 ```
 
-If permissions reset after every reboot, correct the mount options in `/etc/fstab` instead of repeatedly changing the files.
+Repeated `chmod` commands may not survive a remount. Fix the mount configuration instead.
 
-For a permanently attached Ubuntu media disk, ext4 is usually simpler.
+### SMB or CIFS
 
-Use [Jellyfin Cannot Access an External USB Drive](/guides/jellyfin-cannot-access-external-usb-drive/) for a storage-specific workflow.
-
----
-
-## Step 7: Check NAS, SMB, CIFS and NFS mounts
-
-For an SMB or CIFS share:
+Check that the share is mounted:
 
 ```bash
-findmnt | grep -i cifs
+findmnt -t cifs
 ```
 
-Then test it as Jellyfin:
+Then test access:
 
 ```bash
-sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin find /mnt/media -maxdepth 2 -type f | head
 ```
 
 CIFS access may depend on:
@@ -362,104 +502,17 @@ file_mode=
 dir_mode=
 ```
 
-For NFS, check server-side export permissions and UID/GID matching.
+### NFS
 
-If the share is not mounted when Jellyfin starts, the initial scan may see an empty folder. Fix the mount dependency and then rescan.
+Check the client mount and server-side export permissions. UID/GID mapping may matter.
 
----
-
-## Step 8: Check Docker volume paths
-
-If Jellyfin runs in Docker, the library path must be the path visible inside the container.
-
-Example mapping:
-
-```yaml
-volumes:
-  - /srv/media/movies:/media/movies:ro
-```
-
-Host path:
-
-```text
-/srv/media/movies
-```
-
-Container path:
-
-```text
-/media/movies
-```
-
-Inside Jellyfin, add:
-
-```text
-/media/movies
-```
-
-not the host path.
-
-Verify the container can see the files:
-
-```bash
-docker exec -it jellyfin ls -la /media/movies
-```
-
-Inspect the active mount rather than assuming the Compose file was deployed:
-
-```bash
-docker inspect jellyfin --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
-```
-
-If the expected source-to-destination mapping is absent, recreate the container from the correct Compose project.
-
-If the path is present but empty, check the host mount and source directory before changing Jellyfin library settings.
-
-Use [Jellyfin Docker Permissions: Fix Media Folder Access Properly](/guides/jellyfin-docker-permissions-media-folder/) for the complete container workflow.
+If the network storage is unavailable when Jellyfin starts, fix the mount dependency and then rescan.
 
 ---
 
-## Step 9: Check new-file permissions
+## Step 10: Check naming, extensions, and library type
 
-A common pattern is:
-
-- old media appears
-- newly downloaded media does not
-
-This usually means new files inherit different ownership or permissions.
-
-Check a working and non-working file:
-
-```bash
-ls -ld /mnt/media/tv/Working-Show
-ls -ld /mnt/media/tv/New-Show
-getfacl /mnt/media/tv/Working-Show
-getfacl /mnt/media/tv/New-Show
-```
-
-Compare:
-
-- owner
-- group
-- directory execute permission
-- default ACL entries
-- the service that created the new file
-
-Set a default ACL so future files inherit Jellyfin access:
-
-```bash
-sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
-```
-
-If Sonarr, Radarr, qBittorrent, or another service creates the files, also inspect its user, group, and umask settings.
-
-Use [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/) when old media works but newly imported files remain missing.
-
----
-
-## Step 10: Check file names and folder structure
-
-Clear organisation helps Jellyfin identify media correctly.
+Poor naming usually causes identification or metadata problems rather than a completely empty library. Still, inspect the structure once path access is proven.
 
 Recommended movie layout:
 
@@ -473,239 +526,231 @@ Recommended television layout:
 /mnt/media/tv/Show Name/Season 01/Show Name - S01E01.mkv
 ```
 
-Poor naming usually causes identification or metadata problems rather than a completely empty library. If no files appear at all, path, permissions, mounts, and Docker mappings remain the priorities.
-
-Check that files have real media extensions:
+Inspect extensions:
 
 ```bash
-find /mnt/media -type f | head -30
+find /mnt/media -maxdepth 4 -type f \
+  -printf '%f\n' | sed -n '1,30p'
 ```
 
-Files without recognised extensions, partial downloads, hidden files, and temporary download files may be skipped.
+Check for:
 
-For playback compatibility after the files appear, read [Best File Formats for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/).
+- incomplete downloads
+- temporary files
+- files without media extensions
+- television content added to a movie library
+- movie content added to a television library
+- unexpected nested folders
 
 ---
 
-## Step 11: Rescan the library
+## Step 11: Rescan and inspect logs
 
-In Jellyfin:
+Run a manual scan:
 
 ```text
 Dashboard → Libraries → Scan All Libraries
 ```
 
-Or scan the affected library from its settings page.
+Restart after correcting mounts or access:
 
-A very large library may take time, especially on a low-power system. However, a scan that finishes almost immediately can indicate Jellyfin found no accessible files.
-
-After changing permissions or mounts, restart Jellyfin before rescanning.
-
-Native installation:
+Native:
 
 ```bash
 sudo systemctl restart jellyfin
 ```
 
-Docker installation:
+Docker:
 
 ```bash
 docker restart jellyfin
 ```
 
----
+Read recent logs.
 
-## Step 12: Check Jellyfin logs
-
-For a native installation, check the service status:
+Native:
 
 ```bash
-systemctl status jellyfin --no-pager
+sudo journalctl -u jellyfin --since "10 minutes ago" --no-pager
 ```
 
-Read recent logs:
+Docker:
 
 ```bash
-sudo journalctl -u jellyfin --no-pager -n 200
+docker logs --since 10m jellyfin
 ```
 
-Search for likely errors:
+Filter likely access and path failures:
 
 ```bash
-sudo journalctl -u jellyfin --no-pager | grep -Ei "permission|denied|not found|inaccessible|scan|mount"
+docker logs jellyfin 2>&1 |
+  grep -Ei 'permission|denied|not found|inaccessible|scan|mount'
 ```
 
-For Docker:
-
-```bash
-docker logs --tail 200 jellyfin
-docker logs jellyfin 2>&1 | grep -Ei "permission|denied|not found|inaccessible|scan|mount"
-```
-
-Look for messages about:
+Look for:
 
 - `Permission denied`
 - path not found
 - inaccessible directories
 - unavailable mounts
-- unsupported files
-- database or metadata errors
+- scan failures
+- unsupported or skipped files
+- database errors
 
-The logs help distinguish a scanning problem from a folder-access problem.
+A scan that finishes almost immediately can indicate that Jellyfin found no accessible files.
 
 ---
 
-## Worked troubleshooting example
+## Verified SmallGrid case: host, pool, container, and library agreed
 
-The following is a sanitised example based on the SmallGrid Docker layout. Names and non-essential details are removed, but the path relationship reflects the real setup.
+The following verification uses the real SmallGrid path relationship, with private filenames omitted.
 
-The Jellyfin television library was expected to use:
+### 1. Confirm the MergerFS pool
+
+```bash
+findmnt -T /srv/media_pool
+```
+
+The active target was `/srv/media_pool`, exposed as a MergerFS filesystem.
+
+### 2. Confirm the host library
+
+```bash
+find /srv/media_pool/TV -type f | wc -l
+```
+
+The active storage branches contained **1,539 media files in total** at the time of verification.
+
+### 3. Confirm the active Docker mapping
+
+```bash
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+```
+
+The television library used this path relationship:
 
 ```text
-Host path:      /srv/media_pool/TV
-Container path: /tv
-Jellyfin path:  /tv
+/srv/media_pool/TV -> /tv
 ```
 
-The host check comes first:
+### 4. Confirm visibility inside the container
 
 ```bash
-findmnt /srv/media_pool
-ls -la /srv/media_pool/TV
+docker exec jellyfin find /tv -type f | wc -l
 ```
 
-This confirms whether the pooled storage is mounted and whether television folders exist on the host.
+The host and Jellyfin-visible media counts matched for the active pool.
 
-Next, verify the active container mapping:
+### 5. Confirm the Jellyfin library path
 
-```bash
-docker inspect jellyfin --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+The television library used:
+
+```text
+/tv
 ```
 
-The relevant mapping should show the host media path connected to the expected container destination.
+### 6. Final result
 
-Then test inside Jellyfin's container:
-
-```bash
-docker exec -it jellyfin ls -la /tv
+```text
+Storage mounted:          yes
+Host media visible:       yes
+Docker mapping correct:   yes
+Container media visible:  yes
+Host/container counts:    matched
+Jellyfin healthy:         yes
+Library path:             /tv
 ```
 
-Interpret the sequence as follows:
-
-| Host path | Container path | Meaning |
-|---|---|---|
-| Files visible | Files visible | Storage and Docker mapping work; check the Jellyfin library path and scan |
-| Files visible | Empty or missing | Docker bind mount or destination path is wrong |
-| Empty or missing | Empty or missing | Fix the host storage or MergerFS mount first |
-| Permission denied | Permission denied | Fix host permissions or the container user/group configuration |
-
-This order prevents unnecessary Jellyfin reinstalls and avoids changing permissions when the real issue is a missing mount or incorrect bind path.
+This case demonstrates the correct evidence chain. A matching final state does not prove every future scan will succeed, but it proves that the storage, bind mount, and container visibility layers are aligned.
 
 ---
 
 ## Exact troubleshooting sequence
 
-For a native installation, run this block in order:
+### Native installation
 
 ```bash
-ls -la /mnt/media
 findmnt /mnt/media
-namei -l /mnt/media/movies
-sudo -u jellyfin ls -la /mnt/media
-sudo -u jellyfin ls -la /mnt/media/movies
-sudo -u jellyfin find /mnt/media/movies -maxdepth 2 -type f | head -20
+find /mnt/media -maxdepth 3 -type f | head -20
+namei -l /mnt/media
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
 systemctl status jellyfin --no-pager
-sudo journalctl -u jellyfin --no-pager -n 100
+sudo journalctl -u jellyfin --since "10 minutes ago" --no-pager
 ```
 
-For Docker, use:
+### Docker installation
 
 ```bash
-ls -la /srv/media
 findmnt /srv/media
-docker inspect jellyfin --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
-docker exec -it jellyfin ls -la /media
-docker exec -it jellyfin find /media -maxdepth 3 -type f | head -20
-docker logs --tail 100 jellyfin
+find /srv/media -maxdepth 3 -type f | head -20
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+docker logs --since 10m jellyfin
 ```
 
-Interpret the result using this table:
-
-| Result | Meaning | Fix |
-|---|---|---|
-| Path missing | Jellyfin is pointing at the wrong location or storage is unavailable | Correct the location or mount |
-| Mount missing | The folder exists but the actual disk, pool, or share is absent | Fix `/etc/fstab`, MergerFS, USB, or network mounting |
-| Permission denied | The service account or container identity cannot traverse or read the path | Fix parent traversal, ACLs, ownership, group, or container UID/GID |
-| Host files visible but container path empty | Docker mapping is wrong | Correct the bind mount and recreate the container |
-| Files visible to Jellyfin | Filesystem access works | Check the exact library path, scan, naming, library type, and logs |
-| Only new files fail | Inherited permissions differ | Fix downloader/importer ownership, group, umask, or default ACL |
+Stop at the first failed layer. Do not change later layers until the earlier one is confirmed.
 
 ---
 
 ## Final verification
 
-Do not consider the problem resolved only because one command stops returning an error.
+Confirm all of these:
 
-Confirm all of the following:
-
-1. The storage is mounted at the expected host path.
+1. The intended storage is mounted.
 2. The host path contains real media files.
-3. The Jellyfin service user or Docker container can list those files.
-4. The library uses the exact path visible to Jellyfin.
-5. A manual scan runs without path or permission errors.
-6. At least one previously missing item appears in the library.
-7. Newly added media also appears after the importer finishes.
-8. The storage and library remain available after a controlled reboot.
+3. The native Jellyfin user or Docker container can list those files.
+4. The active Docker source and destination are correct, where applicable.
+5. Jellyfin uses the exact path visible inside its runtime environment.
+6. A manual scan completes without path or permission errors.
+7. At least one previously missing item appears.
+8. Newly imported media also appears.
+9. The storage and library remain available after a controlled restart or reboot.
 
-Useful final checks include:
-
-```bash
-findmnt /mnt/media
-sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
-```
-
-or, for Docker:
+Useful count comparison for Docker:
 
 ```bash
-findmnt /srv/media
-docker exec -it jellyfin find /media -maxdepth 3 -type f | head -20
-docker logs --tail 100 jellyfin
+find /srv/media -type f | wc -l
+docker exec jellyfin find /media -type f | wc -l
 ```
 
-A successful result is not merely an empty error log. Jellyfin should be able to see the expected files, complete a scan, display the missing media, and retain access after restart or reboot.
+Counts can differ when the host path contains files outside the mounted subtree, but unexpected differences should be investigated.
 
 ---
 
 ## Related guides
 
+- [Jellyfin Docker Volume Paths Explained](/guides/jellyfin-docker-volume-paths-explained/)
+- [Jellyfin Docker Permissions](/guides/jellyfin-docker-permissions-media-folder/)
 - [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
-- [Jellyfin Docker Permissions: Fix Media Folder Access Properly](/guides/jellyfin-docker-permissions-media-folder/)
 - [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/)
-- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
-- [Jellyfin Direct Play vs Transcoding](/guides/jellyfin-direct-play-vs-transcoding/)
-- [Best File Formats for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/)
-- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
+- [Jellyfin Media Disappears After Reboot](/guides/jellyfin-media-disappears-after-reboot/)
+- [Jellyfin Cannot Access an External USB Drive](/guides/jellyfin-cannot-access-external-usb-drive/)
+- [Jellyfin on Ubuntu: Low-Power Setup](/guides/jellyfin-ubuntu-low-power/)
 
 ---
 
 ## Recap
 
-If a Jellyfin library is not showing files, start with the server rather than reinstalling Jellyfin.
+When a Jellyfin library is not showing files, test the complete evidence chain:
 
-For native Jellyfin, test:
-
-```bash
-sudo -u jellyfin ls -la /mnt/media
+```text
+storage → host path → service/container visibility → Jellyfin library path → scan → logs
 ```
 
-For Docker, test:
+For native Jellyfin:
 
 ```bash
-docker exec -it jellyfin ls -la /media
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head
 ```
 
-Then confirm the mount, path mapping, library path, scan, and logs.
+For Docker:
 
-If Jellyfin cannot list the files, fix permissions, parent-folder traversal, mount options, or Docker volume mappings before changing metadata settings.
+```bash
+docker exec jellyfin find /media -maxdepth 3 -type f | head
+```
 
-If Jellyfin can list the files, focus on the exact library path, scan behaviour, naming, library type, and log messages.
+If Jellyfin cannot list the files, fix the mount, mapping, or permissions first.
+
+If Jellyfin can list the files, focus on the exact library folder, scan behaviour, naming, library type, and log messages.
