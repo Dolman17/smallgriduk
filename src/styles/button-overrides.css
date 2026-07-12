@@ -1,3 +1,15 @@
+:root {
+  --sg-font-display: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+/*
+ * Keep the above-the-fold homepage hero immediately visible.
+ * Other cards retain the existing fade-up treatment.
+ */
+.article-card > section:first-child.card[style*="radial-gradient"] {
+  animation: none !important;
+}
+
 .btn,
 a.btn,
 button.btn {
