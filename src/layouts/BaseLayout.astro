@@ -121,6 +121,25 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
         -webkit-backdrop-filter: blur(14px);
       }
 
+      @media (max-width: 1100px) {
+        .site-header-inner {
+          align-items: center;
+          flex-direction: column;
+        }
+
+        .site-nav {
+          width: 100%;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 0.35rem 0.5rem;
+        }
+
+        .site-nav-link {
+          font-size: 0.84rem;
+          padding: 0.28rem 0.5rem;
+        }
+      }
+
       .page-with-ad-rails {
         display: grid;
         grid-template-columns: minmax(0, 980px);
@@ -242,7 +261,20 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
 
       @media (max-width: 720px) {
         :root {
-          --sg-sticky-header-offset: 190px;
+          --sg-sticky-header-offset: 230px;
+        }
+
+        .site-header-inner {
+          padding-inline: 0.85rem;
+        }
+
+        .site-nav {
+          gap: 0.25rem 0.35rem;
+        }
+
+        .site-nav-link {
+          font-size: 0.8rem;
+          padding: 0.25rem 0.42rem;
         }
 
         .guide-trust-grid {
@@ -251,6 +283,10 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
       }
 
       @media (max-width: 520px) {
+        :root {
+          --sg-sticky-header-offset: 270px;
+        }
+
         .site-search-form {
           align-items: stretch;
           flex-direction: column;
@@ -406,6 +442,7 @@ const ogImageUrl = ogImage.startsWith("http") ? ogImage : `${base}${ogImage.repl
               <a href={`${base}cookies/`}>Cookies</a>
               <a href={`${base}contact/`}>Contact</a>
               <a href={`${base}checklists/`}>Checklists</a>
+              <a href={`${base}partner-projects/`}>Partner Projects</a>
               <a href={`${base}about/`}>About</a>
             </span>
           </p>
