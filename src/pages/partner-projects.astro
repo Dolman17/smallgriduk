@@ -1,0 +1,54 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PartnerProjectAd from "../components/PartnerProjectAd.astro";
+---
+
+<BaseLayout
+  title="Partner projects | SmallGrid.uk"
+  description="Explore other practical software projects connected with SmallGrid, including PayScope and Pathly Hire."
+  canonicalPath="/partner-projects/"
+>
+  <header class="card" style="overflow:hidden; background:radial-gradient(circle at top right, rgba(10,102,255,0.16), transparent 34%), radial-gradient(circle at top left, rgba(14,61,57,0.15), transparent 36%), linear-gradient(135deg,#ffffff,#f4fbfb);">
+    <div class="kicker">SmallGrid Partner Projects</div>
+    <h1>Practical software built around real work.</h1>
+    <p style="font-size:1.08rem; max-width:820px;">
+      These are independent projects connected with SmallGrid. Each focuses on solving a specific operational problem with clear, practical software rather than unnecessary complexity.
+    </p>
+  </header>
+
+  <section style="margin-top:16px;" aria-labelledby="current-projects-heading">
+    <div style="display:flex; align-items:end; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+      <div>
+        <div class="kicker">Current projects</div>
+        <h2 id="current-projects-heading" style="margin-bottom:0;">Explore the projects</h2>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:10px;">
+      <PartnerProjectAd
+        name="PayScope"
+        description="UK pay intelligence and workforce benchmarking tools designed to support clearer workforce and reward decisions."
+        href="https://payscope.uk"
+        cta="Visit PayScope →"
+        theme="teal"
+      />
+
+      <PartnerProjectAd
+        name="Pathly Hire"
+        description="Recruitment and applicant tracking software built for practical hiring workflows, candidate management, and onboarding."
+        href="https://pathly-hire.uk"
+        cta="Visit Pathly Hire →"
+        theme="blue"
+      />
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px; border-left:5px solid #0e3d39; background:linear-gradient(180deg,#ffffff,#f3fbf9);">
+    <div class="kicker">Clear separation</div>
+    <h2 style="margin-top:0;">How partner projects are presented</h2>
+    <p>
+      Partner-project links are first-party promotions. They are clearly labelled, use no third-party advertising scripts, and do not affect the editorial independence of SmallGrid guides and tutorials.
+    </p>
+    <a class="btn" href="/about/">About SmallGrid →</a>
+  </section>
+</BaseLayout>
