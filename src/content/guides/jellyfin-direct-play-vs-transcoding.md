@@ -1,388 +1,654 @@
 ---
-title: "Jellyfin Direct Play vs Transcoding: CPU Use, Quality and Fixes"
-description: "Understand Jellyfin direct play, direct stream and transcoding, how each affects CPU usage and quality, and how to reduce unnecessary transcoding."
+title: "Jellyfin Direct Play vs Transcoding: Differences, CPU Use and How to Check"
+description: "Compare Jellyfin Direct Play, Direct Stream and transcoding. Learn how each affects CPU use and quality, why transcoding starts, and how to diagnose it."
 pubDate: 2026-06-27
-updatedDate: 2026-07-06
+updatedDate: 2026-07-14
 tags: ["jellyfin", "transcoding", "direct-play", "direct-stream", "low-power", "media"]
 cover: "/images/guides/jellyfin-direct-play-vs-transcoding-diagram.webp"
 ---
 
 ## Quick answer
 
-Jellyfin can play media in three main ways:
+Jellyfin uses three main playback modes:
 
-- **Direct Play** sends the original file to the client unchanged. This uses the least server CPU.
-- **Direct Stream** keeps the video or audio largely unchanged but repackages the file into a different container or stream. Server load is usually low.
-- **Transcoding** converts video, audio, resolution, bitrate, subtitles, or a combination of them while you watch. This uses the most CPU or GPU power.
+| Playback mode | What happens | Video re-encoded? | Typical server load | Quality |
+|---|---|---:|---:|---|
+| **Direct Play** | Jellyfin sends the original file to the client | No | Lowest | Original |
+| **Direct Stream** | Jellyfin repackages compatible streams into another container or delivery format | No | Low | Usually unchanged |
+| **Transcoding** | Jellyfin converts video, audio, resolution, bitrate, subtitles, or several of these | Sometimes or yes | Highest | May change |
 
-For a low-power Jellyfin server, the best outcome is usually **Direct Play first, Direct Stream second, and transcoding only when the client or connection genuinely needs it**.
-
-If Jellyfin is using too much CPU, buffering, or making your mini PC run hot, open the Jellyfin dashboard during playback and check the active session. The playback mode and transcode reason usually tell you exactly what needs fixing.
-
----
-
-## Jellyfin Direct Play vs transcoding
-
-The practical difference is simple:
-
-| Playback mode | What Jellyfin does | Typical server load | Quality impact |
-|---|---|---:|---|
-| Direct Play | Sends the original file unchanged | Lowest | Original quality |
-| Direct Stream | Repackages the media without fully converting the video | Low | Usually unchanged |
-| Transcoding | Converts video, audio, bitrate, resolution, or subtitles | Highest | May reduce quality |
-
-Direct Play is usually the best result because the client device does the playback work. The server mainly reads the file and sends it across the network.
-
-Transcoding moves that work back to the server. Jellyfin must decode the original media, convert it into a compatible format, and stream the result quickly enough to stay ahead of playback.
-
-That difference matters most on:
-
-- low-power mini PCs
-- older CPUs
-- systems without hardware acceleration
-- servers handling several streams
-- 4K HEVC libraries
-- remote connections with limited bandwidth
-
-A good Jellyfin setup is not the one with the biggest advertised transcoding number. It is the one where most of your real devices can play most of your real library without conversion.
-
----
-
-## What Direct Play means
-
-Direct Play means Jellyfin sends the media file to the client without changing the video codec, audio codec, resolution, bitrate, subtitles, or container.
-
-The client device handles playback. Examples include:
-
-- smart TV apps
-- Android TV and Google TV devices
-- Apple TV
-- phones and tablets
-- desktop applications
-- supported web browsers
-
-Direct Play normally gives you:
-
-- the lowest CPU usage
-- the lowest power draw
-- the least heat
-- quieter fans
-- original media quality
-- fewer buffering problems
-
-For a low-power home server, Direct Play is usually the target.
-
----
-
-## What transcoding means
-
-Transcoding means Jellyfin converts some part of the media while you watch.
-
-That can include:
-
-- video codec
-- audio codec
-- resolution
-- bitrate
-- subtitle handling
-- container format
-
-For example, Jellyfin might convert a high-bitrate 4K HEVC file into a lower-bitrate H.264 stream because the client cannot play HEVC or the network cannot carry the original bitrate.
-
-That conversion happens on the server.
-
-On a small mini PC, software transcoding can quickly become the difference between smooth playback and buffering. Hardware transcoding can reduce CPU load, but it still uses resources and requires correct configuration.
-
----
-
-## Jellyfin Direct Play vs Direct Stream
-
-Direct Stream sits between Direct Play and full transcoding.
-
-It usually means the main video stream is compatible, but the container or delivery method is not. Jellyfin repackages the media into something the client can accept without fully re-encoding the video.
-
-A common example is:
+For a low-power Jellyfin server, the preferred order is:
 
 ```text
-Video codec: supported
-Audio codec: supported
-Container: not supported by the client
+Direct Play first
+Direct Stream second
+Transcoding only when the client or connection requires it
+```
+
+Direct Play is not always possible, and transcoding is not automatically a fault. The important questions are:
+
+1. **Why did Jellyfin choose this playback mode?**
+2. **Is the resulting server load acceptable?**
+
+Open the Jellyfin dashboard while the problem file is playing. The active session should show the playback mode and, when conversion is happening, the reason.
+
+Use [How to Check Why Jellyfin Is Transcoding](/guides/how-to-check-why-jellyfin-is-transcoding/) for the full step-by-step diagnosis of one problem file.
+
+---
+
+## What this guide covers
+
+This is the conceptual cornerstone for Jellyfin playback.
+
+It explains:
+
+- the difference between Direct Play, Direct Stream, audio transcoding, and video transcoding
+- which mode normally uses the most CPU or GPU resources
+- when quality can change
+- why a compatible-looking file may still transcode
+- how clients, subtitles, audio, bitrate, and remote bandwidth affect playback
+- when hardware transcoding is useful
+- how to decide whether anything actually needs fixing
+
+It does not duplicate the full troubleshooting workflows in the narrower guides.
+
+Use:
+
+- [Jellyfin Direct Stream vs Direct Play](/guides/jellyfin-direct-stream-vs-direct-play/) for remuxing and container behaviour
+- [How to Check Why Jellyfin Is Transcoding](/guides/how-to-check-why-jellyfin-is-transcoding/) for session-by-session diagnosis
+- [Jellyfin Subtitles Causing Transcoding](/guides/jellyfin-subtitles-causing-transcoding/) for burn-in problems
+- [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/) for library format choices
+- [Best Cheap Jellyfin Client for Direct Play](/guides/best-cheap-jellyfin-client-direct-play/) for client selection
+- [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/) when conversion is necessary and needs acceleration
+
+---
+
+## Direct Play, Direct Stream and transcoding compared
+
+### Direct Play
+
+Direct Play means the client accepts the complete media combination without server-side conversion:
+
+- container
+- video codec and profile
+- audio codec and channel layout
+- subtitle format
+- resolution
+- bitrate
+- HDR format, where relevant
+- delivery method used by the client
+
+Jellyfin mainly reads the original file and sends it across the network.
+
+Typical benefits:
+
+- original video and audio quality
+- minimal CPU activity
+- lower power use
+- less heat and fan noise
+- no temporary video conversion
+- better capacity for several simultaneous users
+
+### Direct Stream
+
+Direct Stream is often called **remuxing**.
+
+It usually means the video stream is already compatible, but the client cannot accept the original container or delivery format.
+
+Example:
+
+```text
+Container: MKV
+Video: H.264 supported
+Audio: AAC supported
+Client accepts MP4-style delivery but not the original MKV
 Result: Direct Stream
 ```
 
-Direct Stream is usually much lighter than full video transcoding. It may use a little more server work than Direct Play, but it is not normally a serious problem on low-power hardware.
+Jellyfin repackages the compatible streams rather than re-encoding the video.
 
-The main mode to investigate is **full video transcoding**, especially when it happens unexpectedly.
+This normally uses little server CPU and does not reduce video quality.
 
----
+Audio can still be converted during a Direct Stream session if the selected track is unsupported. That is why the dashboard details matter more than the headline mode alone.
 
-## Does Jellyfin Direct Play use the CPU?
+### Transcoding
 
-Yes, but normally very little.
+Transcoding means Jellyfin converts one or more parts of the media during playback.
 
-During Direct Play, the server still needs to:
+Possible conversions include:
 
-- read the media file from storage
-- send it across the network
-- handle the Jellyfin session
-- provide metadata and playback progress
+- HEVC to H.264
+- 4K to 1080p
+- high bitrate to a lower bitrate
+- TrueHD or DTS to AAC or AC3
+- HDR to SDR tone mapping
+- subtitle burn-in
+- container and delivery changes alongside stream conversion
 
-That is much lighter than converting video in real time.
-
-A Direct Play session may show modest CPU activity, especially on slower storage, encrypted connections, or busy servers, but it should not usually drive sustained high CPU usage.
-
-If CPU usage jumps sharply during playback, check whether Jellyfin has switched to Direct Stream or transcoding.
-
-For measuring the real power difference on your own machine, see [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/).
+Video transcoding is normally the expensive operation. Audio-only conversion is usually much lighter.
 
 ---
 
-## How to tell if Jellyfin is Direct Playing
+## Which mode uses the most CPU?
 
-While a video is playing:
+The normal order is:
+
+```text
+Lowest load
+Direct Play
+Direct Stream or audio-only conversion
+Hardware-accelerated video transcoding
+Software video transcoding
+Highest load
+```
+
+This is a practical hierarchy, not a fixed benchmark. Actual CPU use depends on:
+
+- source codec and resolution
+- target codec and resolution
+- bitrate
+- frame rate
+- subtitles and burn-in filters
+- HDR tone mapping
+- hardware acceleration support
+- driver and device configuration
+- number of simultaneous streams
+- the server's storage and network activity
+
+### Direct Play CPU behaviour
+
+Direct Play still requires the server to:
+
+- read the file from storage
+- send it over the network
+- maintain the Jellyfin session
+- update playback progress
+- serve metadata and artwork
+
+That usually causes only modest activity.
+
+Sustained high CPU during supposed Direct Play is a reason to verify the active session rather than assume the label is correct or that Jellyfin is the only busy process.
+
+### Direct Stream CPU behaviour
+
+Direct Stream normally adds container repackaging and delivery work.
+
+On a healthy server this is usually lightweight. A Direct Stream session that plays smoothly with low server load does not normally need fixing.
+
+### Video-transcoding CPU behaviour
+
+Software video transcoding can use several CPU cores continuously, particularly with:
+
+- 4K HEVC sources
+- high frame rates
+- subtitle burn-in
+- scaling
+- HDR tone mapping
+- several concurrent sessions
+
+Hardware acceleration moves much of that work to a GPU or dedicated media engine. It can make required conversion practical, but it does not remove the reason the client needed conversion.
+
+---
+
+## Playback evidence to record
+
+Use the same file, scene, client, user, and quality setting for each comparison.
+
+Record:
+
+```text
+Client:
+Connection: local or remote
+Container:
+Video codec and profile:
+Audio codec:
+Subtitle format:
+Resolution:
+Bitrate:
+Selected quality:
+Playback mode:
+Reported conversion reason:
+Hardware acceleration active: yes / no / unknown
+Playback smooth: yes / no
+```
+
+Change one variable at a time.
+
+Examples:
+
+- disable subtitles, then replay the same scene
+- select a different audio track, then replay
+- switch local quality to Original, then replay
+- use another client with the same file
+
+This prevents several changes from hiding the real cause.
+
+---
+
+## How to check the playback mode
+
+While the file is playing:
 
 1. Open Jellyfin in a browser.
 2. Go to **Dashboard**.
 3. Find the active playback session.
 4. Check whether it says **Direct Play**, **Direct Stream**, or **Transcoding**.
-5. If it is transcoding, read the reason shown beneath the session.
-
-The transcode reason is the most useful clue.
+5. Read the stream and conversion details.
+6. Record every stated reason before changing settings.
 
 Common reasons include:
 
-- video codec not supported
-- audio codec not supported
-- bitrate exceeds the client limit
-- subtitles require burn-in
-- container not supported
-- resolution too high
-- remote bandwidth limit
+```text
+Video codec not supported
+Audio codec not supported
+Subtitle burn-in required
+Bitrate exceeds client limit
+Resolution not supported
+Container not supported
+Remote bandwidth limit
+HDR or tone-mapping conversion required
+```
 
-Do not guess. Check the active playback session first.
+Menu wording can vary slightly between Jellyfin versions and clients, but the required evidence remains the same.
 
 ---
 
 ## Why Jellyfin transcodes instead of Direct Playing
 
-Jellyfin usually transcodes because the client, connection, or playback settings cannot use the original file as-is.
+### The video codec or profile is unsupported
 
-The most common causes are:
+A client may support H.264 but not HEVC, AV1, a specific HEVC profile, 10-bit video, or the source pixel format.
 
-### Unsupported video codec
+A device advertised as “4K” does not automatically support every 4K codec, profile, HDR format, or bitrate.
 
-The client cannot decode the video format. HEVC is a frequent example on older televisions, browsers, and budget streaming devices.
+### The selected audio track is unsupported
 
-### Unsupported audio codec
+The video can remain compatible while Jellyfin converts the audio.
 
-The video may be compatible while the audio is not. Jellyfin may transcode only the audio or may change the playback mode depending on the client.
+Common problem formats include:
 
-### Subtitles force burn-in
+- DTS
+- DTS-HD
+- TrueHD
+- some EAC3 combinations
+- multichannel formats unsupported by the television or receiver
 
-Some subtitle formats must be rendered directly into the video. This forces video transcoding even when the video and audio would otherwise Direct Play.
+Try another track if the file contains AAC or AC3 compatibility audio.
 
-If playback only transcodes when subtitles are enabled, test with subtitles turned off.
+### Subtitles require burn-in
 
-### Client quality is limited
+Some clients cannot render the selected subtitle track directly.
 
-If a client is set to a lower bitrate or resolution, Jellyfin converts the file to match that limit.
+Jellyfin may then decode the video, draw the subtitles into every frame, and encode a new video stream.
 
-For local playback, set quality to **Original** or a sufficiently high value.
+This can turn an otherwise easy Direct Play session into a heavy video transcode.
+
+Test with subtitles disabled. If the mode changes, use [Jellyfin Subtitles Causing Transcoding](/guides/jellyfin-subtitles-causing-transcoding/).
+
+### The client quality limit is below the source bitrate
+
+A local client set to a lower quality may force Jellyfin to create a smaller stream even when the network could carry the original file.
+
+For local playback, test with:
+
+```text
+Original
+```
+
+Do not raise remote limits beyond what the server's upload connection and the viewer's download connection can sustain.
 
 ### Remote bandwidth is limited
 
-A high-bitrate file may be too large for the available upload or download speed. Jellyfin then creates a smaller stream.
+A 4K remux may Direct Play on the local network but require conversion when viewed remotely.
 
-### Browser codec support is limited
+In that case the file and client may both be compatible. The limiting factor is the connection.
 
-A file that Direct Plays in a native Jellyfin app may transcode in a web browser because the browser supports fewer codecs or containers.
+### The browser has narrower support than a native app
 
-### Container incompatibility
+A file that transcodes in a browser may Direct Play in:
 
-The video and audio may be supported, but the container is not. This often leads to Direct Stream rather than full video transcoding.
+- Jellyfin Media Player
+- an Android TV or Google TV app
+- a maintained smart-TV app
+- another native client
+
+Do not judge the entire server or library using browser playback alone.
+
+### Only the container is incompatible
+
+If the codecs are compatible but the original container is not, Jellyfin may Direct Stream rather than transcode the video.
+
+This is usually an acceptable lightweight fallback.
 
 ---
 
-## Best formats for Jellyfin Direct Play
+## Practical playback matrix
 
-There is no single format that Direct Plays on every client, but some combinations are safer than others.
+These are diagnostic examples, not guarantees for every client.
 
-A practical compatibility target is:
+| Source and client situation | Likely mode | Why |
+|---|---|---|
+| H.264 + AAC in MP4 on a compatible client | Direct Play | Complete combination is supported |
+| H.264 + AAC in MKV where the client rejects MKV | Direct Stream | Codecs work; container is repackaged |
+| HEVC Main 10 on a client without HEVC support | Video transcoding | Video codec/profile must be converted |
+| Compatible video with unsupported TrueHD track | Audio transcoding or Direct Stream with audio conversion | Video remains unchanged; audio is converted |
+| Compatible video and audio with PGS subtitle burn-in | Video transcoding | Subtitle rendering requires new video frames |
+| High-bitrate 4K file over a restricted remote connection | Video transcoding | Bitrate or resolution is reduced |
+| Same file on a stronger native client | Direct Play or Direct Stream | Client capability removes the conversion trigger |
+
+The same media file can use different playback modes on different clients.
+
+---
+
+## Worked diagnosis 1: subtitles trigger full video transcoding
+
+Initial observation:
 
 ```text
-Container: MP4 or MKV
-Video:     H.264 for maximum compatibility
-           H.265/HEVC for better compression where supported
-Audio:     AAC or AC3
-Subtitles: External SRT where possible
+File: MKV
+Video: HEVC Main 10
+Audio: AC3
+Subtitles: PGS enabled
+Client quality: Original
+Result: Transcoding
 ```
 
-H.264 remains the safest choice for broad client compatibility.
+Test sequence:
 
-H.265 or HEVC can reduce file size, but older clients may require transcoding. The best answer is often to choose capable playback devices rather than immediately converting an entire library.
+1. Replay with PGS subtitles enabled: video transcodes.
+2. Disable subtitles and replay the same scene.
+3. Session changes to Direct Play.
 
-For a deeper compatibility breakdown, read [Best File Formats for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/).
-
----
-
-## How to reduce unnecessary Jellyfin transcoding
-
-Work through these checks in order.
-
-### 1. Use a better Jellyfin client
-
-A better client often fixes more than a more powerful server.
-
-Native television apps, Android TV devices, Apple TV devices, and dedicated Jellyfin clients usually support more formats than browser playback.
-
-### 2. Set local quality to Original
-
-If the client is set to a low bitrate, Jellyfin may transcode even though the local network can handle the original file.
-
-Set playback quality to **Original** or a sufficiently high value when watching at home.
-
-### 3. Test without subtitles
-
-Turn subtitles off and replay the same scene.
-
-If the session changes from transcoding to Direct Play, the subtitle format or styling is the likely cause.
-
-External SRT subtitles are usually easier for clients to handle than image-based subtitle formats.
-
-### 4. Check the audio track
-
-Try another audio track if one is available.
-
-A compatible video can still trigger conversion because of DTS, TrueHD, or another unsupported audio format.
-
-### 5. Compare another client
-
-Play the same file on another device.
-
-If one client Direct Plays and another transcodes, the server and file are probably fine. The difference is client compatibility or client settings.
-
-### 6. Check the file bitrate
-
-High-bitrate 4K media may exceed remote bandwidth or client limits.
-
-For remote viewing, a separate 1080p version may be more practical than converting 4K in real time.
-
-### 7. Enable hardware transcoding only when needed
-
-Do not start with hardware transcoding. First confirm why Jellyfin is converting the file.
-
-When transcoding is genuinely required, follow [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/).
-
----
-
-## Can you force Jellyfin to Direct Play?
-
-You cannot reliably force Direct Play when the client cannot support the original file.
-
-You can encourage Direct Play by:
-
-- using a client that supports the media codecs
-- setting playback quality to Original
-- using compatible audio tracks
-- avoiding subtitles that require burn-in
-- keeping media in broadly supported formats
-- using a stable local network
-
-Disabling transcoding does not make an incompatible client suddenly support the file. It normally causes playback to fail instead.
-
-The correct goal is not to force Direct Play at any cost. It is to remove the compatibility or settings issue that caused conversion.
-
----
-
-## When hardware transcoding is useful
-
-Hardware transcoding uses a GPU or dedicated media engine instead of relying only on the CPU.
-
-It is useful when:
-
-- you stream outside the home
-- you have several users
-- clients cannot play parts of your library
-- 4K media sometimes needs conversion
-- subtitles regularly require burn-in
-- your server includes Intel Quick Sync, VAAPI, or a compatible NVIDIA GPU
-
-For small home setups, Intel Quick Sync is often a practical choice because many used mini PCs already include it.
-
-But hardware transcoding is not magic. It still uses power, adds configuration, and does not fix every compatibility issue.
-
-Default rule:
+Conclusion:
 
 ```text
-Prefer Direct Play.
-Accept Direct Stream when needed.
-Use hardware transcoding when a real playback requirement remains.
+Video codec was compatible: yes
+Audio codec was compatible: yes
+Transcode trigger: PGS subtitle burn-in
+Server upgrade required: no
 ```
 
-Before buying hardware, read [Best Mini PC Specs for Jellyfin](/guides/best-mini-pc-specs-for-jellyfin/).
+The appropriate fix is a compatible subtitle track or a client that can render the original subtitles, not a larger CPU.
+
+---
+
+## Worked diagnosis 2: one client transcodes and another Direct Plays
+
+Initial observation:
+
+```text
+File: MKV
+Video: H.264
+Audio: AAC
+Client A: web browser
+Result A: Direct Stream or Transcoding
+Client B: native Jellyfin client
+Result B: Direct Play
+```
+
+Conclusion:
+
+```text
+Server can deliver the original file: yes
+File is broadly compatible: yes
+Difference: client container or codec support
+```
+
+A client change is more targeted than converting the whole library.
+
+---
+
+## Worked diagnosis 3: local Direct Play but remote transcoding
+
+Initial observation:
+
+```text
+Source: high-bitrate 4K HEVC
+Local client quality: Original
+Local result: Direct Play
+Remote client limit: lower than source bitrate
+Remote result: Transcoding
+```
+
+Conclusion:
+
+```text
+File compatibility problem: no
+Local network problem: no
+Remote trigger: bandwidth or quality limit
+```
+
+Appropriate options include:
+
+- accept hardware-accelerated remote transcoding
+- reduce the remote quality target
+- keep a smaller secondary version
+- improve available upload bandwidth where possible
 
 ---
 
 ## Direct Play vs transcoding quality
 
-Direct Play keeps the original video and audio quality because Jellyfin sends the existing file unchanged.
+### Direct Play
 
-Transcoding can reduce quality because Jellyfin is creating a new stream in real time. The result depends on:
+Direct Play preserves the original streams.
+
+Jellyfin is not generating a new video representation, so the client receives the source quality.
+
+### Direct Stream
+
+Direct Stream normally preserves the original video quality because the video is not re-encoded.
+
+The container or delivery method changes, not the visual content.
+
+### Transcoding
+
+A video transcode creates a new stream.
+
+Quality depends on:
 
 - target bitrate
 - target resolution
-- encoder settings
-- hardware encoder quality
 - source quality
+- software or hardware encoder
+- encoder settings
+- tone mapping
 - client limits
+- network conditions
 
-A high-quality hardware transcode can still look very good, but it is not identical to the original file.
+A well-configured transcode can look very good. It is still not identical to the original stream.
 
-For local viewing on a capable client, Direct Play normally gives the best quality and the lowest server load.
+Audio conversion can also change codec, channel layout, bitrate, or passthrough behaviour.
+
+---
+
+## Best formats for Direct Play
+
+There is no single format guaranteed to Direct Play on every Jellyfin client.
+
+A broad compatibility target is:
+
+```text
+Container: MP4 or MKV
+Video:     H.264
+Audio:     AAC or AC3
+Subtitles: External SRT
+```
+
+For storage-efficient 4K libraries:
+
+```text
+Container: MKV
+Video:     HEVC Main 10
+Audio:     original track plus a compatible fallback where useful
+Subtitles: text subtitles where possible
+```
+
+HEVC saves space but requires compatible clients. The correct target depends on the actual devices used in the household.
+
+Read [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/) before converting a library.
+
+---
+
+## How to reduce unnecessary transcoding
+
+Use this order.
+
+### 1. Read the dashboard reason
+
+Do not begin with hardware changes or file conversion.
+
+Identify the exact stream or setting that triggered conversion.
+
+### 2. Set local quality to Original
+
+A low client quality limit can force an unnecessary local transcode.
+
+### 3. Disable subtitles
+
+If playback changes to Direct Play, subtitle handling is the cause.
+
+### 4. Select another audio track
+
+A compatibility track can remove audio conversion without changing the video.
+
+### 5. Test another client
+
+If another client Direct Plays the same file, the difference is client support or client configuration.
+
+See [Best Cheap Jellyfin Client for Direct Play](/guides/best-cheap-jellyfin-client-direct-play/).
+
+### 6. Inspect the media
+
+Use `ffprobe`:
+
+```bash
+ffprobe -hide_banner "Film Name.mkv"
+```
+
+Check:
+
+- container
+- video codec and profile
+- pixel format
+- audio tracks
+- subtitle tracks
+- resolution
+- frame rate
+- bitrate
+
+### 7. Check remote limits
+
+Compare the source bitrate with:
+
+- Jellyfin client quality limit
+- home upload speed
+- remote download speed
+- Wi-Fi or mobile network conditions
+
+### 8. Configure hardware acceleration only when conversion remains necessary
+
+Hardware acceleration is an optimisation for required conversion.
+
+It is not the first diagnostic step.
+
+---
+
+## Can Jellyfin be forced to Direct Play?
+
+Not reliably when the client cannot decode the original media.
+
+You can encourage Direct Play by:
+
+- using a client that supports the library
+- setting local quality to Original
+- selecting compatible audio
+- using text subtitles where practical
+- avoiding unnecessary remote bitrate restrictions
+- keeping media in formats supported by important clients
+
+Disabling transcoding does not add codec support to the client. It usually causes incompatible playback to fail.
+
+The goal is to remove the actual conversion trigger, not to force a label.
+
+---
+
+## When hardware transcoding is useful
+
+Hardware transcoding is useful when:
+
+- remote bandwidth requires smaller streams
+- several users have different client capabilities
+- parts of the library cannot Direct Play on important devices
+- subtitle burn-in cannot be avoided
+- 4K content occasionally requires conversion
+- the server has a supported Intel, AMD, or NVIDIA media engine
+
+A practical rule is:
+
+```text
+Direct Play when possible
+Accept Direct Stream when harmless
+Use hardware transcoding for genuine compatibility or bandwidth needs
+```
+
+Check the logs and active FFmpeg process to confirm that the configured hardware path is actually being used.
+
+Follow [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/) for configuration guidance.
 
 ---
 
 ## When transcoding is acceptable
 
-Transcoding is not automatically bad. Unnecessary transcoding is the problem.
+Transcoding is acceptable when:
 
-It is acceptable when:
-
-- it only happens occasionally
-- the server handles it comfortably
+- it solves a real client or bandwidth limitation
 - playback remains smooth
-- temperatures and fan noise stay reasonable
-- remote bandwidth makes it necessary
-- you understand why it is happening
+- the server stays within reasonable CPU, GPU, temperature, and power limits
+- other users are not affected
+- the reason is understood
+- the resulting quality is acceptable
 
-For one household, occasional hardware transcoding on a modern mini PC may be completely reasonable.
+Investigate when:
 
-Do not replace the server just because a single file transcodes. First check the client, subtitle track, audio codec, bitrate, and playback settings.
+- a normally compatible local file suddenly transcodes
+- CPU remains heavily loaded
+- playback buffers
+- temperatures or fan noise increase sharply
+- several users cannot stream simultaneously
+- subtitles unexpectedly trigger video conversion
+- hardware acceleration is configured but software encoding is still used
+
+Do not replace the server because one unusual file transcodes.
 
 ---
 
-## A sensible low-power Jellyfin setup
+## SmallGrid verification method
 
-A practical SmallGrid-style setup looks like this:
+SmallGrid evaluates playback by comparing the same file across clients and changing one variable at a time.
 
-```text
-Server:    Low-power mini PC
-Storage:   Local SSD/HDD or simple mounted storage
-Playback:  Direct Play wherever possible
-Fallback:  Direct Stream or hardware transcoding where needed
-Remote:    Private access such as Tailscale
-Backups:   Jellyfin config and important metadata backed up
-Power:     Measured rather than guessed
-```
+A reusable test set should include:
 
-Useful supporting guides:
+- 1080p H.264 + AAC in MP4
+- 1080p H.264 + AC3 in MKV
+- 1080p HEVC Main 10 in MKV
+- 4K HEVC Main 10 HDR
+- external SRT subtitles
+- embedded ASS or SSA subtitles
+- embedded PGS subtitles
+- a high-bitrate local sample
 
-- [Jellyfin on Ubuntu: Low-Power Setup and Folder Permissions](/guides/jellyfin-ubuntu-low-power/)
-- [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
-- [Best File Formats for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/)
-- [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
-- [Best Mini PC Specs for Jellyfin](/guides/best-mini-pc-specs-for-jellyfin/)
-- [Remote Access Without Port Forwarding: Jellyfin + Tailscale](/guides/jellyfin-tailscale-remote-access/)
+For each test, record:
+
+- Direct Play, Direct Stream, or Transcoding
+- stated Jellyfin reason
+- video conversion
+- audio conversion
+- subtitle burn-in
+- approximate server load
+- buffering or playback issues
+
+This is more reliable than using generic codec-support claims as proof that a particular file will Direct Play.
 
 ---
 
@@ -390,26 +656,41 @@ Useful supporting guides:
 
 If Jellyfin buffers or uses too much CPU:
 
-1. Open the Jellyfin dashboard during playback.
-2. Check whether the session says Direct Play, Direct Stream, or Transcoding.
-3. Read the transcode reason.
-4. Set client quality to Original on the local network.
-5. Turn subtitles off and test again.
-6. Try another audio track.
-7. Play the same file on another client.
-8. Check whether the file is high-bitrate 4K or uses an unusual codec.
-9. Only then configure or upgrade hardware transcoding.
+1. Play the problem file on the problem client.
+2. Open the Jellyfin dashboard.
+3. Record Direct Play, Direct Stream, or Transcoding.
+4. Record every stated conversion reason.
+5. Set local quality to Original.
+6. Disable subtitles and replay.
+7. Select another audio track and replay.
+8. Test the same file on another client.
+9. Inspect the file with `ffprobe`.
+10. Compare source bitrate with remote limits.
+11. Check logs and hardware acceleration only if video conversion remains necessary.
 
-Do not start by replacing the server.
+Stop changing variables when the playback mode changes. The last change identifies the likely trigger.
+
+---
+
+## Related guides
+
+- [How to Check Why Jellyfin Is Transcoding](/guides/how-to-check-why-jellyfin-is-transcoding/)
+- [Jellyfin Direct Stream vs Direct Play](/guides/jellyfin-direct-stream-vs-direct-play/)
+- [Jellyfin Subtitles Causing Transcoding](/guides/jellyfin-subtitles-causing-transcoding/)
+- [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/)
+- [Best Cheap Jellyfin Client for Direct Play](/guides/best-cheap-jellyfin-client-direct-play/)
+- [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
+- [Best Mini PC Specs for Jellyfin](/guides/best-mini-pc-specs-for-jellyfin/)
+- [Jellyfin on Ubuntu: Low-Power Setup](/guides/jellyfin-ubuntu-low-power/)
 
 ---
 
 ## Recap
 
-**Direct Play** sends the original file to the client and uses the least server CPU.
+**Direct Play** sends the original media and normally uses the least server CPU.
 
-**Direct Stream** repackages the media without fully converting the video and is usually lightweight.
+**Direct Stream** repackages compatible streams and is usually a lightweight, quality-preserving fallback.
 
-**Transcoding** converts video, audio, bitrate, resolution, or subtitles and uses the most server resources.
+**Transcoding** converts audio, video, resolution, bitrate, subtitles, or several of these. Video conversion uses the most server resources and can change quality.
 
-For a low-power Jellyfin server, aim for Direct Play first. Use Direct Stream when necessary, and use hardware transcoding when it solves a real compatibility or bandwidth problem.
+Use the Jellyfin dashboard to identify the playback mode and conversion reason. Fix the specific client, subtitle, audio, quality, format, or bandwidth issue before changing server hardware.
