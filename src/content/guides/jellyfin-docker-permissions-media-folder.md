@@ -1,337 +1,645 @@
 ---
-title: "Jellyfin Docker Permissions: Fix Media Folder Access Properly"
-description: "Fix Jellyfin Docker media folder permission problems using bind mounts, container paths, user IDs, group IDs, and read-only volumes."
+title: "Jellyfin Docker Permissions: Fix Media Folder Access and UID/GID Errors"
+description: "Fix Jellyfin Docker permission denied errors. Check bind mounts, container paths, UID and GID values, read-only media access, active mounts, and file visibility step by step."
 pubDate: 2026-07-02
+updatedDate: 2026-07-15
 tags: ["jellyfin", "docker", "permissions", "media", "homelab"]
 cover: "/images/guides/jellyfin-folder-permissions-diagram.webp"
 ---
 
-## Goal
+## Quick answer
 
-Fix Jellyfin Docker permission problems without guessing.
+When Jellyfin runs in Docker, prove each layer in this order:
 
-This guide covers the common Docker-specific issues:
+1. the media exists on the host
+2. the active container mount maps the expected host path to the expected container path
+3. the container can list the media
+4. the container identity can read the files
+5. Jellyfin uses the container path, not the host path
 
-- Jellyfin cannot see mounted media
-- the path works on the host but not in Jellyfin
-- the container path is different from the host path
-- files show as permission denied
-- the wrong user ID or group ID is running the container
-
-If Jellyfin is installed directly on Ubuntu instead of Docker, use [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
-
----
-
-## The default recommendation
-
-Use simple bind mounts and make them read-only unless Jellyfin needs to write to the media folder.
-
-A clean Docker layout is:
-
-```text
-Host media path:      /srv/media
-Container media path: /media
-Jellyfin library path: /media
-```
-
-The path you add inside Jellyfin is the container path, not necessarily the host path.
-
----
-
-## The most common mistake
-
-This is the classic problem:
-
-```text
-Host path: /srv/media/movies
-Container path: /media/movies
-```
-
-Inside Jellyfin, you add:
-
-```text
-/srv/media/movies
-```
-
-But that path does not exist inside the container.
-
-You should add:
-
-```text
-/media/movies
-```
-
-The host path is for Docker. The container path is for Jellyfin.
-
----
-
-## Step 1: Check your Docker Compose file
-
-A simple Jellyfin Docker Compose setup might look like this:
+Example mapping:
 
 ```yaml
-services:
-  jellyfin:
-    image: jellyfin/jellyfin
-    container_name: jellyfin
-    restart: unless-stopped
-    ports:
-      - "8096:8096"
-    volumes:
-      - /srv/jellyfin/config:/config
-      - /srv/jellyfin/cache:/cache
-      - /srv/media:/media:ro
-```
-
-The important line is:
-
-```yaml
-- /srv/media:/media:ro
+volumes:
+  - /srv/media:/media:ro
 ```
 
 This means:
 
 ```text
-/srv/media on the host appears as /media inside the container
+Host path:      /srv/media
+Container path: /media
+Jellyfin path:  /media
+Access mode:    read-only
 ```
 
-The `:ro` means read-only.
+The fastest checks are:
+
+```bash
+find /srv/media -maxdepth 3 -type f | head -20
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination "RW=" .RW}}{{end}}'
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+```
+
+Interpretation:
+
+| Result | Meaning |
+|---|---|
+| Host and container both list files | Mount visibility works; check the Jellyfin library path and scan |
+| Host lists files but container does not | Bind mount, destination path, or active container configuration is wrong |
+| Container returns `Permission denied` | Container UID/GID, groups, Unix modes, ACLs, or mount options block access |
+| Both paths are empty | Host storage may not be mounted |
+
+Do not use `chmod -R 777` as the permanent fix.
 
 ---
 
-## Step 2: Check the host path exists
+## What this guide covers
 
-On the Docker host, run:
+This guide is specifically about **Docker permissions and container identity**.
 
-```bash
-ls -la /srv/media
-ls -la /srv/media/movies
+It covers:
+
+- host versus container paths
+- checking the active bind mount
+- identifying the user and groups inside the container
+- official Jellyfin and LinuxServer-style identity configuration
+- testing file access inside the running container
+- fixing host permissions without giving unnecessary write access
+- handling supplementary groups and render devices
+- validating new-file inheritance
+- confirming the fix after container recreation and host reboot
+
+It does not repeat the complete host-to-container path tutorial. Use [Jellyfin Docker Volume Paths Explained](/guides/jellyfin-docker-volume-paths-explained/) when the main issue is understanding or correcting path mapping.
+
+Use [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/) when you have not yet identified whether the failure is storage, mounts, Docker, permissions, scanning or naming.
+
+For native Ubuntu package installations, use [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/).
+
+---
+
+## The permission chain
+
+A Docker Jellyfin container depends on several separate layers:
+
+```text
+Mounted storage on host
+        ↓
+Host directory permissions
+        ↓
+Docker bind mount
+        ↓
+Container user and groups
+        ↓
+Container path visibility
+        ↓
+Jellyfin library path
 ```
 
-If the path does not exist on the host, Docker cannot mount it properly.
+A failure at an earlier layer cannot be fixed by changing a later one.
 
-If the folder exists but is empty, check whether the disk or NAS share is mounted.
+For example, adding `/media/movies` in Jellyfin does not help when the host disk is not mounted or the active container does not have `/media` mapped.
+
+---
+
+## Diagnostic decision table
+
+| Evidence | Most likely cause | Next action |
+|---|---|---|
+| Host path does not exist | Wrong source path | Find the real media path |
+| Host path exists but is empty | Disk, pool or network share not mounted | Fix the host mount first |
+| Active `docker inspect` output lacks the mapping | Wrong Compose project or container not recreated | Apply the correct Compose file |
+| Container path is missing | Destination path differs from the path being tested | Inspect active mounts and use the correct destination |
+| Container path exists but returns `Permission denied` | UID, GID, group, mode, ACL or mount option problem | Inspect container identity and host permissions |
+| Container lists files but Jellyfin shows none | Wrong Jellyfin library path or scan issue | Add the exact container path and rescan |
+| Existing media works but new imports fail | New files inherit different ownership or mode | Compare working and failing files and fix inheritance |
+| Access disappears after reboot | Host storage mounted late or not at all | Fix persistent mount ordering before restarting Docker |
+
+---
+
+## Step 1: Confirm the host storage
+
+Check the exact source path used in Compose:
 
 ```bash
-findmnt
-lsblk
+ls -ld /srv/media
+find /srv/media -maxdepth 3 -type f | head -20
+findmnt -T /srv/media
+```
+
+A useful result contains real media files:
+
+```text
+/srv/media/tv/Show Name/Season 01/Show Name - S01E01.mkv
+```
+
+If the files are missing on the host, stop. Docker cannot expose files that are absent from the source path.
+
+Record a count for later comparison:
+
+```bash
+find /srv/media -type f | wc -l
 ```
 
 ---
 
-## Step 3: Check the path inside the container
+## Step 2: Inspect the active Docker mount
 
-Run a shell inside the Jellyfin container:
+Do not assume the Compose file on disk matches the running container.
+
+Inspect the live mount configuration:
 
 ```bash
-docker exec -it jellyfin bash
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Type .Source "->" .Destination "RW=" .RW}}{{end}}'
 ```
 
-Then check the container path:
+Expected shape:
 
-```bash
-ls -la /media
-ls -la /media/movies
+```text
+bind /srv/jellyfin/config -> /config RW= true
+bind /srv/media -> /media RW= false
 ```
 
-If `/media` is empty or missing, the volume mount is wrong.
+This confirms:
 
-Exit the container:
+- the source is `/srv/media`
+- the destination is `/media`
+- media is read-only
+
+If the expected row is missing, find the active Compose project:
 
 ```bash
-exit
+docker inspect jellyfin \
+  --format 'Project={{index .Config.Labels "com.docker.compose.project"}} WorkingDir={{index .Config.Labels "com.docker.compose.project.working_dir"}} ConfigFiles={{index .Config.Labels "com.docker.compose.project.config_files"}}'
+```
+
+Then render the configuration from that project directory:
+
+```bash
+docker compose config
 ```
 
 ---
 
-## Step 4: Check which user runs the container
+## Step 3: Test the container path directly
 
-If you use the official Jellyfin image without a custom user, permissions may differ from a LinuxServer-style setup.
+You normally do not need an interactive shell.
 
-Check the running container:
+Run:
 
 ```bash
-docker inspect jellyfin --format '{{.Config.User}}'
+docker exec jellyfin ls -ld /media
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
 ```
 
-If that returns empty, the container is using its image default.
+Compare file counts when the mounted trees are equivalent:
 
-If you deliberately run Jellyfin as your own user, you might have something like:
+```bash
+find /srv/media -type f | wc -l
+docker exec jellyfin find /media -type f | wc -l
+```
+
+Interpretation:
+
+| Host result | Container result | Meaning |
+|---|---|---|
+| Files visible | Files visible | Bind mount and basic read access work |
+| Files visible | Path missing | Wrong destination or mapping not applied |
+| Files visible | Empty | Wrong source, nested mount issue, or old container configuration |
+| Files visible | Permission denied | Identity or host permission problem |
+| Empty | Empty | Fix the host storage or mount first |
+
+---
+
+## Step 4: Identify the container user
+
+Check the configured Docker user:
+
+```bash
+docker inspect jellyfin --format 'Configured user={{json .Config.User}}'
+```
+
+Then inspect the effective identity inside the running container:
+
+```bash
+docker exec jellyfin id
+```
+
+Possible result:
+
+```text
+uid=1000(jellyfin) gid=1000(jellyfin) groups=1000(jellyfin),44(video),109(render)
+```
+
+The exact values vary. Record the numeric UID, primary GID and supplementary groups.
+
+An empty `.Config.User` value does not prove the process is root. It means the image default is being used. The `docker exec jellyfin id` result is the useful runtime evidence.
+
+---
+
+## Step 5: Understand image-specific identity settings
+
+### Official Jellyfin image
+
+The official image can be run with a Compose `user` setting when required:
 
 ```yaml
-user: "1000:1000"
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    user: "1000:1000"
 ```
 
-Then the host files need to be readable by that user or group.
+### LinuxServer-style image
+
+LinuxServer images commonly use environment values:
+
+```yaml
+environment:
+  - PUID=1000
+  - PGID=1000
+```
+
+Do not mix identity instructions from one image family into another without checking the image documentation and the running container.
+
+After applying either approach, verify with:
+
+```bash
+docker exec jellyfin id
+```
 
 ---
 
-## Step 5: Use your real UID and GID if needed
+## Step 6: Check host ownership and modes
 
-On the host, check your user ID:
+Inspect the host path and a known file:
 
 ```bash
-id
+namei -l /srv/media/tv
+ls -ld /srv/media /srv/media/tv
+find /srv/media/tv -type f -print -quit | xargs -r ls -l
+getfacl /srv/media/tv
+```
+
+The container identity needs:
+
+- execute permission on every parent directory
+- read and execute access to library directories
+- read access to media files
+
+A common shared-group layout is:
+
+```text
+Owner: downloader or media manager
+Group: media
+Jellyfin container: member of media group
+Directories: group read and execute
+Files: group read
+```
+
+Avoid changing the whole library owner to Jellyfin merely to solve playback access.
+
+---
+
+## Step 7: Add a shared group when appropriate
+
+Find the host media-group ID:
+
+```bash
+getent group media
 ```
 
 Example:
 
 ```text
-uid=1000(sean) gid=1000(sean)
+media:x:1001:sean
 ```
 
-Then Docker Compose can use:
+Add that supplementary group to the container:
 
 ```yaml
-user: "1000:1000"
+services:
+  jellyfin:
+    group_add:
+      - "1001"
 ```
 
-But this only works if that user can read the media files on the host.
-
-Test on the host:
+Apply the configuration:
 
 ```bash
-ls -la /srv/media
+docker compose up -d --force-recreate jellyfin
 ```
+
+Verify:
+
+```bash
+docker exec jellyfin id
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+```
+
+The container's `id` output should include the supplementary group ID.
 
 ---
 
-## Step 6: Keep media read-only unless needed
+## Step 8: Use ACLs when a dedicated read grant is cleaner
 
-For a normal Jellyfin library, read-only media is safer:
+On a normal Linux filesystem such as ext4, an ACL can grant the container UID read access without changing the main owner.
 
-```yaml
-- /srv/media:/media:ro
+Suppose the effective container UID is `1000`:
+
+```bash
+sudo apt install -y acl
+sudo setfacl -R -m u:1000:rX /srv/media
+sudo setfacl -R -d -m u:1000:rX /srv/media
 ```
 
-Jellyfin can still read and scan the media.
+Verify:
 
-Use read-write only if you need Jellyfin or a plugin to write into the media folder:
+```bash
+getfacl /srv/media
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+```
+
+Check the ACL mask if an entry exists but its effective permissions are reduced:
+
+```text
+user:1000:r-x            #effective:r--
+mask::r--
+```
+
+A suitable mask for directory traversal must allow execute permission.
+
+Use numeric IDs carefully. A future image or Compose change can alter the effective UID.
+
+---
+
+## Step 9: Keep media read-only unless writing is required
+
+For normal playback and library scanning:
+
+```yaml
+volumes:
+  - /srv/media:/media:ro
+```
+
+Read-only media reduces accidental changes from inside the container.
+
+Keep configuration and cache writable:
+
+```yaml
+volumes:
+  - /srv/jellyfin/config:/config
+  - /srv/jellyfin/cache:/cache
+  - /srv/media:/media:ro
+```
+
+Use read-write media only for a specific feature that genuinely modifies the library:
 
 ```yaml
 - /srv/media:/media:rw
 ```
 
-Do not give write access just because it seems easier.
+Do not interpret a read-only error as a read-permission failure. Jellyfin may be able to play the file while being correctly blocked from deleting or modifying it.
 
 ---
 
-## Step 7: Restart the container cleanly
+## Step 10: Apply changes safely
 
-After changing Docker Compose:
-
-```bash
-docker compose down
-docker compose up -d
-```
-
-Then check logs:
+First validate the rendered configuration:
 
 ```bash
-docker logs --tail=100 jellyfin
+docker compose config
 ```
 
-In Jellyfin, rescan the library:
+Then recreate only the Jellyfin service:
 
-```text
-Dashboard → Libraries → Scan All Libraries
+```bash
+docker compose up -d --force-recreate jellyfin
 ```
+
+Check status and logs:
+
+```bash
+docker ps --filter name=jellyfin
+docker logs --since 10m jellyfin
+```
+
+Re-run the same evidence checks:
+
+```bash
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination "RW=" .RW}}{{end}}'
+docker exec jellyfin id
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+```
+
+Changing Compose without recreating the container does not change the active mounts or identity.
 
 ---
 
-## Step 8: Add the correct library path in Jellyfin
+## Step 11: Add the correct path in Jellyfin
 
-If your Compose file has:
+For this mapping:
 
 ```yaml
 - /srv/media:/media:ro
 ```
 
-Then inside Jellyfin, add:
-
-```text
-/media
-```
-
-or a subfolder:
+Use these paths inside Jellyfin:
 
 ```text
 /media/movies
 /media/tv
 ```
 
-Do not add `/srv/media` unless `/srv/media` is also the path inside the container.
-
----
-
-## Common problem: NAS shares
-
-If `/srv/media` is actually a mounted NAS share, make sure it is mounted before Docker starts.
-
-Check:
-
-```bash
-findmnt | grep media
-```
-
-If Docker starts before the share mounts, Jellyfin may see an empty folder.
-
-A simple fix is to make sure the mount is reliable in `/etc/fstab`, then restart Docker after confirming the mount exists.
-
----
-
-## Common problem: Docker Desktop on Windows or macOS
-
-For a small home server, Docker on Linux is the cleaner setup.
-
-Windows and macOS Docker setups add extra filesystem and hardware acceleration complications. If you want a reliable always-on Jellyfin box, use native Linux or a Linux server VM.
-
----
-
-## Quick verification checklist
-
-Check these in order:
-
-```bash
-ls -la /srv/media
-docker ps
-docker exec -it jellyfin bash
-ls -la /media
-exit
-docker logs --tail=100 jellyfin
-```
-
-Then confirm in Jellyfin:
+Do not use:
 
 ```text
-Library path uses /media or /media/movies
-Library scan runs
-Files appear
-Playback works
+/srv/media/movies
+/srv/media/tv
+```
+
+unless those exact destinations exist inside the container.
+
+After saving the library path, run a scan and check recent logs:
+
+```bash
+docker logs --since 10m jellyfin
 ```
 
 ---
 
-## Next steps
+## Step 12: Check new-file inheritance
 
-Useful related guides:
+When old media works but new imports fail, compare one working and one missing file on the host:
 
+```bash
+WORKING="/srv/media/tv/Working Show/Season 01/episode.mkv"
+NEW="/srv/media/tv/New Show/Season 01/episode.mkv"
+
+ls -l "$WORKING" "$NEW"
+getfacl "$WORKING" "$NEW"
+```
+
+Then test the new file inside the container:
+
+```bash
+docker exec jellyfin stat "/media/tv/New Show/Season 01/episode.mkv"
+```
+
+Inspect:
+
+- owner UID
+- group GID
+- file mode
+- directory traversal
+- default ACLs
+- downloader or media-manager umask
+
+Fix the creating service or shared access model so future imports are correct. Do not rely on repeatedly repairing files after every download.
+
+---
+
+## Worked diagnosis: host works, container gets permission denied
+
+Starting evidence:
+
+```text
+Host source:       /srv/media
+Container target:  /media
+Jellyfin path:     /media/tv
+Container UID:GID: 1000:1000
+Media group GID:   1001
+Result:             Permission denied inside container
+```
+
+### 1. Host files exist
+
+```bash
+find /srv/media/tv -maxdepth 3 -type f | head
+```
+
+Result: files listed.
+
+### 2. Active mount is correct
+
+```bash
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination}}{{end}}'
+```
+
+Result:
+
+```text
+/srv/media -> /media
+```
+
+### 3. Runtime identity lacks the media group
+
+```bash
+docker exec jellyfin id
+```
+
+Result does not include GID `1001`.
+
+### 4. Host media is group-readable by GID 1001
+
+```bash
+getent group media
+ls -ld /srv/media/tv
+```
+
+### 5. Add the group
+
+```yaml
+group_add:
+  - "1001"
+```
+
+Recreate:
+
+```bash
+docker compose up -d --force-recreate jellyfin
+```
+
+### 6. Verify the same path
+
+```bash
+docker exec jellyfin id
+docker exec jellyfin find /media/tv -maxdepth 3 -type f | head
+```
+
+Final result:
+
+```text
+Bind mount correct:       yes
+Media group present:      yes
+Container files visible:  yes
+Media mount read-only:    yes
+Jellyfin path:            /media/tv
+```
+
+This diagnosis changes only the missing access layer. It does not make the library world-writable or transfer ownership to Jellyfin.
+
+---
+
+## Final verification
+
+Confirm all of these:
+
+1. the host storage is mounted
+2. the host source contains real media
+3. `docker inspect` shows the expected source and destination
+4. the container identity is known
+5. the container can list a known media file
+6. media remains read-only unless writing is required
+7. Jellyfin uses the exact container path
+8. a scan completes without access errors
+9. new imports inherit usable access
+10. the same state returns after container recreation and host reboot
+
+Useful final command block:
+
+```bash
+findmnt -T /srv/media
+find /srv/media -maxdepth 3 -type f | head -20
+docker inspect jellyfin \
+  --format '{{range .Mounts}}{{println .Source "->" .Destination "RW=" .RW}}{{end}}'
+docker exec jellyfin id
+docker exec jellyfin find /media -maxdepth 3 -type f | head -20
+docker logs --since 10m jellyfin
+```
+
+---
+
+## Related guides
+
+- [Jellyfin Docker Volume Paths Explained](/guides/jellyfin-docker-volume-paths-explained/)
 - [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/)
-- [Fix Jellyfin Folder Permissions on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
+- [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
+- [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/)
+- [Jellyfin Media Disappears After Reboot](/guides/jellyfin-media-disappears-after-reboot/)
 - [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
-- [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
 
 ---
 
 ## Recap
 
-Docker has two paths to think about:
+A correct Docker mount does not automatically mean the container can read the files.
+
+Prove the complete chain:
 
 ```text
-Host path:      used in docker-compose.yml
-Container path: used inside Jellyfin
+Host storage mounted
+Host files visible
+Active bind mount correct
+Container identity known
+Container files readable
+Jellyfin library path correct
+Scan succeeds
+New imports inherit access
 ```
 
-Most Jellyfin Docker library problems are caused by using the host path inside Jellyfin, or by running the container as a user that cannot read the mounted media folder.
-
-Keep the mount simple, test inside the container, and add the container path to Jellyfin.
+Fix the first failed layer, keep media read-only where possible, and verify the result from inside the running container.
