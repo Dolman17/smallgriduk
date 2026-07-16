@@ -1,26 +1,27 @@
 ---
-title: "Install Jellyfin on Ubuntu: Low-Power Setup, Media Folders and Permissions"
-description: "Install Jellyfin on Ubuntu, create media folders, fix permission denied errors, survive reboots, and build a reliable low-power home media server."
+title: "Jellyfin on Ubuntu: Low-Power Setup, Media Folders and Reboot Checks"
+description: "Build a reliable low-power Jellyfin server on Ubuntu. Install Jellyfin, mount storage, fix media access, favour Direct Play, measure power, and verify the server after reboot."
 pubDate: 2026-01-20
-updatedDate: 2026-07-09
+updatedDate: 2026-07-15
 tags: ["jellyfin", "ubuntu", "low-power", "media", "permissions", "installation"]
 cover: "/images/guides/jellyfin-ubuntu-low-power-hero.webp"
 ---
 
 ## Quick answer
 
-A reliable low-power Jellyfin server on Ubuntu needs five things:
+A reliable low-power Jellyfin server on Ubuntu needs six things:
 
 1. Jellyfin installed as a managed service.
 2. Media stored at a stable server path.
-3. The Jellyfin service account able to read every library folder.
-4. Storage mounted before Jellyfin scans it.
+3. Storage mounted before Jellyfin starts scanning.
+4. The Jellyfin service account able to read every library folder.
 5. Clients capable of Direct Play for the formats you actually use.
+6. A measured power baseline rather than an assumed one.
 
-The most useful permission test is:
+The most useful access test is:
 
 ```bash
-sudo -u jellyfin ls -la /mnt/media
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
 The most useful reboot checks are:
@@ -31,113 +32,124 @@ findmnt /mnt/media
 sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
-Do not optimise power consumption until the server reliably starts, mounts its storage, sees the files, and survives a reboot.
+Do not optimise power consumption until the service starts correctly, the storage is mounted, the files are readable, and the library survives a controlled reboot.
 
 ---
 
 ## What this guide covers
 
-This guide builds a native Ubuntu Jellyfin installation intended for a mini PC, small desktop, or other always-on home server.
+This is the complete native-Ubuntu build guide for a small, always-on Jellyfin server.
 
 It covers:
 
-- installation and service checks
-- a maintainable media-folder layout
-- native Ubuntu permissions and ACLs
-- persistent storage mounts
-- adding and verifying libraries
-- keeping Direct Play as the default goal
-- optional hardware transcoding
-- reboot and recovery checks
-- a repeatable verification record
+- installing Jellyfin as a system service
+- choosing a maintainable storage layout
+- mounting media reliably
+- granting the `jellyfin` account read access
+- adding and validating libraries
+- reducing avoidable transcoding
+- measuring idle and playback power
+- checking temperatures, storage and service health
+- proving the build survives restart and reboot
 
-For Docker, use the Docker-specific guides because container paths and user IDs change the permission model.
+It does not duplicate the full repair workflow for every failure type.
+
+Use:
+
+- [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/) for detailed ACL and parent-directory diagnosis
+- [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/) for the broad empty-library decision tree
+- [How to Check Why Jellyfin Is Transcoding](/guides/how-to-check-why-jellyfin-is-transcoding/) for playback diagnosis
+- [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/) when a required transcode needs acceleration
+
+For Docker installations, use the Docker-specific guides because container paths and user IDs change the permission model.
 
 ---
 
 ## SmallGrid verification environment
 
-SmallGrid's current media environment uses Ubuntu Server with Jellyfin and related media services on Linux. The production setup is containerised and stores television media under a MergerFS-backed path, but the same reliability checks apply to a native installation:
+SmallGrid's current media-server environment uses:
 
-- service or container status
-- stable media paths
-- mounted storage
-- direct file access from the Jellyfin process
-- library scan results
-- playback mode
-- restart and reboot survival
+```text
+Operating system: Ubuntu Server
+Jellyfin runtime: Docker in production
+Storage pool:     MergerFS
+TV host path:     /srv/media_pool/TV
+Container path:   /tv
+Media services:   Jellyfin, Sonarr, Radarr and qBittorrent
+Network:          Local Ethernet
+Timezone:         Europe/London
+```
 
-The example native path in this guide is `/mnt/media`. Replace it with the path actually used by your server.
+The production system is containerised, but the reliability checks in this guide also apply to a native package installation:
 
-No power-consumption figure is claimed here without a wall-meter measurement. “Low power” means designing the server to avoid unnecessary work, especially avoidable video transcoding.
+- the service is active
+- the storage is mounted
+- the Jellyfin process can read real files
+- the library path is correct
+- playback mode is known
+- the same state returns after reboot
+
+At the last verified storage check, the active media branches contained **1,539 files**, and the host and Jellyfin-visible counts matched.
+
+No wattage figure is claimed in this guide without a wall-meter measurement. “Low power” means avoiding unnecessary work and measuring the whole machine rather than guessing from CPU utilisation.
 
 ---
 
-## Build decision table
+## Recommended starting design
 
 | Decision | Recommended starting point | Reason |
 |---|---|---|
 | Operating system | Current Ubuntu Server LTS | Stable package and service management |
-| System disk | SSD | Faster metadata, database, updates, and lower idle noise |
-| Media path | `/mnt/media` or `/srv/media` | Clear shared-service location |
-| Network | Wired Ethernet | More predictable high-bitrate playback |
+| System disk | SSD | Fast metadata access, quiet operation and responsive updates |
+| Media path | `/mnt/media` or `/srv/media` | Clear location for shared service data |
+| Network | Wired Ethernet | Predictable high-bitrate playback |
 | Playback target | Direct Play | Lowest server processing requirement |
-| 1080p format target | H.264 with AAC or AC3 | Broad client compatibility |
-| 4K format target | HEVC only where clients support it | Saves space without forcing server conversion |
-| Permissions | Read/execute ACL for `jellyfin` | Avoids changing the main owner |
-| Permanent disks | UUID-based `/etc/fstab` mount | Stable after device-name changes and reboot |
-| Transcoding | Hardware acceleration only when required | Reduces CPU load but adds setup complexity |
+| 1080p target | H.264 with AAC or AC3 | Broad client compatibility |
+| 4K target | HEVC only where clients support it | Saves storage without forcing conversion |
+| Permissions | Read and execute ACL for `jellyfin` | Preserves the main owner while granting access |
+| Permanent disks | UUID-based `/etc/fstab` mount | Stable after reboots and device-name changes |
+| Transcoding | Hardware acceleration only when required | Reduces CPU load but adds configuration complexity |
 
----
-
-## What you need
-
-- Ubuntu Server 22.04 or newer
-- SSH or local terminal access
-- a user with `sudo`
-- a stable media disk or folder
-- another device with a browser
-- preferably wired networking
-
-This guide uses:
+A low-power design is mostly about removing unnecessary activity:
 
 ```text
-Media path: /mnt/media
-Server IP:  192.168.1.50
-Web port:   8096
+Direct Play instead of video conversion
+Stable mounts instead of failed rescans
+SSD metadata instead of slow random access
+Suitable clients instead of server upgrades
+Measured changes instead of assumptions
 ```
-
-Adjust every value for your environment.
 
 ---
 
 ## Step 1: Record the starting environment
 
-Before installing Jellyfin, record the system:
+Before changing the server, record its current state:
 
 ```bash
 cat /etc/os-release
 uname -r
-lscpu | sed -n '1,20p'
+lscpu | sed -n '1,25p'
+free -h
 lsblk -o NAME,SIZE,FSTYPE,MODEL,MOUNTPOINTS
 ip -brief address
-```
-
-Keep this with your server notes. It makes later troubleshooting and guide updates more precise.
-
-Check the current date and timezone:
-
-```bash
 timedatectl
 ```
 
-Correct time matters for logs, scheduled tasks, certificates, and backup records.
+Check the graphics devices if hardware transcoding may be used later:
+
+```bash
+lspci | grep -Ei 'vga|display|3d'
+ls -la /dev/dri 2>/dev/null
+```
+
+Keep this output with the date. It makes later troubleshooting, upgrades and power comparisons meaningful.
 
 ---
 
 ## Step 2: Install Jellyfin
 
-Update Ubuntu and install repository tools:
+Update Ubuntu and install the repository tools:
 
 ```bash
 sudo apt update
@@ -166,57 +178,38 @@ sudo apt install -y jellyfin
 sudo systemctl enable --now jellyfin
 ```
 
-Verify:
+Verify the service:
 
 ```bash
 systemctl status jellyfin --no-pager
 systemctl is-enabled jellyfin
-```
-
-You want an active service and an enabled startup state.
-
-Check the installed version:
-
-```bash
+systemctl show jellyfin -p User -p Group
 jellyfin --version
 ```
 
-Record that version with the date the guide was followed.
+Expected state:
+
+```text
+Service active:  yes
+Starts at boot:  yes
+Service user:    jellyfin
+Version recorded: yes
+```
 
 ---
 
-## Step 3: Open the setup interface
+## Step 3: Create a stable media layout
 
-From another device on the same network, open:
-
-```text
-http://YOUR-SERVER-IP:8096
-```
-
-Example:
-
-```text
-http://192.168.1.50:8096
-```
-
-Complete the administrator and regional settings, but add the media libraries only after the storage and permissions checks below.
-
-That prevents the common situation where Jellyfin installs correctly but the folder picker is empty or a scan finds nothing.
-
----
-
-## Step 4: Create a stable media structure
-
-A simple layout is:
+Use a shared-service path rather than a personal home directory:
 
 ```text
 /mnt/media/
-  movies/
-  tv/
-  music/
+├── movies/
+├── tv/
+└── music/
 ```
 
-Create it:
+Create the directories:
 
 ```bash
 sudo mkdir -p /mnt/media/movies
@@ -231,31 +224,35 @@ Recommended naming examples:
 /mnt/media/tv/The Expanse/Season 01/The Expanse - S01E01 - Dulcinea.mkv
 ```
 
-Avoid shared libraries inside a personal home directory unless you understand every parent directory's traversal permissions.
+Avoid storing shared libraries below `/home/YOUR-USER` unless you understand every parent directory's traversal permissions.
 
 ---
 
-## Step 5: Confirm the storage is mounted
+## Step 4: Confirm the storage is mounted
 
-For media on another disk, USB device, NAS share, or pooled filesystem, check:
+A mount-point directory can exist even when the actual disk, share or pool is missing.
+
+Check the active mount:
 
 ```bash
 findmnt /mnt/media
+findmnt -no SOURCE,TARGET,FSTYPE,OPTIONS /mnt/media
 lsblk -f
-ls -la /mnt/media
+find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
-A mount-point directory can exist even when the actual storage is absent. In that state Jellyfin scans the empty directory underneath it.
+Interpretation:
 
-Inspect the active filesystem and options:
+| Result | Meaning |
+|---|---|
+| `findmnt` shows the expected source | Storage is mounted at the intended target |
+| Folder exists but `findmnt` shows nothing | Jellyfin may be scanning the empty mount-point directory |
+| Files are absent | Fix the storage or import path before changing Jellyfin |
+| Files are present | Continue to the service-user access test |
 
-```bash
-findmnt -no TARGET,SOURCE,FSTYPE,OPTIONS /mnt/media
-```
+For permanent disks, use UUID-based entries in `/etc/fstab`.
 
-For permanent disks, use a UUID-based entry in `/etc/fstab`.
-
-After editing `/etc/fstab`, validate it before rebooting:
+After editing `/etc/fstab`, validate before rebooting:
 
 ```bash
 sudo mount -a
@@ -266,7 +263,7 @@ Do not continue until the expected files appear at the host path.
 
 ---
 
-## Step 6: Give Jellyfin access
+## Step 5: Give Jellyfin read access
 
 Confirm the service account:
 
@@ -274,49 +271,48 @@ Confirm the service account:
 id jellyfin
 ```
 
-Test the paths as that user:
+Test the path as Jellyfin:
 
 ```bash
-sudo -u jellyfin ls -la /mnt/media
-sudo -u jellyfin ls -la /mnt/media/movies
-sudo -u jellyfin ls -la /mnt/media/tv
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
-If access fails, inspect the full path:
+If access fails, inspect every directory in the path:
 
 ```bash
 namei -l /mnt/media/movies
+getfacl /mnt/media
 ```
 
-For a normal ext4 library, install ACL support and grant read/execute access:
+For a normal ext4 library, grant read and conditional execute access:
 
 ```bash
 sudo apt install -y acl
-sudo setfacl -R -m u:jellyfin:rx /mnt/media
-sudo setfacl -R -d -m u:jellyfin:rx /mnt/media
+sudo setfacl -R -m u:jellyfin:rX /mnt/media
+sudo setfacl -R -d -m u:jellyfin:rX /mnt/media
 sudo systemctl restart jellyfin
 ```
 
-Verify the result:
+Verify with the same test:
 
 ```bash
 getfacl /mnt/media
 sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
 ```
 
-Use [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/) for the complete permission workflow.
+The direct service-user test is the proof. A successful `setfacl` command alone is not enough.
 
 ---
 
-## Step 7: Add the libraries
+## Step 6: Open Jellyfin and add the libraries
 
-In Jellyfin, open:
+From another device on the same network, open:
 
 ```text
-Dashboard → Libraries → Add Media Library
+http://YOUR-SERVER-IP:8096
 ```
 
-Use the real native Ubuntu paths:
+Add the native Ubuntu paths:
 
 ```text
 Movies:   /mnt/media/movies
@@ -324,19 +320,30 @@ TV Shows: /mnt/media/tv
 Music:    /mnt/media/music
 ```
 
-Save each library and run a scan.
+Run a library scan.
 
-If a scan completes almost immediately or finds nothing, do not reinstall Jellyfin. Repeat the direct service-user and mount checks.
+A successful result should include:
 
-Use [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/) for the diagnostic decision tree.
+```text
+Library path accepted
+Scan does not finish immediately with no files
+Known media appears
+No permission or path errors in logs
+```
+
+Check recent logs:
+
+```bash
+sudo journalctl -u jellyfin --since "10 minutes ago" --no-pager
+```
 
 ---
 
-## Step 8: Check new-file inheritance
+## Step 7: Verify new-file inheritance
 
-Old files may appear while new Sonarr, Radarr, download-client, or manually copied files remain invisible.
+Old files may work while new Sonarr, Radarr, download-client or manually copied files remain invisible.
 
-Compare a working and missing folder:
+Compare one working and one new folder:
 
 ```bash
 ls -ld "/mnt/media/tv/Working Show"
@@ -348,18 +355,18 @@ getfacl "/mnt/media/tv/New Show"
 Test the new path directly:
 
 ```bash
-sudo -u jellyfin ls -la "/mnt/media/tv/New Show"
+sudo -u jellyfin find "/mnt/media/tv/New Show" -maxdepth 2 -type f | head
 ```
 
-The default ACL created earlier should allow future folders to inherit Jellyfin access. Also check the creating service's user, group, and umask.
+The default ACL should be inherited. Also inspect the creating service's user, group and umask when new imports differ from existing media.
 
 ---
 
-## Step 9: Make Direct Play the default goal
+## Step 8: Make Direct Play the default goal
 
-Direct Play sends the original file to the client without converting the video.
+Direct Play keeps server work low because Jellyfin sends the original media to the client.
 
-For broad 1080p compatibility, start with:
+A broadly compatible 1080p target is:
 
 ```text
 Container: MP4 or MKV
@@ -368,165 +375,180 @@ Audio:     AAC or AC3
 Subtitles: SRT
 ```
 
-For 4K, HEVC is practical only when the main clients support the exact profile, bit depth, HDR format, audio, and subtitles.
+For 4K, use HEVC only when the main playback clients support the exact profile, bit depth, HDR format, audio and subtitles.
 
-While a file plays, open the Jellyfin dashboard and record:
+During playback, record:
 
-- Direct Play, Direct Stream, or Transcoding
-- the stated conversion reason
-- whether video or only audio is being converted
-- whether subtitles trigger burn-in
+```text
+Client:
+Connection: local or remote
+Playback mode:
+Video codec:
+Audio codec:
+Subtitle format:
+Reported transcode reason:
+```
 
-Use [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/) before converting a library.
+If a file transcodes, test subtitles, audio, client and quality settings before upgrading the server.
 
 ---
 
-## Step 10: Keep the server genuinely low power
+## Step 9: Measure power properly
 
-Prioritise changes that remove unnecessary work:
+Use a plug-in wall meter or another whole-system measurement method.
 
-- choose clients that support the library formats
-- use wired networking for high-bitrate playback
-- keep the operating system and Jellyfin metadata on an SSD
-- avoid converting video when Direct Play is possible
-- use text subtitles instead of image subtitle burn-in where practical
-- avoid background tasks that repeatedly rescan or process the whole library
-- allow large media disks to follow a considered power policy
-- measure at the wall before claiming a saving
-
-Do not infer power consumption from CPU utilisation alone. A wall plug meter gives the useful whole-system figure.
-
-When measuring, record:
+Record the same server in these states:
 
 | State | What to record |
 |---|---|
-| Idle | Server running with no playback |
-| Direct Play | One representative local stream |
-| Direct Stream | Container or audio remux scenario |
-| Software transcode | One known incompatible file |
-| Hardware transcode | Same file after acceleration is enabled |
+| Powered on and idle | Whole-system watts after background work settles |
+| Local Direct Play | Same representative file and client |
+| Direct Stream | A known remux or audio-conversion case |
+| Software transcode | One incompatible file without acceleration |
+| Hardware transcode | The same file after acceleration is enabled |
+| Library scan | Temporary peak during active indexing |
 
-Use the same file and client when comparing states.
+Use the same file, client and test duration when comparing playback states.
+
+A useful record looks like:
+
+```text
+Date:
+Server hardware:
+Ubuntu version:
+Jellyfin version:
+Storage state:
+Playback file:
+Playback client:
+Playback mode:
+Wall power:
+CPU temperature:
+Notes:
+```
+
+Do not publish or rely on a power saving unless the measured difference is repeatable.
 
 ---
 
-## Step 11: Optional hardware transcoding
+## Step 10: Optional hardware transcoding
 
-Enable hardware acceleration only when a real playback requirement remains after client and format testing.
+Enable hardware acceleration only when a real playback requirement remains.
 
-For Intel graphics, inspect the device:
+Inspect available devices:
 
 ```bash
 ls -la /dev/dri
+id jellyfin
 ```
 
-Install diagnostic tools where appropriate:
+For Intel VAAPI or Quick Sync diagnostics:
 
 ```bash
 sudo apt install -y vainfo intel-media-va-driver-non-free
 vainfo
 ```
 
-The common render device is:
+Confirm the Jellyfin user can access the render device and enable only the codecs the hardware actually supports.
 
-```text
-/dev/dri/renderD128
-```
-
-The `jellyfin` user must be able to access the render device. Check relevant groups:
-
-```bash
-id jellyfin
-getent group render
-getent group video
-```
-
-After enabling acceleration in Jellyfin, test one known transcoding file and inspect both the dashboard and logs.
-
-Use [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/) for the detailed setup.
+Hardware acceleration can make a necessary transcode efficient. It does not make an incompatible client Direct Play the original file.
 
 ---
 
-## Step 12: Verify restart and reboot survival
+## Step 11: Check temperatures and background load
 
-First restart Jellyfin:
+Install basic monitoring tools:
 
 ```bash
-sudo systemctl restart jellyfin
-systemctl status jellyfin --no-pager
+sudo apt install -y lm-sensors htop
+sudo sensors-detect --auto
+sensors
 ```
 
-Then perform one controlled reboot:
+Inspect active processes:
+
+```bash
+top
+ps aux --sort=-%cpu | head -15
+```
+
+Unexpected background work can come from:
+
+- a library scan
+- chapter-image extraction
+- metadata refreshes
+- software transcoding
+- another media service
+- filesystem maintenance
+- a failed task retrying repeatedly
+
+Do not treat every short CPU spike as a power problem. Look for sustained, repeatable activity.
+
+---
+
+## Step 12: Reboot and prove recovery
+
+A home server is not reliable until the same working state returns after reboot.
+
+Before rebooting:
+
+```bash
+sudo mount -a
+systemctl is-enabled jellyfin
+sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
+```
+
+Reboot:
 
 ```bash
 sudo reboot
 ```
 
-After the server returns, verify:
+After reconnecting:
 
 ```bash
+uptime
 systemctl status jellyfin --no-pager
-systemctl is-enabled jellyfin
 findmnt /mnt/media
 sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
-sudo journalctl -u jellyfin --no-pager -b -n 100
+sudo journalctl -u jellyfin -b --no-pager -n 100
 ```
 
-Open the web interface and confirm:
+Then confirm in Jellyfin:
 
-- Jellyfin loads
-- the libraries remain present
-- the storage contains the expected files
-- a scan runs normally
-- a known file plays
-
-A server that works only before reboot is not complete.
+1. the web interface loads
+2. libraries remain populated
+3. a known file plays
+4. the expected playback mode appears
+5. no path or permission errors appear in the current-boot logs
 
 ---
 
-## Worked verification record
+## Final verification record
 
-Use a simple record after installation:
+Do not call the build complete until every row is confirmed:
 
-| Check | Evidence to capture | Result |
-|---|---|---|
-| Ubuntu and Jellyfin versions | `cat /etc/os-release` and `jellyfin --version` | Pass or fail |
-| Service startup | `systemctl status jellyfin` | Pass or fail |
-| Persistent storage | `findmnt /mnt/media` before and after reboot | Pass or fail |
-| Service-user access | `sudo -u jellyfin find ...` | Pass or fail |
-| Library scan | Previously absent item appears | Pass or fail |
-| Direct Play | Dashboard shows playback mode | Pass or fail |
-| New-file inheritance | Newly created folder remains readable | Pass or fail |
-| Reboot recovery | Libraries and playback still work | Pass or fail |
+| Check | Required result |
+|---|---|
+| Jellyfin service | Active and enabled |
+| Media mount | Expected source mounted at the expected target |
+| Host files | Real media visible |
+| Service-user access | `jellyfin` can list known media files |
+| Library path | Exact native Ubuntu path configured |
+| Library scan | Completes without access errors |
+| New imports | Inherit usable access |
+| Playback | Mode and conversion reason known |
+| Power | Idle and playback states measured |
+| Reboot | Service, mount, library and playback recover |
 
-Use real dates, versions, and results. Do not mark a check as passed because the instructions merely appear correct.
-
----
-
-## Exact verification sequence
+Useful final command block:
 
 ```bash
-cat /etc/os-release
-jellyfin --version
-systemctl status jellyfin --no-pager
+systemctl is-active jellyfin
 systemctl is-enabled jellyfin
-id jellyfin
 findmnt /mnt/media
-namei -l /mnt/media/movies
-sudo -u jellyfin ls -la /mnt/media
 sudo -u jellyfin find /mnt/media -maxdepth 3 -type f | head -20
-getfacl /mnt/media
-sudo journalctl -u jellyfin --no-pager -n 100
+sudo journalctl -u jellyfin -b --no-pager -n 100
 ```
-
-Then verify in the interface:
-
-1. Libraries use the exact Linux paths.
-2. Existing media appears.
-3. Newly copied media appears after a scan.
-4. A representative file plays.
-5. The dashboard shows the expected playback mode.
-6. The same result remains after reboot.
 
 ---
 
@@ -534,18 +556,26 @@ Then verify in the interface:
 
 - [Give Jellyfin Access to Media Folders on Ubuntu](/guides/jellyfin-ubuntu-folder-permissions/)
 - [Jellyfin Library Not Showing Files](/guides/jellyfin-media-library-not-showing-files/)
-- [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/)
-- [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/)
 - [Jellyfin Direct Play vs Transcoding](/guides/jellyfin-direct-play-vs-transcoding/)
+- [How to Check Why Jellyfin Is Transcoding](/guides/how-to-check-why-jellyfin-is-transcoding/)
 - [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
+- [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
 - [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
 
 ---
 
 ## Recap
 
-A low-power Jellyfin server is primarily a reliable server that avoids unnecessary conversion work.
+A low-power Jellyfin server is not simply a low-wattage computer.
 
-Install Jellyfin as a managed service, use stable storage paths, prove the service account can read the media, validate mounts before and after reboot, and test playback on the actual clients.
+It is a server that:
 
-Measure power at the wall before and after a controlled change rather than relying on assumptions.
+- starts predictably
+- mounts storage correctly
+- can read the media without broad permissions
+- Direct Plays most everyday files
+- uses hardware transcoding only when required
+- has measured idle and playback consumption
+- returns to the same healthy state after reboot
+
+Build reliability first, then measure and optimise.
