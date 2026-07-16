@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">A very long homelab hard-drive transfer</title>
+  <desc id="desc">Humorous cartoon of a tired homelab owner waiting while an old hard drive slowly transfers media files to a replacement 4TB drive.</desc>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#25324a"/><stop offset="1" stop-color="#182235"/></linearGradient>
+    <linearGradient id="desk" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#8a552f"/><stop offset="1" stop-color="#6b3f24"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-opacity=".28"/></filter>
+  </defs>
+  <rect width="1200" height="675" fill="url(#wall)"/>
+  <rect y="520" width="1200" height="155" fill="url(#desk)"/>
+  <rect x="0" y="0" width="1200" height="675" fill="none" stroke="#0f172a" stroke-width="16"/>
+
+  <g transform="translate(45 135)" filter="url(#shadow)">
+    <rect width="215" height="385" rx="14" fill="#111827" stroke="#020617" stroke-width="8"/>
+    <rect x="20" y="25" width="175" height="42" rx="5" fill="#1f2937"/>
+    <rect x="20" y="84" width="175" height="42" rx="5" fill="#1f2937"/>
+    <rect x="20" y="143" width="175" height="42" rx="5" fill="#1f2937"/>
+    <rect x="20" y="202" width="175" height="42" rx="5" fill="#1f2937"/>
+    <rect x="20" y="261" width="175" height="42" rx="5" fill="#1f2937"/>
+    <rect x="20" y="320" width="175" height="42" rx="5" fill="#1f2937"/>
+    <g fill="#22c55e"><circle cx="43" cy="46" r="5"/><circle cx="43" cy="105" r="5"/><circle cx="43" cy="164" r="5"/><circle cx="43" cy="223" r="5"/></g>
+    <g fill="#38bdf8"><circle cx="63" cy="46" r="5"/><circle cx="63" cy="105" r="5"/><circle cx="63" cy="164" r="5"/><circle cx="63" cy="223" r="5"/></g>
+    <rect x="72" y="46" width="95" height="5" rx="2" fill="#64748b"/><rect x="72" y="105" width="95" height="5" rx="2" fill="#64748b"/><rect x="72" y="164" width="95" height="5" rx="2" fill="#64748b"/>
+    <rect x="70" y="232" width="105" height="72" rx="3" fill="#facc15" transform="rotate(-3 70 232)"/>
+    <text x="122" y="252" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#422006">BACKUPS</text>
+    <text x="122" y="274" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="18" fill="#422006">ARE GOOD</text>
+    <text x="122" y="294" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#422006">☺</text>
+  </g>
+
+  <g transform="translate(305 55)">
+    <circle cx="0" cy="0" r="76" fill="#f8fafc" stroke="#0f172a" stroke-width="11"/>
+    <g stroke="#0f172a" stroke-width="4"><line x1="0" y1="-59" x2="0" y2="-47"/><line x1="59" y1="0" x2="47" y2="0"/><line x1="0" y1="59" x2="0" y2="47"/><line x1="-59" y1="0" x2="-47" y2="0"/></g>
+    <line x1="0" y1="0" x2="-39" y2="-25" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="35" y2="-40" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+    <circle r="8" fill="#f97316" stroke="#111827" stroke-width="4"/>
+  </g>
+
+  <g font-family="Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <rect x="390" y="18" width="92" height="48" rx="4" fill="#fde68a" transform="rotate(-2 390 18)"/><text x="436" y="49" font-size="20" fill="#422006">DAY 1</text>
+    <rect x="390" y="77" width="92" height="48" rx="4" fill="#fde68a" transform="rotate(2 390 77)"/><text x="436" y="108" font-size="20" fill="#422006">DAY 2</text>
+    <rect x="390" y="136" width="92" height="48" rx="4" fill="#fde68a" transform="rotate(-1 390 136)"/><text x="436" y="167" font-size="20" fill="#422006">DAY 3</text>
+    <rect x="390" y="195" width="92" height="48" rx="4" fill="#fde68a"/><text x="436" y="227" font-size="24" fill="#422006">...</text>
+  </g>
+
+  <g transform="translate(700 40)" font-family="Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <rect width="110" height="45" rx="6" fill="#dc2626"/><text x="55" y="30" fill="white" font-size="21">DAYS</text>
+    <rect x="7" y="43" width="96" height="72" fill="#fff" transform="rotate(3 55 79)"/><text x="55" y="92" font-size="48" fill="#111827">1</text>
+    <rect x="7" y="108" width="96" height="72" fill="#fff" transform="rotate(-2 55 144)"/><text x="55" y="157" font-size="48" fill="#111827">2</text>
+    <rect x="7" y="173" width="96" height="72" fill="#fff" transform="rotate(2 55 209)"/><text x="55" y="222" font-size="48" fill="#111827">3</text>
+    <rect x="7" y="238" width="96" height="72" fill="#fff"/><text x="55" y="286" font-size="40" fill="#111827">...</text>
+  </g>
+
+  <g transform="translate(485 175)" filter="url(#shadow)">
+    <rect width="360" height="230" rx="18" fill="#0f172a" stroke="#020617" stroke-width="10"/>
+    <rect x="18" y="18" width="324" height="194" rx="10" fill="#17233a"/>
+    <text x="180" y="79" text-anchor="middle" font-family="Arial,sans-serif" font-size="31" font-weight="700" fill="#f8fafc">Copying files...</text>
+    <rect x="54" y="105" width="252" height="30" rx="15" fill="#e2e8f0"/>
+    <rect x="58" y="109" width="22" height="22" rx="11" fill="#22c55e"/>
+    <text x="180" y="174" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#f8fafc">7%</text>
+    <rect x="158" y="230" width="44" height="54" rx="5" fill="#111827"/>
+    <rect x="105" y="274" width="150" height="18" rx="9" fill="#111827"/>
+  </g>
+
+  <g transform="translate(270 375)" filter="url(#shadow)">
+    <rect width="185" height="210" rx="20" fill="#b7c1cf" stroke="#475569" stroke-width="8"/>
+    <circle cx="92" cy="72" r="48" fill="#e2e8f0" stroke="#64748b" stroke-width="5"/>
+    <circle cx="75" cy="66" r="6" fill="#111827"/><circle cx="109" cy="66" r="6" fill="#111827"/>
+    <path d="M72 92 Q92 110 112 92" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
+    <rect x="50" y="145" width="85" height="40" rx="7" fill="#f8fafc"/>
+    <text x="92" y="172" text-anchor="middle" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#334155">OLD</text>
+    <line x1="15" y1="168" x2="-25" y2="202" stroke="#475569" stroke-width="12" stroke-linecap="round"/><line x1="170" y1="168" x2="212" y2="202" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(725 390)" filter="url(#shadow)">
+    <rect width="185" height="195" rx="20" fill="#cbd5e1" stroke="#475569" stroke-width="8"/>
+    <circle cx="92" cy="68" r="44" fill="#f1f5f9" stroke="#64748b" stroke-width="5"/>
+    <circle cx="77" cy="63" r="6" fill="#111827"/><circle cx="107" cy="63" r="6" fill="#111827"/>
+    <path d="M74 86 Q92 102 110 86" fill="none" stroke="#111827" stroke-width="5" stroke-linecap="round"/>
+    <rect x="48" y="132" width="88" height="42" rx="7" fill="#dcfce7"/>
+    <text x="92" y="160" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#166534">4TB</text>
+    <circle cx="154" cy="166" r="8" fill="#22c55e"/>
+    <line x1="18" y1="151" x2="-25" y2="190" stroke="#475569" stroke-width="12" stroke-linecap="round"/><line x1="168" y1="151" x2="210" y2="190" stroke="#475569" stroke-width="12" stroke-linecap="round"/>
+  </g>
+
+  <g fill="#c98232" stroke="#7c3f13" stroke-width="4" filter="url(#shadow)">
+    <rect x="455" y="450" width="74" height="54" rx="5" transform="rotate(-8 492 477)"/>
+    <rect x="535" y="430" width="74" height="54" rx="5" transform="rotate(6 572 457)"/>
+    <rect x="616" y="449" width="74" height="54" rx="5" transform="rotate(-4 653 476)"/>
+    <rect x="690" y="425" width="58" height="46" rx="5" transform="rotate(8 719 448)"/>
+  </g>
+  <g fill="#3f2414" font-family="Arial,sans-serif" font-size="24" font-weight="700" text-anchor="middle"><text x="492" y="485">▶</text><text x="572" y="465">♫</text><text x="653" y="484">▧</text><text x="719" y="455">▤</text></g>
+  <path d="M450 575 C560 620 650 620 735 575" fill="none" stroke="#111827" stroke-width="13" stroke-linecap="round"/>
+
+  <g transform="translate(575 563)">
+    <ellipse cx="45" cy="40" rx="48" ry="22" fill="#d6a15e"/>
+    <circle cx="22" cy="20" r="25" fill="#9a5e25" stroke="#5b3416" stroke-width="5"/>
+    <path d="M22 20 c18-16 26 18 5 18 c-14 0-14-18-2-18" fill="none" stroke="#f2c078" stroke-width="4"/>
+    <rect x="65" y="18" width="40" height="16" rx="8" fill="#d6a15e"/>
+    <circle cx="98" cy="11" r="5" fill="#f8fafc" stroke="#111827" stroke-width="2"/><circle cx="111" cy="11" r="5" fill="#f8fafc" stroke="#111827" stroke-width="2"/>
+    <circle cx="98" cy="11" r="2" fill="#111827"/><circle cx="111" cy="11" r="2" fill="#111827"/>
+  </g>
+
+  <g transform="translate(930 255)" filter="url(#shadow)">
+    <circle cx="110" cy="72" r="60" fill="#f3c5a5" stroke="#8b5e43" stroke-width="5"/>
+    <path d="M63 54 Q110 -10 160 45 Q140 20 94 25 Q74 28 63 54" fill="#6b341b"/>
+    <circle cx="92" cy="72" r="5" fill="#111827"/><circle cx="128" cy="72" r="5" fill="#111827"/>
+    <path d="M92 98 Q112 112 132 96" fill="none" stroke="#7c2d12" stroke-width="5" stroke-linecap="round"/>
+    <rect x="45" y="125" width="130" height="175" rx="45" fill="#253b5d"/>
+    <path d="M62 150 L110 210 L158 150" fill="#314b72"/>
+    <line x1="55" y1="172" x2="15" y2="236" stroke="#f3c5a5" stroke-width="22" stroke-linecap="round"/>
+    <circle cx="10" cy="242" r="20" fill="#f3c5a5"/>
+  </g>
+
+  <g transform="translate(970 490)" filter="url(#shadow)" font-family="Arial,sans-serif" font-weight="700" text-anchor="middle">
+    <rect x="0" y="40" width="82" height="70" rx="8" fill="#f8fafc" stroke="#334155" stroke-width="4"/><text x="41" y="71" font-size="15" fill="#334155">MORE</text><text x="41" y="91" font-size="15" fill="#334155">COFFEE</text>
+    <rect x="70" y="10" width="82" height="70" rx="8" fill="#fef3c7" stroke="#334155" stroke-width="4"/><text x="111" y="42" font-size="14" fill="#78350f">HOMELAB</text><text x="111" y="61" font-size="14" fill="#78350f">LIFE</text>
+    <rect x="145" y="45" width="82" height="70" rx="8" fill="#111827" stroke="#334155" stroke-width="4"/><text x="186" y="78" font-size="14" fill="#f8fafc">7%</text><text x="186" y="97" font-size="14" fill="#f8fafc">STILL</text>
+  </g>
+
+  <rect x="845" y="40" width="290" height="155" rx="10" fill="#071426" stroke="#334155" stroke-width="8"/>
+  <circle cx="1060" cy="92" r="28" fill="#fde68a"/><circle cx="1072" cy="82" r="28" fill="#071426"/>
+  <g fill="#f8fafc"><circle cx="900" cy="75" r="3"/><circle cx="950" cy="115" r="3"/><circle cx="1000" cy="65" r="3"/><circle cx="1110" cy="135" r="3"/></g>
+</svg>
