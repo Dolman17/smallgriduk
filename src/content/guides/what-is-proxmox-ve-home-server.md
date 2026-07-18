@@ -4,6 +4,7 @@ description: "Learn what Proxmox VE does, how virtual machines and LXC container
 pubDate: 2026-07-18
 updatedDate: 2026-07-18
 tags: ["proxmox", "virtualisation", "homelab", "home-server", "linux", "lxc", "virtual-machines"]
+cover: "/images/guides/what_is_proxmox_VE.png"
 ---
 
 ## Quick answer
