@@ -21,7 +21,7 @@ To use an existing Linux filesystem in Proxmox without erasing it:
 
 Do not use Proxmox's create-filesystem workflow on a disk whose existing data must survive.
 
-Start with [How to Add a Second Hard Drive to Proxmox](/guides/add-second-hard-drive-proxmox/) if the disk is empty and intended to be reformatted.
+Start with [How to Add a Second Hard Drive to Proxmox](/guides/add-second-hard-drive-proxmox/) if the disk is empty and intended to be reformatted. For the wider platform context, see [What Is Proxmox VE? A Beginner's Guide for Home Servers](/guides/what-is-proxmox-ve-home-server/).
 
 ---
 
