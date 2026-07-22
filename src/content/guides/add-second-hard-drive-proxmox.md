@@ -14,7 +14,7 @@ The critical step is identifying the correct physical disk. Creating a filesyste
 
 If the disk already contains data you need, stop here and use [How to Mount an Existing Linux Drive in Proxmox](/guides/mount-existing-linux-drive-proxmox/) instead.
 
-Read [Proxmox Storage Explained](/guides/proxmox-storage-explained-local-local-lvm-directory/) before deciding what the new drive should hold.
+Read [Proxmox Storage Explained](/guides/proxmox-storage-explained-local-local-lvm-directory/) before deciding what the new drive should hold. For the wider platform context, see [What Is Proxmox VE? A Beginner's Guide for Home Servers](/guides/what-is-proxmox-ve-home-server/).
 
 ---
 
