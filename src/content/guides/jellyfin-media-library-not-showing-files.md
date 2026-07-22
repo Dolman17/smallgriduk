@@ -727,6 +727,7 @@ Counts can differ when the host path contains files outside the mounted subtree,
 - [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/)
 - [Jellyfin Media Disappears After Reboot](/guides/jellyfin-media-disappears-after-reboot/)
 - [Jellyfin Cannot Access an External USB Drive](/guides/jellyfin-cannot-access-external-usb-drive/)
+- [Run Jellyfin in Proxmox](/guides/run-jellyfin-proxmox/)
 - [Jellyfin on Ubuntu: Low-Power Setup](/guides/jellyfin-ubuntu-low-power/)
 
 ---
