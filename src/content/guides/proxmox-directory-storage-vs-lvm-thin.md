@@ -14,7 +14,7 @@ Choose **LVM-thin** when the main job is thin-provisioned VM and LXC disks with 
 
 Neither is universally better. The choice should follow the content, recovery plan and monitoring you can maintain.
 
-For the default layout, read [Proxmox Storage Explained](/guides/proxmox-storage-explained-local-local-lvm-directory/).
+For the default layout, read [Proxmox Storage Explained](/guides/proxmox-storage-explained-local-local-lvm-directory/). For the wider platform context, see [What Is Proxmox VE? A Beginner's Guide for Home Servers](/guides/what-is-proxmox-ve-home-server/).
 
 ---
 
@@ -187,7 +187,7 @@ local-lvm  → active VM and LXC disks
 backup     → VZDump archives on separate storage
 ```
 
-This is a recommendation, not a measured SmallGrid configuration.
+This guide is a recommendation, not a record of a measured or completed SmallGrid storage configuration.
 
 Next: [How to Back Up a Proxmox VM or LXC Container](/guides/back-up-proxmox-vm-lxc/).
 
