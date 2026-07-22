@@ -356,6 +356,7 @@ A successful test is the active Jellyfin session showing the expected mode on th
 - [Jellyfin Subtitles Causing Transcoding](/guides/jellyfin-subtitles-causing-transcoding/)
 - [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
 - [Best Mini PC Specs for Jellyfin](/guides/best-mini-pc-specs-for-jellyfin/)
+- [Jellyfin in a VM vs LXC vs Bare Metal](/guides/jellyfin-vm-vs-lxc-vs-bare-metal/)
 - [Jellyfin on Ubuntu: Low-Power Setup](/guides/jellyfin-ubuntu-low-power/)
 
 ---
