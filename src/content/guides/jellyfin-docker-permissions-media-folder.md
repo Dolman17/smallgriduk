@@ -622,6 +622,7 @@ docker logs --since 10m jellyfin
 - [Jellyfin Not Scanning New Files](/guides/jellyfin-not-scanning-new-files/)
 - [Jellyfin Media Disappears After Reboot](/guides/jellyfin-media-disappears-after-reboot/)
 - [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
+- [Build a Docker Server Inside Proxmox](/guides/build-docker-server-inside-proxmox/)
 
 ---
 
