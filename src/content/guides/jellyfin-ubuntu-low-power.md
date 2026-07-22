@@ -560,6 +560,7 @@ sudo journalctl -u jellyfin -b --no-pager -n 100
 - [How to Check Why Jellyfin Is Transcoding](/guides/how-to-check-why-jellyfin-is-transcoding/)
 - [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
 - [How to Measure Homelab Power Usage Properly](/guides/measure-power-usage-homelab/)
+- [Jellyfin in a VM vs LXC vs Bare Metal](/guides/jellyfin-vm-vs-lxc-vs-bare-metal/)
 - [Backups That Don’t Lie: 3-2-1 for Home Servers](/guides/backups-3-2-1-home-server/)
 
 ---
