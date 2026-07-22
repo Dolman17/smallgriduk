@@ -680,6 +680,7 @@ Stop changing variables when the playback mode changes. The last change identifi
 - [Best Video Format for Jellyfin Direct Play](/guides/best-file-formats-for-jellyfin-direct-play/)
 - [Best Cheap Jellyfin Client for Direct Play](/guides/best-cheap-jellyfin-client-direct-play/)
 - [Jellyfin Hardware Transcoding on Ubuntu](/guides/jellyfin-hardware-transcoding-ubuntu/)
+- [Pass an Intel GPU Through to Jellyfin in Proxmox](/guides/pass-intel-gpu-through-jellyfin-proxmox/)
 - [Best Mini PC Specs for Jellyfin](/guides/best-mini-pc-specs-for-jellyfin/)
 - [Jellyfin on Ubuntu: Low-Power Setup](/guides/jellyfin-ubuntu-low-power/)
 
