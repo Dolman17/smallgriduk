@@ -21,7 +21,7 @@ Proof: scheduled restore tests
 
 The best destination is the one that survives the failures you are planning for and can be restored within the time you can tolerate.
 
-Start with [How to Back Up a Proxmox VM or LXC Container](/guides/back-up-proxmox-vm-lxc/) and the broader [3-2-1 home-server backup guide](/guides/backups-3-2-1-home-server/).
+Start with [How to Back Up a Proxmox VM or LXC Container](/guides/back-up-proxmox-vm-lxc/) and the broader [3-2-1 home-server backup guide](/guides/backups-3-2-1-home-server/). For the wider platform context, see [What Is Proxmox VE? A Beginner's Guide for Home Servers](/guides/what-is-proxmox-ve-home-server/).
 
 ---
 
@@ -211,7 +211,7 @@ Test storage
 └── periodic isolated restore
 ```
 
-This is a recommendation, not the recorded SmallGrid setup.
+This guide is a recommendation, not a record of a completed or tested SmallGrid backup setup.
 
 ## How often should you back up?
 
